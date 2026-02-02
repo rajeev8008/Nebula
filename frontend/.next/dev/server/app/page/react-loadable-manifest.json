@@ -1,0 +1,14 @@
+{
+  "[project]/node_modules/react-force-graph-3d/dist/react-force-graph-3d.mjs [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/node_modules/react-force-graph-3d/dist/react-force-graph-3d.mjs [app-client] (ecmascript, next/dynamic entry)",
+    "files": [
+      "static/chunks/node_modules_three_build_three_core_996ef05a.js",
+      "static/chunks/node_modules_three_build_three_module_0c59ee63.js",
+      "static/chunks/node_modules_three_build_three_webgpu_0b895824.js",
+      "static/chunks/node_modules_three_examples_jsm_f08cfaa7._.js",
+      "static/chunks/node_modules_polished_dist_polished_esm_714c8fb0.js",
+      "static/chunks/node_modules_bcf13df8._.js",
+      "static/chunks/node_modules_react-force-graph-3d_dist_react-force-graph-3d_mjs_78f5d9bc._.js"
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+@import "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap";
+/* [project]/app/globals.css [app-client] (css) */
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  color: #fff;
+  background: #000;
+  width: 100%;
+  height: 100%;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #00000080;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #06b6d44d;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #06b6d499;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px #06b6d44d;
+  }
+
+  50% {
+    box-shadow: 0 0 40px #06b6d499;
+  }
+}
+
+.animate-fade-in-up {
+  animation: .6s ease-out fadeInUp;
+}
+
+.animate-fade-in {
+  animation: .6s ease-out fadeIn;
+}
+
+.animate-slide-left {
+  animation: .6s ease-out slideInFromLeft;
+}
+
+.animate-slide-right {
+  animation: .6s ease-out slideInFromRight;
+}
+
+.animate-glow {
+  animation: 3s ease-in-out infinite glow;
+}
+
+.glass-effect {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  background: #0f172a80;
+  border: 1px solid #06b6d433;
+}
+
+@apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-400 to-purple-500;
+
+@apply border border-cyan-500 / 30 hover:border-cyan-400 / 60 transition-all duration-300;
+
+/*# sourceMappingURL=app_globals_71f961d1.css.map*/

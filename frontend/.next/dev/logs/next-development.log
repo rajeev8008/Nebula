@@ -1,0 +1,2046 @@
+[00:00:01.302] Server  LOG     ✓ Ready in 841ms
+[00:00:01.540] Server  ERROR   ⨯ ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:01.558] Server  ERROR   ⨯ ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:01.572] Server  ERROR   ⨯ ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:02.005] Browser ERROR   uncaughtError: Error: ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:02.125] Browser ERROR   uncaughtError: Error: ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:02.157] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:02.157] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:02.157] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:02.157] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:02.165] Browser ERROR   uncaughtError: Error: ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:02.328] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:02.328] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:02.328] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:02.328] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:03.045] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.176] Server  ERROR   ⨯ ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:13.340] Browser ERROR   uncaughtError: Error: ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:13.343] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.343] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.492] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.493] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.493] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.493] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.495] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:13.495] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.056] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.056] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.056] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.056] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.126] Server  ERROR   ⨯ ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:14.296] Browser ERROR   uncaughtError: Error: ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:14.299] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.299] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.446] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.446] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.446] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.446] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.447] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:14.447] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:15.057] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:15.057] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:15.057] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:15.057] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.051] Server  ERROR   ⨯ ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:17.199] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.199] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.222] Browser ERROR   uncaughtError: Error: ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:17.373] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.373] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.373] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.373] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.373] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.373] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:17.946] Server  ERROR   ⨯ ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+
+./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:18.128] Browser ERROR   uncaughtError: Error: ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+
+
+[00:00:18.130] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:18.130] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:18.280] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:18.280] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:18.280] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:18.280] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:18.296] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:18.296] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:11
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |           ^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:19.044] Browser ERROR   ./components/ui/animated-shader-hero.js:612:12
+Parsing ecmascript source code failed
+  610 |
+  611 | export default Hero;
+> 612 |           </h1>
+      |            ^^^^
+  613 |           <h1 className="text-5xl md:text-7xl font-bold text-white">
+  614 |             {headline.line2}
+  615 |           </h1>
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./components/ui/animated-shader-hero.js [Client Component Browser]
+    ./app/page.js [Client Component Browser]
+    ./app/page.js [Server Component]
+
+  Client Component SSR:
+    ./components/ui/animated-shader-hero.js [Client Component SSR]
+    ./app/page.js [Client Component SSR]
+    ./app/page.js [Server Component]
+[00:00:36.702] Server  LOG     ✓ Compiled in 78ms
+[00:00:37.509] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:37.558] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:38.057] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <HotReload globalError={[...]} webSocket={WebSocket} staticIndicatorState={{pathname:null, ...}}>
+      <AppDevOverlayErrorBoundary globalError={[...]}>
+        <ReplaySsrOnlyErrors>
+        <DevRootHTTPAccessFallbackBoundary>
+          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>
+            <HTTPAccessFallbackErrorBoundary pathname="/" notFound={<NotAllowedRootHTTPFallbackError>} ...>
+              <RedirectBoundary>
+                <RedirectErrorBoundary router={{...}}>
+                  <Head>
+                  <__next_root_layout_boundary__>
+                    <SegmentViewNode type="layout" pagePath="layout.js">
+                      <SegmentTrieNode>
+                      <link>
+                      <script>
+                      <RootLayout>
+                        <html lang="en">
+                          <body
+-                           data-scholarcy-content-script-executed="1"
+                          >
+                  ...
+
+[00:02:52.717] Server  LOG     ✓ Compiled in 33ms
