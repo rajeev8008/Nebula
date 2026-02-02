@@ -9,6 +9,10 @@ precision highp float;
 out vec4 O;
 uniform vec2 resolution;
 uniform float time;
+uniform vec2 move;
+uniform vec2 touch;
+uniform int pointerCount;
+uniform vec2 pointers[10];
 #define FC gl_FragCoord.xy
 #define T time
 #define R resolution
@@ -52,8 +56,14 @@ void main(void) {
   vec3 col=vec3(0);
   float bg=clouds(vec2(st.x+T*.5,-st.y));
   uv*=1.-.3*(sin(T*.2)*.5+.5);
+  
+  // Add cursor interaction effect
+  vec2 mousePos = touch / R;
+  float cursorDist = length(FC - touch);
+  float cursorEffect = exp(-cursorDist * 0.005) * 0.8;
+  
   for (float i=1.; i<12.; i++) {
-    uv+=.1*cos(i*vec2(.1+.01*i, .8)+i*i+T*.5+.1*uv.x);
+    uv+=.1*cos(i*vec2(.1+.01*i, .8)+i*i+T*.5+.1*uv.x + move * 0.02);
     vec2 p=uv;
     float d=length(p);
     col+=.00125/d*(cos(sin(i)*vec3(1,2,3))+1.);
@@ -61,6 +71,12 @@ void main(void) {
     col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));
     col=mix(col,vec3(bg*.25,bg*.137,bg*.05),d);
   }
+  
+  // Add orange glow at cursor position
+  col += vec3(0.98, 0.58, 0.20) * cursorEffect * 0.5;
+  // Add subtle distortion around cursor
+  col += vec3(0.98, 0.46, 0.08) * cursorEffect * 0.3;
+  
   O=vec4(col,1);
 }`;
 
@@ -218,6 +234,7 @@ class PointerHandler {
     this.pointers = new Map();
     this.lastCoords = [0, 0];
     this.moves = [0, 0];
+    this.lastMousePos = [0, 0];
 
     const map = (element, scale, x, y) => [x * scale, element.height - y * scale];
 
@@ -247,6 +264,18 @@ class PointerHandler {
       this.lastCoords = [e.clientX, e.clientY];
       this.pointers.set(e.pointerId, map(element, this.getScale(), e.clientX, e.clientY));
       this.moves = [this.moves[0] + e.movementX, this.moves[1] + e.movementY];
+    });
+
+    // Add mousemove listener for regular cursor tracking with movement
+    element.addEventListener('mousemove', (e) => {
+      const mappedPos = map(element, this.getScale(), e.clientX, e.clientY);
+      this.lastCoords = mappedPos;
+      
+      // Calculate and accumulate movement delta for shader effect
+      const deltaX = mappedPos[0] - this.lastMousePos[0];
+      const deltaY = mappedPos[1] - this.lastMousePos[1];
+      this.moves = [this.moves[0] + deltaX * 0.1, this.moves[1] + deltaY * 0.1];
+      this.lastMousePos = mappedPos;
     });
   }
 
