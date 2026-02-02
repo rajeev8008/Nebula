@@ -12,7 +12,7 @@ export default function NebulaGraph({ nodes, onNodeClick }) {
         ref={graphRef}
         graphData={{ nodes, links: [] }}
         nodeLabel="title"
-        nodeColor={() => "#00f3ff"}
+        nodeColor={() => "#f97316"}
         nodeVal={5}
         nodeResolution={16}
         backgroundColor="#000000"

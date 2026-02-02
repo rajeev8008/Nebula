@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 // Default shader source for WebGL
 const defaultShaderSource = `#version 300 es
@@ -440,9 +441,9 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
                 paddingRight: '1.5rem',
                 paddingTop: '0.75rem',
                 paddingBottom: '0.75rem',
-                background: 'rgba(6, 182, 212, 0.1)',
+                background: 'rgba(249, 115, 22, 0.1)',
                 backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(34, 211, 238, 0.3)',
+                border: '1px solid rgba(251, 146, 60, 0.3)',
                 borderRadius: '9999px',
                 fontSize: '0.875rem',
               }}
@@ -456,7 +457,7 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
                   ))}
                 </div>
               )}
-              <span style={{ color: 'rgba(165, 243, 252, 1)' }}>{trustBadge.text}</span>
+              <span style={{ color: 'rgba(254, 243, 199, 1)' }}>{trustBadge.text}</span>
             </div>
           </div>
         )}
@@ -476,54 +477,60 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
         >
           {/* Main Heading */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <h1
-              className="animate-fade-in-up animation-delay-200"
+            <motion.h1
+              initial={{ filter: 'blur(10px)', opacity: 0 }}
+              animate={{ filter: 'blur(0px)', opacity: 1 }}
+              transition={{ duration: 0.8 }}
               style={{
                 fontSize: 'clamp(2rem, 8vw, 4.5rem)',
                 fontWeight: 700,
-                background: 'linear-gradient(to right, rgb(6, 182, 212), rgb(14, 165, 233), rgb(59, 130, 246))',
+                background: 'linear-gradient(to right, rgb(249, 115, 22), rgb(251, 146, 60), rgb(250, 204, 21))',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
             >
               {headline.line1}
-            </h1>
-            <h1
-              className="animate-fade-in-up animation-delay-400"
+            </motion.h1>
+            <motion.h1
+              initial={{ filter: 'blur(10px)', opacity: 0 }}
+              animate={{ filter: 'blur(0px)', opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
               style={{
                 fontSize: 'clamp(2rem, 8vw, 4.5rem)',
                 fontWeight: 700,
-                background: 'linear-gradient(to right, rgb(59, 130, 246), rgb(139, 92, 246), rgb(168, 85, 247))',
+                background: 'linear-gradient(to right, rgb(250, 204, 21), rgb(239, 68, 68), rgb(220, 38, 38))',
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}
             >
               {headline.line2}
-            </h1>
+            </motion.h1>
           </div>
 
           {/* Subtitle */}
-          <div
-            className="animate-fade-in-up animation-delay-600"
-            style={{
-              maxWidth: '48rem',
-              marginLeft: 'auto',
-              marginRight: 'auto',
-            }}
-          >
-            <p
+            <motion.div
+              initial={{ filter: 'blur(10px)', opacity: 0 }}
+              animate={{ filter: 'blur(0px)', opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
               style={{
-                fontSize: 'clamp(1rem, 3vw, 1.5rem)',
-                color: 'rgba(209, 250, 229, 0.9)',
-                fontWeight: 300,
-                lineHeight: 1.5,
+                maxWidth: '48rem',
+                marginLeft: 'auto',
+                marginRight: 'auto',
               }}
             >
-              {subtitle}
-            </p>
-          </div>
+              <p
+                style={{
+                  fontSize: 'clamp(1rem, 3vw, 1.5rem)',
+                  color: 'rgba(254, 243, 199, 0.9)',
+                  fontWeight: 300,
+                  lineHeight: 1.5,
+                }}
+              >
+                {subtitle}
+              </p>
+            </motion.div>
 
           {/* CTA Buttons */}
           {buttons && (
@@ -546,23 +553,23 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
                     paddingRight: '2rem',
                     paddingTop: '1rem',
                     paddingBottom: '1rem',
-                    background: 'linear-gradient(to right, rgb(6, 182, 212), rgb(59, 130, 246))',
-                    color: 'white',
+                    background: 'linear-gradient(to right, rgb(249, 115, 22), rgb(234, 179, 8))',
+                    color: 'black',
                     borderRadius: '9999px',
                     fontWeight: 600,
                     fontSize: '1.125rem',
                     border: 'none',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease-out',
-                    boxShadow: '0 20px 25px rgba(6, 182, 212, 0.3)',
+                    boxShadow: '0 20px 25px rgba(249, 115, 22, 0.3)',
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.transform = 'scale(1.05)';
-                    e.target.style.boxShadow = '0 25px 30px rgba(6, 182, 212, 0.4)';
+                    e.target.style.boxShadow = '0 25px 30px rgba(249, 115, 22, 0.4)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.transform = 'scale(1)';
-                    e.target.style.boxShadow = '0 20px 25px rgba(6, 182, 212, 0.3)';
+                    e.target.style.boxShadow = '0 20px 25px rgba(249, 115, 22, 0.3)';
                   }}
                 >
                   {buttons.primary.text}
@@ -576,9 +583,9 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
                     paddingRight: '2rem',
                     paddingTop: '1rem',
                     paddingBottom: '1rem',
-                    background: 'rgba(6, 182, 212, 0.1)',
-                    border: '1px solid rgba(34, 211, 238, 0.3)',
-                    color: 'rgba(165, 243, 252, 1)',
+                    background: 'rgba(249, 115, 22, 0.1)',
+                    border: '1px solid rgba(251, 146, 60, 0.3)',
+                    color: 'rgba(254, 243, 199, 1)',
                     borderRadius: '9999px',
                     fontWeight: 600,
                     fontSize: '1.125rem',
@@ -588,13 +595,13 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.transform = 'scale(1.05)';
-                    e.target.style.background = 'rgba(6, 182, 212, 0.2)';
-                    e.target.style.borderColor = 'rgba(34, 211, 238, 0.5)';
+                    e.target.style.background = 'rgba(249, 115, 22, 0.2)';
+                    e.target.style.borderColor = 'rgba(251, 146, 60, 0.5)';
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.transform = 'scale(1)';
-                    e.target.style.background = 'rgba(6, 182, 212, 0.1)';
-                    e.target.style.borderColor = 'rgba(34, 211, 238, 0.3)';
+                    e.target.style.background = 'rgba(249, 115, 22, 0.1)';
+                    e.target.style.borderColor = 'rgba(251, 146, 60, 0.3)';
                   }}
                 >
                   {buttons.secondary.text}

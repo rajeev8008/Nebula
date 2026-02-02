@@ -9,15 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
     "3d-force-graph": "^1.73.0",
-    "react-force-graph-3d": "^1.25.0",
+    "axios": "^1.6.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.30.0",
     "lucide-react": "^0.563.0",
     "next": "^16.1.6",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "tailwind-merge": "^3.4.0",
-    "axios": "^1.6.0"
+    "react-force-graph-3d": "^1.25.0",
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.0",
