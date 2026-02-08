@@ -1,9 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
-import numpy as np
 
-# Import after conftest sets up mocks
-from backend.main import app, model, index
+# Import only what we need - app without model/index
+from backend.main import app
 
 client = TestClient(app)
 

@@ -29,6 +29,7 @@ Thumbs.db
 # Build
 dist/
 build/
+deployment/
 
 # Testing
 .pytest_cache/
@@ -41,8 +42,10 @@ playwright-report/
 test-results/
 coverage/
 
+# Next.js
 frontend/.next/
 
-frontend/.next/
-
-frontend/.next/
+# Documentation (generated)
+*_PROJECT_CODE.md
+IMPROVEMENTS.md
+TESTING_GUIDE.md

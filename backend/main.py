@@ -25,11 +25,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 4. Load AI Model & DB (Runs once on startup)
-print("Loading Model...")
-model = SentenceTransformer('all-MiniLM-L6-v2')
-pc = Pinecone(api_key=PINECONE_KEY)
-index = pc.Index("nebula-index")
+# 4. Load AI Model & DB (Runs once on startup, skip in tests)
+if os.getenv('TESTING') != 'true':
+    print("Loading Model...")
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    pc = Pinecone(api_key=PINECONE_KEY)
+    index = pc.Index("nebula-index")
+else:
+    # In test mode, use None (mocked in actual tests if needed)
+    model = None
+    pc = None
+    index = None
 
 # --- Data Models ---
 class SearchRequest(BaseModel):
