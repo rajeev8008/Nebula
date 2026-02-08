@@ -2044,3 +2044,190 @@ It can also happen if the client has a browser extension installed which messes 
                   ...
 
 [00:02:52.717] Server  LOG     ✓ Compiled in 33ms
+[02:10:34.403] Server  LOG     ✓ Compiled in 349ms
+[02:12:14.677] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:14.825] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/layout-router.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:14.975] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/render-from-template-context.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:15.118] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/layout-router.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:15.246] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/render-from-template-context.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:15.436] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:15.602] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:15.736] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:15.875] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:16.031] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/client-page.js#ClientPageRoot" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:16.167] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/app/page.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:16.302] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#OutletBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:16.437] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#ViewportBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:16.572] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#MetadataBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:16.737] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:16.872] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.031] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#ViewportBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.180] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#MetadataBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.311] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.446] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.591] Server  ERROR   [ Server ] Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.739] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.886] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:17.981] Server  ERROR   ⨯ TurbopackInternalError: Failed to write page endpoint /_app
+
+Caused by:
+- content is not available as task execution failed
+- content is not available as task execution failed
+- range start index 7144901 out of range for slice of length 7144525
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Execution of endpoint_write_to_disk failed
+- Execution of <PageEndpoint as Endpoint>::output failed
+- Failed to write page endpoint /_app
+- Execution of PageEndpoint::output failed
+- Execution of *ChunkGroupResult::all_assets failed
+- Execution of PageEndpoint::client_chunk_group failed
+- Execution of PageEndpoint::client_evaluatable_assets failed
+- content is not available as task execution failed
+- Execution of PageEndpoint::client_module failed
+- content is not available as task execution failed
+- Execution of create_page_loader_entry_module failed
+- Execution of *ProcessResult::module failed
+- Execution of <ModuleAssetContext as AssetContext>::process failed
+- range start index 7144901 out of range for slice of length 7144525
+[02:12:18.129] Server  ERROR   Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:18.135] Server  ERROR   ⨯ TurbopackInternalError: Failed to write page endpoint /_app
+
+Caused by:
+- content is not available as task execution failed
+- content is not available as task execution failed
+- range start index 7144901 out of range for slice of length 7144525
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Execution of endpoint_write_to_disk failed
+- Execution of <PageEndpoint as Endpoint>::output failed
+- Failed to write page endpoint /_app
+- Execution of PageEndpoint::output failed
+- Execution of *ChunkGroupResult::all_assets failed
+- Execution of PageEndpoint::client_chunk_group failed
+- Execution of PageEndpoint::client_evaluatable_assets failed
+- content is not available as task execution failed
+- Execution of PageEndpoint::client_module failed
+- content is not available as task execution failed
+- Execution of create_page_loader_entry_module failed
+- Execution of *ProcessResult::module failed
+- Execution of <ModuleAssetContext as AssetContext>::process failed
+- range start index 7144901 out of range for slice of length 7144525
+[02:12:18.138] Server  ERROR   TurbopackInternalError: Failed to write page endpoint /_app
+
+Caused by:
+- content is not available as task execution failed
+- content is not available as task execution failed
+- range start index 7144901 out of range for slice of length 7144525
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Execution of endpoint_write_to_disk failed
+- Execution of <PageEndpoint as Endpoint>::output failed
+- Failed to write page endpoint /_app
+- Execution of PageEndpoint::output failed
+- Execution of *ChunkGroupResult::all_assets failed
+- Execution of PageEndpoint::client_chunk_group failed
+- Execution of PageEndpoint::client_evaluatable_assets failed
+- content is not available as task execution failed
+- Execution of PageEndpoint::client_module failed
+- content is not available as task execution failed
+- Execution of create_page_loader_entry_module failed
+- Execution of *ProcessResult::module failed
+- Execution of <ModuleAssetContext as AssetContext>::process failed
+- range start index 7144901 out of range for slice of length 7144525
+[02:12:18.315] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:18.466] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/layout-router.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:18.665] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/render-from-template-context.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:18.821] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/layout-router.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:18.963] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/render-from-template-context.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:19.106] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:19.241] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:19.385] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:19.526] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:19.662] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/client/components/client-page.js#ClientPageRoot" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:19.820] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/app/page.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:19.979] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#OutletBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:20.116] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#ViewportBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:20.252] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#MetadataBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:20.391] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:20.532] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:20.765] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#ViewportBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:20.913] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/lib/framework/boundary-components.js#MetadataBoundary" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:21.060] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:21.201] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/esm/next-devtools/userspace/app/segment-explorer-node.js#SegmentViewNode" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:21.335] Server  ERROR   [ Server ] Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:21.476] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:21.609] Server  ERROR   ⨯ Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:21.638] Server  ERROR   ⨯ TurbopackInternalError: Failed to write page endpoint /_app
+
+Caused by:
+- content is not available as task execution failed
+- content is not available as task execution failed
+- range start index 7144901 out of range for slice of length 7144525
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Execution of endpoint_write_to_disk failed
+- Execution of <PageEndpoint as Endpoint>::output failed
+- Failed to write page endpoint /_app
+- Execution of PageEndpoint::output failed
+- Execution of *ChunkGroupResult::all_assets failed
+- Execution of PageEndpoint::client_chunk_group failed
+- Execution of PageEndpoint::client_evaluatable_assets failed
+- content is not available as task execution failed
+- Execution of PageEndpoint::client_module failed
+- content is not available as task execution failed
+- Execution of create_page_loader_entry_module failed
+- Execution of *ProcessResult::module failed
+- Execution of <ModuleAssetContext as AssetContext>::process failed
+- range start index 7144901 out of range for slice of length 7144525
+[02:12:21.787] Server  ERROR   Error: Could not find the module "[project]/frontend/node_modules/next/dist/client/components/builtin/global-error.js#default" in the React Client Manifest. This is probably a bug in the React Server Components bundler.
+[02:12:21.794] Server  ERROR   ⨯ TurbopackInternalError: Failed to write page endpoint /_app
+
+Caused by:
+- content is not available as task execution failed
+- content is not available as task execution failed
+- range start index 7144901 out of range for slice of length 7144525
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Execution of endpoint_write_to_disk failed
+- Execution of <PageEndpoint as Endpoint>::output failed
+- Failed to write page endpoint /_app
+- Execution of PageEndpoint::output failed
+- Execution of *ChunkGroupResult::all_assets failed
+- Execution of PageEndpoint::client_chunk_group failed
+- Execution of PageEndpoint::client_evaluatable_assets failed
+- content is not available as task execution failed
+- Execution of PageEndpoint::client_module failed
+- content is not available as task execution failed
+- Execution of create_page_loader_entry_module failed
+- Execution of *ProcessResult::module failed
+- Execution of <ModuleAssetContext as AssetContext>::process failed
+- range start index 7144901 out of range for slice of length 7144525
+[02:12:21.798] Server  ERROR   TurbopackInternalError: Failed to write page endpoint /_app
+
+Caused by:
+- content is not available as task execution failed
+- content is not available as task execution failed
+- range start index 7144901 out of range for slice of length 7144525
+
+Debug info:
+- Execution of get_written_endpoint_with_issues_operation failed
+- Execution of endpoint_write_to_disk failed
+- Execution of <PageEndpoint as Endpoint>::output failed
+- Failed to write page endpoint /_app
+- Execution of PageEndpoint::output failed
+- Execution of *ChunkGroupResult::all_assets failed
+- Execution of PageEndpoint::client_chunk_group failed
+- Execution of PageEndpoint::client_evaluatable_assets failed
+- content is not available as task execution failed
+- Execution of PageEndpoint::client_module failed
+- content is not available as task execution failed
+- Execution of create_page_loader_entry_module failed
+- Execution of *ProcessResult::module failed
+- Execution of <ModuleAssetContext as AssetContext>::process failed
+- range start index 7144901 out of range for slice of length 7144525

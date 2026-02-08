@@ -30,6 +30,17 @@ Thumbs.db
 dist/
 build/
 
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.hypothesis/
+playwright-report/
+test-results/
+coverage/
+
 frontend/.next/
 
 frontend/.next/
