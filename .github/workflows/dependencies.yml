@@ -1,0 +1,106 @@
+name: Dependency Check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9 AM UTC
+  workflow_dispatch:
+
+jobs:
+  check-python-deps:
+    name: Check Python Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install safety pip-audit
+
+      - name: Check for vulnerabilities with Safety
+        continue-on-error: true
+        run: |
+          safety check --json || echo "Safety check completed with warnings"
+
+      - name: Audit dependencies with pip-audit
+        continue-on-error: true
+        run: |
+          pip-audit || echo "Pip audit completed with warnings"
+
+      - name: Check for outdated packages
+        run: |
+          echo "Outdated Python packages:"
+          pip list --outdated
+
+  check-npm-deps:
+    name: Check NPM Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: frontend
+        continue-on-error: true
+        run: |
+          npm audit --audit-level=moderate || echo "NPM audit completed with warnings"
+
+      - name: Check for outdated packages
+        working-directory: frontend
+        run: |
+          echo "Outdated NPM packages:"
+          npm outdated || true
+
+      - name: Check bundle size
+        working-directory: frontend
+        run: |
+          npm run build
+          echo "Build size:"
+          du -sh .next
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+      - name: Check for secrets in git history
+        run: |
+          echo "Scanning for potential secrets in git history..."
+          git log --all --pretty=format: --name-only | sort -u | while read file; do
+            if [ -f "$file" ]; then
+              if grep -i "password\|secret\|api[_-]key" "$file" > /dev/null 2>&1; then
+                echo "Potential secret found in: $file"
+              fi
+            fi
+          done

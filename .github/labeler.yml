@@ -1,0 +1,25 @@
+backend:
+  - changed-files:
+    - any-glob-to-any-file: 'backend/**/*'
+    - any-glob-to-any-file: 'scripts/**/*'
+
+frontend:
+  - changed-files:
+    - any-glob-to-any-file: 'frontend/**/*'
+
+dependencies:
+  - changed-files:
+    - any-glob-to-any-file: '**/package.json'
+    - any-glob-to-any-file: '**/requirements.txt'
+    - any-glob-to-any-file: '**/package-lock.json'
+
+documentation:
+  - changed-files:
+    - any-glob-to-any-file: '**/*.md'
+    - any-glob-to-any-file: 'docs/**/*'
+
+ci-cd:
+  - changed-files:
+    - any-glob-to-any-file: '.github/workflows/**/*'
+    - any-glob-to-any-file: 'Dockerfile*'
+    - any-glob-to-any-file: 'docker-compose.yml'

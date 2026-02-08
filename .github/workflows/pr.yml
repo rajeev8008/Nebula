@@ -1,0 +1,148 @@
+name: Pull Request Automation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr-info:
+    name: PR Information
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+          echo "Changed files:"
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }}
+          
+          FILES_CHANGED=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | wc -l)
+          echo "files_changed=$FILES_CHANGED" >> $GITHUB_OUTPUT
+
+      - name: Calculate lines changed
+        run: |
+          echo "Lines of code changed:"
+          git diff --stat ${{ github.event.pull_request.base.sha }} ${{ github.sha }}
+
+  code-review:
+    name: Automated Code Review
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check commit messages
+        run: |
+          echo "Checking commit message quality..."
+          git log --format=%B -n 1 ${{ github.sha }} | head -1 | while read line; do
+            if [ ${#line} -lt 10 ]; then
+              echo "Warning: Commit message is too short"
+            fi
+            if [ ${#line} -gt 72 ]; then
+              echo "Warning: Commit message is too long (>72 chars)"
+            fi
+          done
+
+      - name: Check for TODOs
+        run: |
+          echo "Scanning for TODOs..."
+          grep -r "TODO\|FIXME\|XXX" --include="*.py" --include="*.js" --include="*.jsx" . || echo "No TODOs found"
+
+      - name: Check for console.logs
+        run: |
+          echo "Checking for console.log statements..."
+          if grep -r "console\.log" frontend/ --include="*.js" --include="*.jsx"; then
+            echo "Warning: console.log statements found - consider removing for production"
+          fi
+
+  label-pr:
+    name: Auto Label PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Labeler
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add size labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            const changes = files.reduce((sum, file) => sum + file.changes, 0);
+            
+            let sizeLabel = 'size/XL';
+            if (changes < 10) sizeLabel = 'size/XS';
+            else if (changes < 50) sizeLabel = 'size/S';
+            else if (changes < 200) sizeLabel = 'size/M';
+            else if (changes < 500) sizeLabel = 'size/L';
+            
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [sizeLabel]
+            });
+
+  comment-pr:
+    name: Comment on PR
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    
+    steps:
+      - name: Welcome comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.data.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('Thanks for your PR')
+            );
+            
+            if (!botComment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `## 🎉 Thanks for your PR!
+                
+                Your pull request has been received and will be reviewed soon.
+                
+                ### ✅ Checklist
+                - [ ] Code follows the project style guidelines
+                - [ ] Tests have been added/updated
+                - [ ] Documentation has been updated
+                - [ ] All CI checks are passing
+                
+                ### 🤖 Automated Checks
+                - CI Pipeline will run automatically
+                - Code quality checks in progress
+                - Security scanning enabled
+                
+                Feel free to ask questions in the comments!`
+              });
+            }
