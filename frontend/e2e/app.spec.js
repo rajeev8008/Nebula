@@ -1,22 +1,21 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect } from '@playwright/test';
 
-test.describe('Nebula App Basic Tests', () => {
-  test('homepage loads', async ({ page }) => {
-    // Navigate to the app
-    await page.goto('http://localhost:3000');
+test.describe('Nebula App E2E', () => {
+  test('homepage loads successfully', async ({ page }) => {
+    await page.goto('/');
     
-    // Check if page loaded
+    // Check page title
     await expect(page).toHaveTitle(/Nebula/i);
   });
 
-  test('page contains hero section', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+  test('page renders main content', async ({ page }) => {
+    await page.goto('/');
    
-    // Wait for page to load
-    await page.waitForLoadState('domcontentloaded');
+    // Wait for page to fully load
+    await page.waitForLoadState('networkidle');
     
-    // Check if content exists
-    const content = await page.content();
-    expect(content.length).toBeGreaterThan(0);
+    // Check if page body exists
+    const body = await page.locator('body');
+    await expect(body).toBeVisible();
   });
 });
