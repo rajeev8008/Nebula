@@ -1,8 +1,10 @@
 import os
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
@@ -48,36 +50,75 @@ class MovieResponse(BaseModel):
 def home():
     return {"message": "Nebula API is running. Go to /docs for swagger UI."}
 
-@app.post("/search", response_model=List[MovieResponse])
+@app.post("/search")
 def search_movies(req: SearchRequest):
     """
     Takes a user query (e.g., "sad robots"), converts to vector, 
     and finds matching movies in Pinecone.
+    Returns a graph structure (nodes + links) instead of just a list.
     """
     try:
         # 1. Convert text to numbers
         query_vector = model.encode(req.query).tolist()
         
-        # 2. Query Pinecone
+        # 2. Query Pinecone with vectors for similarity calculation
         results = index.query(
             vector=query_vector, 
             top_k=req.top_k, 
-            include_metadata=True
+            include_metadata=True,
+            include_values=True  # CRITICAL: Need vectors to calculate links
         )
         
-        # 3. Format response
-        movies = []
-        for match in results.matches:
-            movies.append({
+        # 3. Build nodes and collect vectors
+        nodes = []
+        vectors = []
+        id_map = {}
+        
+        for i, match in enumerate(results.matches):
+            nodes.append({
                 "id": match.id,
-                "score": match.score,
                 "title": match.metadata.get("title", "Unknown"),
                 "poster": match.metadata.get("poster_path", ""),
                 "overview": match.metadata.get("overview", ""),
-                "rating": match.metadata.get("rating", 0.0)
+                "score": float(match.score),
+                "rating": match.metadata.get("rating", 0.0),
+                "val": match.metadata.get("rating", 5.0) * 2,  # Node size
+                "genres": match.metadata.get("genres", "Unknown"),
+                "release_date": match.metadata.get("release_date", "Unknown"),
+                "language": match.metadata.get("original_language", "en"),
+                "popularity": match.metadata.get("popularity", 0.0),
+                "isSearchResult": True,
+                "relevanceRank": i + 1
             })
+            vectors.append(match.values)
+            id_map[i] = match.id
+        
+        # 4. Calculate similarity between search results to create links
+        links = []
+        if len(vectors) > 1:
+            vec_matrix = np.array(vectors)
+            sim_matrix = cosine_similarity(vec_matrix)
             
-        return movies
+            # Create links for highly similar search results
+            threshold = 0.5  # Higher threshold for search results
+            rows, cols = sim_matrix.shape
+            for i in range(rows):
+                for j in range(i + 1, cols):
+                    score = sim_matrix[i][j]
+                    if score > threshold:
+                        links.append({
+                            "source": id_map[i],
+                            "target": id_map[j],
+                            "value": float(score),
+                            "similarity": float(score)
+                        })
+        
+        return {
+            "nodes": nodes,
+            "links": links,
+            "query": req.query,
+            "totalResults": len(nodes)
+        }
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -85,24 +126,62 @@ def search_movies(req: SearchRequest):
 @app.get("/graph")
 def get_graph_data():
     """
-    Fetches random nodes to populate the 3D graph initially.
-    (Pinecone doesn't support 'get all', so we fetch by a dummy vector)
+    Fetches nodes to populate the 3D graph initially.
+    Now includes similarity-based links to create a true knowledge graph.
     """
-    # Dummy query to get a spread of movies
-    dummy_vec = [0.1] * 384 
-    results = index.query(vector=dummy_vec, top_k=100, include_metadata=True)
-    
-    nodes = []
-    links = []
-    
-    for match in results.matches:
-        nodes.append({
-            "id": match.id,
-            "title": match.metadata.get("title"),
-            "poster": match.metadata.get("poster_path"),
-            "val": 1 # Size of the node
-        })
+    try:
+        # Fetch more movies (100) to make the graph dense
+        dummy_vec = [0.1] * 384 
+        results = index.query(
+            vector=dummy_vec, 
+            top_k=100, 
+            include_metadata=True,
+            include_values=True  # CRITICAL: Need vectors to calculate links
+        )
         
-    # TODO: Advanced Link Logic (Calculate similarity between these 100 nodes)
-    # For now, we return just nodes to prove visualization works
-    return {"nodes": nodes, "links": links}
+        nodes = []
+        vectors = []
+        id_map = {}  # Map Pinecone IDs to array indices
+
+        # Extract Nodes and Vectors
+        for i, match in enumerate(results.matches):
+            nodes.append({
+                "id": match.id,
+                "title": match.metadata.get("title", "Unknown"),
+                "poster": match.metadata.get("poster_path", ""),
+                "overview": match.metadata.get("overview", ""),
+                "val": match.metadata.get("rating", 5.0) * 2,  # Size based on rating
+                "rating": match.metadata.get("rating", 0.0),
+                "genres": match.metadata.get("genres", "Unknown"),
+                "release_date": match.metadata.get("release_date", "Unknown"),
+                "language": match.metadata.get("original_language", "en"),
+                "popularity": match.metadata.get("popularity", 0.0),
+                "group": 1
+            })
+            vectors.append(match.values)
+            id_map[i] = match.id
+
+        # Calculate Similarity Matrix (The "Edges" Logic)
+        vec_matrix = np.array(vectors)
+        sim_matrix = cosine_similarity(vec_matrix)
+
+        links = []
+        threshold = 0.3  # Lower threshold for initial graph to show more connections
+        
+        rows, cols = sim_matrix.shape
+        for i in range(rows):
+            for j in range(i + 1, cols):  # Avoid self-loops and duplicates
+                score = sim_matrix[i][j]
+                if score > threshold:
+                    links.append({
+                        "source": id_map[i],
+                        "target": id_map[j],
+                        "value": float(score),
+                        "similarity": float(score)
+                    })
+
+        print(f"Graph generated: {len(nodes)} nodes, {len(links)} links")
+        return {"nodes": nodes, "links": links}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

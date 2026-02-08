@@ -47,7 +47,19 @@ def fetch_movies(pages=5):
     
     return movies
 
-# 5. Process & Upload
+# 5. Helper function to get genre names
+def get_genre_names(genre_ids):
+    """Convert genre IDs to genre names"""
+    genre_map = {
+        28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
+        80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
+        14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
+        9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
+        10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
+    }
+    return [genre_map.get(gid, "Unknown") for gid in genre_ids]
+
+# 6. Process & Upload
 def process_and_upload():
     raw_movies = fetch_movies(pages=5) # Fetches 100 movies to start
     vectors = []
@@ -62,19 +74,33 @@ def process_and_upload():
         # SKIP movies with empty plots
         if not overview: 
             continue
+        
+        # Extract additional metadata
+        genres = get_genre_names(movie.get('genre_ids', []))
+        genre_str = ", ".join(genres) if genres else "Unknown"
+        release_date = movie.get('release_date', 'Unknown')
+        original_language = movie.get('original_language', 'en')
+        popularity = movie.get('popularity', 0.0)
+        adult = movie.get('adult', False)
             
-        # The "Vibe" Text: Combine title + overview for the AI to read
-        combined_text = f"{title}: {overview}"
+        # The "Vibe" Text: Combine title + genres + overview for better similarity
+        # Including genres helps the model understand the movie type
+        combined_text = f"{title} ({genre_str}): {overview}"
         
         # Create Vector (The AI Magic)
         embedding = model.encode(combined_text).tolist()
         
-        # Prepare Metadata (So we don't need to ask TMDB again later)
+        # Prepare Metadata (Store FULL overview and all useful info)
         metadata = {
             "title": title,
             "poster_path": poster,
-            "overview": overview[:100] + "...", # Store just a snippet
-            "rating": movie['vote_average']
+            "overview": overview,  # FULL TEXT, not truncated!
+            "rating": movie['vote_average'],
+            "genres": genre_str,
+            "release_date": release_date,
+            "original_language": original_language,
+            "popularity": popularity,
+            "adult": adult
         }
         
         vectors.append({
