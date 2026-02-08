@@ -1,10 +1,47 @@
 version: '3.8'
 
 services:
-  # Add your services here
-  
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: nebula-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - TMDB_API_KEY=${TMDB_API_KEY}
+    env_file:
+      - .env
+    networks:
+      - nebula-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: nebula-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - nebula-network
+    restart: unless-stopped
+
 networks:
-  # Define networks if needed
-  
+  nebula-network:
+    driver: bridge
+
 volumes:
-  # Define volumes if needed
+  # No persistent volumes needed currently

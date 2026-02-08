@@ -1,0 +1,45 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy-frontend:
+    name: Deploy Frontend to Vercel
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: frontend
+          vercel-args: '--prod'
+
+  deploy-backend:
+    name: Backend Deployment Info
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Backend deployment instructions
+        run: |
+          echo "Backend deployment options:"
+          echo "1. Railway: Connect your GitHub repo at railway.app"
+          echo "2. Render: Connect your GitHub repo at render.com"
+          echo "3. Docker: Use docker-compose.yml for self-hosting"
+          echo ""
+          echo "Required environment variables:"
+          echo "- PINECONE_API_KEY"
+          echo "- TMDB_API_KEY"
