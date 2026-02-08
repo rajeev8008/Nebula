@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-frontend:
-    name: Deploy Frontend to Vercel
+  deployment-info:
+    name: Deployment Instructions
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     
@@ -15,31 +15,39 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: frontend
-          vercel-args: '--prod'
-
-  deploy-backend:
-    name: Backend Deployment Info
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Backend deployment instructions
+      - name: Display deployment options
         run: |
-          echo "Backend deployment options:"
-          echo "1. Railway: Connect your GitHub repo at railway.app"
-          echo "2. Render: Connect your GitHub repo at render.com"
-          echo "3. Docker: Use docker-compose.yml for self-hosting"
+          echo "🚀 Deployment Options for Nebula"
+          echo "================================"
           echo ""
-          echo "Required environment variables:"
-          echo "- PINECONE_API_KEY"
-          echo "- TMDB_API_KEY"
+          echo "📦 Docker (Recommended):"
+          echo "  - Run: docker-compose up --build"
+          echo "  - Hosts: Frontend (3000) + Backend (8000)"
+          echo "  - Cost: Free (self-hosted)"
+          echo ""
+          echo "☁️ Cloud Platforms:"
+          echo "  1. Railway (railway.app)"
+          echo "     - Connect GitHub repo"
+          echo "     - Auto-deploys on push"
+          echo "     - Cost: $5-20/month"
+          echo ""
+          echo "  2. Render (render.com)"
+          echo "     - Connect GitHub repo"
+          echo "     - Free tier available"
+          echo "     - Cost: $0-7/month"
+          echo ""
+          echo "  3. DigitalOcean Droplet"
+          echo "     - SSH + Docker deployment"
+          echo "     - Full control"
+          echo "     - Cost: $6/month"
+          echo ""
+          echo "  4. Vercel (Frontend) + Railway (Backend)"
+          echo "     - Vercel for Next.js"
+          echo "     - Railway for FastAPI"
+          echo "     - Cost: $0-5/month"
+          echo ""
+          echo "🔑 Required Environment Variables:"
+          echo "  - PINECONE_API_KEY"
+          echo "  - TMDB_API_KEY"
+          echo ""
+          echo "📚 See DOCKER.md for detailed instructions"
