@@ -10,7 +10,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -48,6 +49,7 @@ html {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -58,6 +60,7 @@ html {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -68,6 +71,7 @@ html {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -79,6 +83,7 @@ html {
     opacity: 0;
     transform: translateX(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -86,9 +91,12 @@ html {
 }
 
 @keyframes glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(6, 182, 212, 0.6);
   }
@@ -108,6 +116,32 @@ html {
 
 .animate-slide-right {
   animation: slideInFromRight 0.6s ease-out;
+}
+
+@keyframes slidePanelIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-panel-in {
+  animation: slidePanelIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .animate-glow {
@@ -130,4 +164,3 @@ html {
 .glow-border {
   @apply border border-cyan-500/30 hover:border-cyan-400/60 transition-all duration-300;
 }
-

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Hero from '@/components/ui/animated-shader-hero';
 import NebulaGraph from '@/components/NebulaGraph';
-import { MagnetizeButton } from '@/components/ui/magnetize-button';
 import axios from 'axios';
 
 export default function Home() {
@@ -37,36 +36,36 @@ export default function Home() {
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
-    
+
     // Ensure graph is loaded first
     if (!graphData.nodes || graphData.nodes.length === 0) {
       setError("Please launch the engine first!");
       return;
     }
-    
+
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post('http://127.0.0.1:8000/search', { 
-        query: searchQuery, 
+      const res = await axios.post('http://127.0.0.1:8000/search', {
+        query: searchQuery,
         top_k: 5  // Get top 5 most relevant movies
       });
       console.log('Search results:', res.data);
-      
+
       const searchData = res.data;
       const searchNodes = searchData.nodes || searchData;
-      
+
       // Get IDs of search result nodes
       const searchNodeIds = new Set(searchNodes.map(n => n.id));
-      
+
       // Find all nodes connected to search results from the FULL graph
       const connectedNodeIds = new Set(searchNodeIds);
-      
+
       // Add all nodes connected to search results from full graph links
       graphData.links.forEach(link => {
         const sourceId = link.source.id || link.source;
         const targetId = link.target.id || link.target;
-        
+
         if (searchNodeIds.has(sourceId)) {
           connectedNodeIds.add(targetId);
         }
@@ -74,10 +73,10 @@ export default function Home() {
           connectedNodeIds.add(sourceId);
         }
       });
-      
+
       console.log('Search node IDs:', Array.from(searchNodeIds));
       console.log('Connected node IDs:', Array.from(connectedNodeIds));
-      
+
       // Filter full graph data to include only connected nodes
       const filteredNodes = graphData.nodes.filter(n => connectedNodeIds.has(n.id));
       const filteredLinks = graphData.links.filter(l => {
@@ -85,9 +84,9 @@ export default function Home() {
         const targetId = l.target.id || l.target;
         return connectedNodeIds.has(sourceId) && connectedNodeIds.has(targetId);
       });
-      
+
       console.log('Filtered nodes:', filteredNodes.length, 'Filtered links:', filteredLinks.length);
-      
+
       // Mark search result nodes and preserve search data
       filteredNodes.forEach(node => {
         node.isSearchResult = searchNodeIds.has(node.id);
@@ -98,10 +97,10 @@ export default function Home() {
           node.relevanceRank = searchNode.relevanceRank;
         }
       });
-      
+
       setFilteredData({ nodes: filteredNodes, links: filteredLinks });
       setIsSearchView(true);
-      
+
       // Auto-select THE TOP SEARCH RESULT (from backend search results, not filtered nodes)
       if (searchNodes.length > 0) {
         // Find the #1 ranked search result in filteredNodes
@@ -111,13 +110,13 @@ export default function Home() {
           setTimeout(() => setSelectedMovie(topResult), 100);
         }
       }
-    } catch (e) { 
+    } catch (e) {
       setError("Search failed: " + (e.response?.data?.detail || e.message));
-      console.error(e); 
+      console.error(e);
     }
     setLoading(false);
   };
-  
+
   const handleViewAll = () => {
     setFilteredData(graphData);
     setIsSearchView(false);
@@ -128,171 +127,445 @@ export default function Home() {
   // GRAPH VIEW
   if (view === 'GRAPH') {
     return (
-      <div className="relative w-full h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900">
-        {/* Navigation */}
-        <div className="absolute top-6 left-6 z-20">
-          <MagnetizeButton 
-            onClick={() => setView('LANDING')}
-            particleCount={14}
-          >
-            Back
-          </MagnetizeButton>
-        </div>
-
-        {/* Search Bar */}
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-2xl px-6">
-          <form onSubmit={handleSearch} className="flex gap-3">
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by vibe (e.g., 'action thriller', 'romantic comedy')..."
-              className="flex-1 px-6 py-3 rounded-full bg-black/40 backdrop-blur-xl text-white border border-orange-500/30 focus:border-orange-400 focus:outline-none transition-all placeholder-gray-400"
-            />
-            <MagnetizeButton 
-              type="submit"
-              particleCount={12}
+      <>
+        <div className="relative w-full h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900" style={{ overflow: 'hidden' }}>
+          {/* Navigation */}
+          <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 20 }}>
+            <button
+              onClick={() => setView('LANDING')}
+              style={{
+                padding: '10px 22px',
+                borderRadius: '12px',
+                background: 'rgba(0,0,0,0.5)',
+                backdropFilter: 'blur(12px)',
+                border: '1px solid rgba(249,115,22,0.3)',
+                color: '#fdba74',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                letterSpacing: '0.3px',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(249,115,22,0.2)';
+                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.6)';
+                e.currentTarget.style.color = '#fff';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
+                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
+                e.currentTarget.style.color = '#fdba74';
+              }}
             >
-              Search
-            </MagnetizeButton>
-            {isSearchView && (
-              <MagnetizeButton 
-                onClick={handleViewAll}
-                particleCount={10}
+              <span style={{ fontSize: '16px' }}>←</span> Back
+            </button>
+          </div>
+
+          {/* Search Bar */}
+          <div style={{
+            position: 'absolute',
+            top: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 20,
+            width: '100%',
+            maxWidth: '700px',
+            padding: '0 24px',
+          }}>
+            <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by vibe (e.g., 'action thriller', 'romantic comedy')..."
+                style={{
+                  flex: 1,
+                  padding: '12px 24px',
+                  borderRadius: '14px',
+                  background: 'rgba(0,0,0,0.5)',
+                  backdropFilter: 'blur(12px)',
+                  color: '#fff',
+                  border: '1px solid rgba(249,115,22,0.25)',
+                  fontSize: '14px',
+                  outline: 'none',
+                  transition: 'all 0.3s ease',
+                  letterSpacing: '0.2px',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = 'rgba(249,115,22,0.6)';
+                  e.target.style.boxShadow = '0 0 20px rgba(249,115,22,0.15)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = 'rgba(249,115,22,0.25)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '14px',
+                  background: 'linear-gradient(135deg, #f97316, #f59e0b)',
+                  border: 'none',
+                  color: '#000',
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  whiteSpace: 'nowrap',
+                  boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 25px rgba(249,115,22,0.5)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(249,115,22,0.3)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
               >
-                View All
-              </MagnetizeButton>
-            )}
-          </form>
-          {error && <p className="text-red-400 text-xs mt-2 text-center">{error}</p>}
+                Search
+              </button>
+              {isSearchView && (
+                <button
+                  type="button"
+                  onClick={handleViewAll}
+                  style={{
+                    padding: '12px 20px',
+                    borderRadius: '14px',
+                    background: 'rgba(0,0,0,0.5)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(249,115,22,0.3)',
+                    color: '#fdba74',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    whiteSpace: 'nowrap',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(249,115,22,0.2)';
+                    e.currentTarget.style.borderColor = 'rgba(249,115,22,0.6)';
+                    e.currentTarget.style.color = '#fff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
+                    e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
+                    e.currentTarget.style.color = '#fdba74';
+                  }}
+                >
+                  View All
+                </button>
+              )}
+            </form>
+            {error && <p style={{ color: '#f87171', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>{error}</p>}
+          </div>
+
+          {/* Graph */}
+          <NebulaGraph
+            nodes={filteredData.nodes}
+            links={filteredData.links}
+            onNodeClick={setSelectedMovie}
+            selectedNode={selectedMovie}
+          />
+
+          {/* Loading State */}
+          {loading && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-orange-500/30 border-t-orange-400 rounded-full animate-spin mb-4"></div>
+                <p className="text-orange-300 font-semibold">Building your galaxy...</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Graph */}
-        <NebulaGraph 
-          nodes={filteredData.nodes} 
-          links={filteredData.links} 
-          onNodeClick={setSelectedMovie}
-          selectedNode={selectedMovie}
-        />
-
-        {/* 3D Right Panel - Movie Detail */}
+        {/* Movie Detail Side Panel - FIXED overlay */}
         {selectedMovie && (
-          <div className="absolute top-0 right-0 h-full w-[450px] z-30 bg-gradient-to-l from-slate-900/98 via-slate-900/95 to-transparent backdrop-blur-xl border-l border-orange-500/30 shadow-2xl shadow-orange-500/20 animate-in slide-in-from-right duration-500 overflow-y-auto">
-            <div className="p-8 space-y-6">
-              <button 
-                onClick={() => setSelectedMovie(null)}
-                className="absolute top-6 right-6 text-gray-400 hover:text-orange-400 transition-all text-2xl hover:rotate-90 duration-300"
-              >
-                ×
-              </button>
-              
-              <div className="pt-4">
-                <h2 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-300 via-orange-400 to-yellow-500 mb-2 leading-tight">
+          <div
+            className="animate-slide-panel-in hide-scrollbar"
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              height: '100vh',
+              width: '480px',
+              zIndex: 9999,
+              background: 'linear-gradient(135deg, rgba(15,23,42,0.97) 0%, rgba(10,15,30,0.99) 100%)',
+              backdropFilter: 'blur(30px)',
+              WebkitBackdropFilter: 'blur(30px)',
+              borderLeft: '1px solid rgba(249,115,22,0.25)',
+              boxShadow: '-8px 0 40px rgba(0,0,0,0.5), -2px 0 15px rgba(249,115,22,0.1)',
+              overflowY: 'auto',
+              pointerEvents: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {/* Poster Header with Gradient Overlay */}
+            {selectedMovie.poster && (
+              <div style={{ position: 'relative', width: '100%', height: '220px', flexShrink: 0 }}>
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${selectedMovie.poster}`}
+                  alt={selectedMovie.title}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+                {/* Gradient overlay on poster */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(10,15,30,1) 0%, rgba(10,15,30,0.7) 40%, rgba(10,15,30,0.1) 100%)',
+                }}></div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setSelectedMovie(null)}
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.6)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: '#e5e7eb',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s ease',
+                    zIndex: 10000,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(249,115,22,0.8)';
+                    e.currentTarget.style.color = '#fff';
+                    e.currentTarget.style.transform = 'rotate(90deg) scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
+                    e.currentTarget.style.color = '#e5e7eb';
+                    e.currentTarget.style.transform = 'rotate(0deg) scale(1)';
+                  }}
+                >
+                  ✕
+                </button>
+
+                {/* Title overlaying poster bottom */}
+                <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '60px' }}>
+                  <h2 style={{
+                    fontSize: '1.75rem',
+                    fontWeight: 800,
+                    background: 'linear-gradient(135deg, #fdba74, #f97316, #fbbf24)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    lineHeight: 1.2,
+                    margin: 0,
+                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                  }}>
+                    {selectedMovie.title}
+                  </h2>
+                </div>
+              </div>
+            )}
+
+            {/* Content */}
+            <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+
+              {/* Title (fallback if no poster) */}
+              {!selectedMovie.poster && (
+                <h2 style={{
+                  fontSize: '1.75rem',
+                  fontWeight: 800,
+                  background: 'linear-gradient(135deg, #fdba74, #f97316, #fbbf24)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  lineHeight: 1.2,
+                  margin: 0,
+                }}>
                   {selectedMovie.title}
                 </h2>
-                
-                {selectedMovie.genres && selectedMovie.genres !== 'Unknown' && (
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {selectedMovie.genres.split(', ').map((genre, i) => (
-                      <span key={i} className="px-3 py-1 text-xs font-semibold bg-orange-500/20 text-orange-300 rounded-full border border-orange-500/30">
-                        {genre}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              
-              {selectedMovie.poster && (
-                <div className="relative group">
-                  <img 
-                    src={`https://image.tmdb.org/t/p/w500${selectedMovie.poster}`} 
-                    alt={selectedMovie.title}
-                    className="w-full h-[500px] object-cover rounded-xl border-2 border-orange-500/30 shadow-lg shadow-orange-500/20 transition-transform group-hover:scale-[1.02] duration-300"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent rounded-xl"></div>
+              )}
+
+              {/* Genre Tags */}
+              {selectedMovie.genres && selectedMovie.genres !== 'Unknown' && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {selectedMovie.genres.split(', ').map((genre, i) => (
+                    <span key={i} style={{
+                      padding: '4px 12px',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.5px',
+                      background: 'rgba(249,115,22,0.15)',
+                      color: '#fdba74',
+                      borderRadius: '20px',
+                      border: '1px solid rgba(249,115,22,0.3)',
+                    }}>
+                      {genre}
+                    </span>
+                  ))}
                 </div>
               )}
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-black/30 rounded-lg p-4 border border-orange-500/20">
-                  <div className="text-xs text-gray-400 mb-1">Rating</div>
-                  <div className="flex items-center gap-2 text-orange-400 text-xl font-bold">
-                    <span>★</span>
-                    <span>{selectedMovie.rating ? selectedMovie.rating.toFixed(1) : 'N/A'}</span>
+
+              {/* Stats Row */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: selectedMovie.score ? '1fr 1fr' : '1fr',
+                gap: '10px',
+              }}>
+                {/* Rating */}
+                <div style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  border: '1px solid rgba(249,115,22,0.15)',
+                }}>
+                  <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Rating</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ color: '#fbbf24', fontSize: '20px' }}>★</span>
+                    <span style={{ color: '#fb923c', fontSize: '1.25rem', fontWeight: 700 }}>
+                      {selectedMovie.rating ? selectedMovie.rating.toFixed(1) : 'N/A'}
+                    </span>
+                    <span style={{ color: '#6b7280', fontSize: '13px' }}>/10</span>
                   </div>
                 </div>
-                
+
+                {/* Match Score */}
                 {selectedMovie.score && (
-                  <div className="bg-black/30 rounded-lg p-4 border border-orange-500/20">
-                    <div className="text-xs text-gray-400 mb-1">Match Score</div>
-                    <div className="text-xl font-bold text-orange-400">
+                  <div style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    borderRadius: '12px',
+                    padding: '14px 16px',
+                    border: '1px solid rgba(249,115,22,0.15)',
+                  }}>
+                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Match</div>
+                    <div style={{ color: '#4ade80', fontSize: '1.25rem', fontWeight: 700 }}>
                       {(selectedMovie.score * 100).toFixed(0)}%
                     </div>
                   </div>
                 )}
-                
+              </div>
+
+              {/* Meta Info Row */}
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                flexWrap: 'wrap',
+              }}>
                 {selectedMovie.release_date && selectedMovie.release_date !== 'Unknown' && (
-                  <div className="bg-black/30 rounded-lg p-4 border border-orange-500/20">
-                    <div className="text-xs text-gray-400 mb-1">Release Date</div>
-                    <div className="text-sm font-semibold text-orange-300">
-                      {new Date(selectedMovie.release_date).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(0,0,0,0.2)',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                  }}>
+                    <span style={{ fontSize: '14px' }}>📅</span>
+                    <span style={{ fontSize: '13px', color: '#d1d5db', fontWeight: 500 }}>
+                      {new Date(selectedMovie.release_date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
                       })}
-                    </div>
+                    </span>
                   </div>
                 )}
-                
                 {selectedMovie.language && (
-                  <div className="bg-black/30 rounded-lg p-4 border border-orange-500/20">
-                    <div className="text-xs text-gray-400 mb-1">Language</div>
-                    <div className="text-sm font-semibold text-orange-300 uppercase">
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'rgba(0,0,0,0.2)',
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                  }}>
+                    <span style={{ fontSize: '14px' }}>🌐</span>
+                    <span style={{ fontSize: '13px', color: '#d1d5db', fontWeight: 500, textTransform: 'uppercase' }}>
                       {selectedMovie.language}
-                    </div>
+                    </span>
                   </div>
                 )}
               </div>
-              
+
+              {/* Overview */}
               {selectedMovie.overview && (
-                <div className="bg-black/30 rounded-lg p-5 border border-orange-500/20">
-                  <h3 className="text-sm font-bold text-orange-300 mb-3 uppercase tracking-wider">Overview</h3>
-                  <p className="text-sm text-gray-300 leading-relaxed">
+                <div style={{
+                  background: 'rgba(0,0,0,0.25)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  border: '1px solid rgba(249,115,22,0.12)',
+                }}>
+                  <h3 style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: '#fb923c',
+                    marginBottom: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1.5px',
+                  }}>Synopsis</h3>
+                  <p style={{
+                    fontSize: '13px',
+                    color: '#d1d5db',
+                    lineHeight: 1.6,
+                    margin: 0,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 5,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                  }}>
                     {selectedMovie.overview}
                   </p>
                 </div>
               )}
-              
+
+              {/* Popularity Bar */}
               {selectedMovie.popularity && (
-                <div className="bg-black/30 rounded-lg p-4 border border-orange-500/20">
-                  <div className="text-xs text-gray-400 mb-2">Popularity Score</div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 bg-gray-700 rounded-full h-2 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-orange-500 to-yellow-400 h-full transition-all duration-500"
-                        style={{ width: `${Math.min(selectedMovie.popularity, 100)}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-semibold text-orange-300">
+                <div style={{
+                  background: 'rgba(0,0,0,0.25)',
+                  borderRadius: '12px',
+                  padding: '14px 16px',
+                  border: '1px solid rgba(249,115,22,0.12)',
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Popularity</span>
+                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#fdba74' }}>
                       {selectedMovie.popularity.toFixed(1)}
                     </span>
+                  </div>
+                  <div style={{
+                    width: '100%',
+                    height: '6px',
+                    background: 'rgba(55,65,81,0.6)',
+                    borderRadius: '3px',
+                    overflow: 'hidden',
+                  }}>
+                    <div style={{
+                      width: `${Math.min(selectedMovie.popularity, 100)}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #f97316, #fbbf24)',
+                      borderRadius: '3px',
+                      transition: 'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                    }}></div>
                   </div>
                 </div>
               )}
             </div>
           </div>
         )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-orange-500/30 border-t-orange-400 rounded-full animate-spin mb-4"></div>
-              <p className="text-orange-300 font-semibold">Building your galaxy...</p>
-            </div>
-          </div>
-        )}
-      </div>
+      </>
     );
   }
 

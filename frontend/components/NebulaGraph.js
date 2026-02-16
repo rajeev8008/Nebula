@@ -66,7 +66,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, selectedNode })
   }, []);
 
   return (
-    <div className="w-full h-screen bg-black">
+    <div className="w-full h-screen bg-black relative z-0">
       <ForceGraph3D
         ref={graphRef}
         graphData={{ nodes: nodes || [], links: links || [] }}
