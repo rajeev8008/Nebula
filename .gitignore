@@ -7,6 +7,8 @@
 node_modules/
 npm-debug.log
 yarn-error.log
+package-lock.json
+yarn.lock
 
 # Python
 __pycache__/
@@ -15,21 +17,26 @@ __pycache__/
 venv/
 env/
 .venv
+*.egg-info/
+.Python
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
+*.log
 
 # Build
 dist/
 build/
 deployment/
+out/
 
 # Testing
 .pytest_cache/
@@ -41,11 +48,50 @@ coverage.xml
 playwright-report/
 test-results/
 coverage/
+.nyc_output/
 
 # Next.js
 frontend/.next/
+frontend/out/
+frontend/.swc/
+.next/
+out/
+.swc/
+
+# Data & Models (large files)
+*.csv
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.parquet
+*.feather
+data/raw/
+data/processed/
+models/
+*.pth
+*.pt
+*.onnx
+*.pb
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
 
 # Documentation (generated)
 *_PROJECT_CODE.md
 IMPROVEMENTS.md
 TESTING_GUIDE.md
+
+# Cache directories
+.cache/
+*.cache
+.parcel-cache/
+.turbo/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
