@@ -3,38 +3,120 @@
 import { useState, useEffect } from 'react';
 import Hero from '@/components/ui/animated-shader-hero';
 import NebulaGraph from '@/components/NebulaGraph';
+import BrowseMovies from '@/components/BrowseMovies';
 import axios from 'axios';
 
 export default function Home() {
   const [view, setView] = useState('LANDING');
   const [graphData, setGraphData] = useState({ nodes: [], links: [] }); // Full graph
   const [filteredData, setFilteredData] = useState({ nodes: [], links: [] }); // Filtered for search
+  const [browseData, setBrowseData] = useState(null); // Browse movies data
+  const [allMoviesCache, setAllMoviesCache] = useState(null); // Cached movie data
   const [loading, setLoading] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
   const [isSearchView, setIsSearchView] = useState(false);
 
-  const launchGraph = async () => {
+  // Helper to build graph from flat movie list
+  const buildGraphFromMovies = (movies) => {
+    if (!movies || movies.length === 0) return { nodes: [], links: [] };
+
+    const nodes = movies.slice(0, 100).map((movie) => ({
+      id: movie.id,
+      title: movie.title,
+      poster: movie.poster,
+      overview: movie.overview,
+      val: movie.rating * 2, // Node size based on rating
+      rating: movie.rating,
+      genres: movie.genres,
+      release_date: movie.release_date,
+      language: movie.language,
+      popularity: movie.popularity,
+      group: 1,
+    }));
+
+    // Calculate links using cosine similarity (simplified for frontend)
+    const links = [];
+    const threshold = 0.3;
+
+    // Only calculate links if we have vectors
+    if (movies[0]?.vector) {
+      for (let i = 0; i < Math.min(nodes.length, 50); i++) {
+        for (let j = i + 1; j < Math.min(nodes.length, 50); j++) {
+          // Simple similarity based on shared genres
+          const genresA = new Set(movies[i].genres?.split(', ') || []);
+          const genresB = new Set(movies[j].genres?.split(', ') || []);
+          const intersection = [...genresA].filter(x => genresB.has(x)).length;
+          const union = new Set([...genresA, ...genresB]).size;
+          const similarity = union > 0 ? intersection / union : 0;
+
+          if (similarity > threshold) {
+            links.push({
+              source: nodes[i].id,
+              target: nodes[j].id,
+              value: similarity,
+              similarity: similarity,
+            });
+          }
+        }
+      }
+    }
+
+    return { nodes, links };
+  };
+
+  const fetchMovies = async () => {
+    // Use cached data if available
+    if (allMoviesCache) {
+      return allMoviesCache;
+    }
+
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get('http://127.0.0.1:8000/graph');
-      console.log('Graph data received:', res.data);
-      const data = res.data;
-      setGraphData(data); // Store full graph
-      setFilteredData(data); // Initially show everything
-      setView('GRAPH');
-      setIsSearchView(false);
+      const res = await axios.get('http://127.0.0.1:8000/movies');
+      console.log('Movies data received:', res.data);
+      const movies = res.data.movies || [];
+      setAllMoviesCache(movies); // Cache for reuse
+      return movies;
     } catch (e) {
       if (e.message === 'Network Error') {
         setError("Backend unreachable. Check CORS or if Uvicorn is running on 127.0.0.1:8000.");
       } else {
-        setError("Backend Error: " + (e.response?.data?.detail || e.message));
+        setError("Fetch Error: " + (e.response?.data?.detail || e.message));
       }
       console.error(e);
+      return [];
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
+  };
+
+  const launchBrowse = async () => {
+    const movies = await fetchMovies();
+    if (movies.length > 0) {
+      setView('BROWSE');
+    }
+  };
+
+  const launchGraph = async (preSelectedMovieId = null) => {
+    const movies = await fetchMovies();
+    if (movies.length > 0) {
+      const graphData = buildGraphFromMovies(movies);
+      setGraphData(graphData);
+      setFilteredData(graphData);
+      setView('GRAPH');
+      setIsSearchView(false);
+
+      // Pre-select movie if provided (deep link from browse)
+      if (preSelectedMovieId) {
+        const movie = graphData.nodes.find(n => n.id === preSelectedMovieId);
+        if (movie) {
+          setTimeout(() => setSelectedMovie(movie), 100);
+        }
+      }
+    }
   };
 
   const handleSearch = async (e) => {
@@ -577,6 +659,21 @@ export default function Home() {
     );
   }
 
+  // BROWSE VIEW
+  if (view === 'BROWSE') {
+    return (
+      <BrowseMovies
+        movies={allMoviesCache}
+        onBack={() => setView('LANDING')}
+        onLaunchEngine={() => launchGraph()}
+        onMovieClick={(movie) => {
+          // Deep link: Navigate to graph with this movie pre-selected
+          launchGraph(movie.id);
+        }}
+      />
+    );
+  }
+
   // LANDING VIEW
   return (
     <Hero
@@ -595,8 +692,8 @@ export default function Home() {
           onClick: launchGraph
         },
         secondary: {
-          text: "Learn More",
-          onClick: () => window.open('https://github.com/rajeev8008/nebula', '_blank')
+          text: loading ? "Loading..." : "Browse Movies",
+          onClick: launchBrowse
         }
       }}
     />

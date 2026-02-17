@@ -164,3 +164,43 @@ html {
 .glow-border {
   @apply border border-cyan-500/30 hover:border-cyan-400/60 transition-all duration-300;
 }
+
+/* Horizontal scroll with snap for Browse carousels */
+.horizontal-scroll {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(249, 115, 22, 0.3) transparent;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb {
+  background: rgba(249, 115, 22, 0.3);
+  border-radius: 3px;
+}
+
+.horizontal-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(249, 115, 22, 0.6);
+}
+
+.scroll-item {
+  scroll-snap-align: start;
+}
+
+/* Card hover glow animation */
+@keyframes cardHoverGlow {
+  from {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+  }
+
+  to {
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.8);
+  }
+}

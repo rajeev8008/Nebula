@@ -129,65 +129,57 @@ def search_movies(req: SearchRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/graph")
-def get_graph_data():
+@app.get("/movies")
+def get_movies():
     """
-    Fetches nodes to populate the 3D graph initially.
-    Now includes similarity-based links to create a true knowledge graph.
+    Unified endpoint that returns a flat list of movies with all metadata.
+    Frontend handles both graph construction and browse categorization.
     """
     try:
-        # Fetch more movies (100) to make the graph dense
-        dummy_vec = [0.1] * 384 
+        # Fetch top 250 movies with full metadata
+        dummy_vec = [0.1] * 384
         results = index.query(
-            vector=dummy_vec, 
-            top_k=100, 
+            vector=dummy_vec,
+            top_k=250,
             include_metadata=True,
-            include_values=True  # CRITICAL: Need vectors to calculate links
+            include_values=True  # Include vectors for graph construction
         )
         
-        nodes = []
-        vectors = []
-        id_map = {}  # Map Pinecone IDs to array indices
-
-        # Extract Nodes and Vectors
-        for i, match in enumerate(results.matches):
-            nodes.append({
+        # Format movies with all necessary data
+        movies = []
+        for match in results.matches:
+            movies.append({
                 "id": match.id,
                 "title": match.metadata.get("title", "Unknown"),
                 "poster": match.metadata.get("poster_path", ""),
                 "overview": match.metadata.get("overview", ""),
-                "val": match.metadata.get("rating", 5.0) * 2,  # Size based on rating
                 "rating": match.metadata.get("rating", 0.0),
                 "genres": match.metadata.get("genres", "Unknown"),
                 "release_date": match.metadata.get("release_date", "Unknown"),
                 "language": match.metadata.get("original_language", "en"),
                 "popularity": match.metadata.get("popularity", 0.0),
-                "group": 1
+                "vector": match.values  # For graph similarity calculation
             })
-            vectors.append(match.values)
-            id_map[i] = match.id
-
-        # Calculate Similarity Matrix (The "Edges" Logic)
-        vec_matrix = np.array(vectors)
-        sim_matrix = cosine_similarity(vec_matrix)
-
-        links = []
-        threshold = 0.3  # Lower threshold for initial graph to show more connections
         
-        rows, cols = sim_matrix.shape
-        for i in range(rows):
-            for j in range(i + 1, cols):  # Avoid self-loops and duplicates
-                score = sim_matrix[i][j]
-                if score > threshold:
-                    links.append({
-                        "source": id_map[i],
-                        "target": id_map[j],
-                        "value": float(score),
-                        "similarity": float(score)
-                    })
-
-        print(f"Graph generated: {len(nodes)} nodes, {len(links)} links")
-        return {"nodes": nodes, "links": links}
+        print(f"Movies endpoint: returned {len(movies)} movies")
+        return {"movies": movies, "total": len(movies)}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Keep legacy endpoints for backwards compatibility during transition
+@app.get("/graph")
+def get_graph_data():
+    """
+    Legacy endpoint - redirects to /movies.
+    Graph construction now handled by frontend.
+    """
+    return get_movies()
+
+@app.get("/browse")
+def browse_movies():
+    """
+    Legacy endpoint - redirects to /movies.
+    Categorization now handled by frontend.
+    """
+    return get_movies()
