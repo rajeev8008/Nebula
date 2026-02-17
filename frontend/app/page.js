@@ -27,7 +27,11 @@ export default function Home() {
       setView('GRAPH');
       setIsSearchView(false);
     } catch (e) {
-      setError("Backend offline. Make sure uvicorn is running.");
+      if (e.message === 'Network Error') {
+        setError("Backend unreachable. Check CORS or if Uvicorn is running on 127.0.0.1:8000.");
+      } else {
+        setError("Backend Error: " + (e.response?.data?.detail || e.message));
+      }
       console.error(e);
     }
     setLoading(false);
@@ -111,7 +115,11 @@ export default function Home() {
         }
       }
     } catch (e) {
-      setError("Search failed: " + (e.response?.data?.detail || e.message));
+      if (e.message === 'Network Error') {
+        setError("Search failed: Backend unreachable.");
+      } else {
+        setError("Search failed: " + (e.response?.data?.detail || e.message));
+      }
       console.error(e);
     }
     setLoading(false);

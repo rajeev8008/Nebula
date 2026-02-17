@@ -16,3 +16,4 @@ httpx==0.27.2
 # Code Quality
 flake8==7.1.1
 black==24.10.0
+PyYAML==6.0.2

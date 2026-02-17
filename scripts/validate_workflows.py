@@ -15,13 +15,20 @@ def validate_workflow_file(filepath):
         with open(filepath, 'r', encoding='utf-8') as f:
             workflow = yaml.safe_load(f)
         
+        if not isinstance(workflow, dict):
+            print(f"  ❌ Invalid workflow format (not a dictionary)")
+            return False
+
         # Check required fields
-        if 'name' not in workflow:
-            print(f"  ❌ Missing 'name' field")
+        # YAML 1.1 parsers often convert 'on' to True
+        has_on = 'on' in workflow or True in workflow
+        
+        if not has_on:
+            print(f"  ❌ Missing 'on' field")
             return False
         
-        if 'on' not in workflow:
-            print(f"  ❌ Missing 'on' field")
+        if 'name' not in workflow:
+            print(f"  ❌ Missing 'name' field")
             return False
             
         if 'jobs' not in workflow:

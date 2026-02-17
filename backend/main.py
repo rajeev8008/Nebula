@@ -19,7 +19,7 @@ app = FastAPI(title="Nebula API", description="Semantic Search Engine for Movies
 # 3. Enable CORS (Critical for connecting React to Python)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, replace with your Vercel URL
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

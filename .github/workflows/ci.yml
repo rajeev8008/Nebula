@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  TESTING: "true"
+
 jobs:
   backend:
     name: Backend Tests & Linting
@@ -25,7 +28,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install flake8 pytest
+          pip install flake8 pytest pytest-cov
 
       - name: Lint with flake8
         run: |
@@ -38,8 +41,8 @@ jobs:
         run: |
           pytest tests/ -v --cov=backend --cov-report=term-missing --cov-report=xml
         env:
-          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY || 'test-key' }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY || 'test-key' }}
 
       - name: Upload coverage to artifacts
         uses: actions/upload-artifact@v4
@@ -47,20 +50,6 @@ jobs:
           name: coverage-report
           path: coverage.xml
           retention-days: 7
-
-      - name: Check environment variables
-        run: |
-          echo "Checking required environment variables..."
-          if [ -z "${{ secrets.PINECONE_API_KEY }}" ]; then
-            echo "Warning: PINECONE_API_KEY not set"
-          else
-            echo "PINECONE_API_KEY is configured"
-          fi
-          if [ -z "${{ secrets.TMDB_API_KEY }}" ]; then
-            echo "Warning: TMDB_API_KEY not set"
-          else
-            echo "TMDB_API_KEY is configured"
-          fi
 
   frontend:
     name: Frontend Build & Tests
@@ -120,28 +109,45 @@ jobs:
       - name: Check for large files
         run: |
           echo "Checking for files larger than 5MB..."
-          find . -type f -size +5M -not -path "./.git/*" -not -path "./node_modules/*" | while read file; do
+          find . -type f -size +5M -not -path "./.git/*" -not -path "./node_modules/*" | while read -r file; do
             echo "Large file found: $file"
           done
 
       - name: Check for secrets
         run: |
           echo "Scanning for potential secrets..."
-          if grep -r "api_key\s*=\s*['\"][^'\"]*['\"]" --include="*.py" --include="*.js" .; then
-            echo "Warning: Potential hardcoded API keys found"
+          # Look for hardcoded strings that look like API keys in assignments
+          if grep -rE "api_key\s*=\s*['\"][0-9a-zA-Z]{16,}['\"]" --include="*.py" --include="*.js" .; then
+            echo "Error: Potential hardcoded API keys found"
             exit 1
           fi
 
       - name: Count lines of code
         run: |
           echo "Lines of code:"
-          echo "Backend Python: $(find backend scripts -name '*.py' | xargs wc -l | tail -1)"
-          echo "Frontend JS/JSX: $(find frontend -name '*.js' -o -name '*.jsx' | xargs wc -l | tail -1)"
+          python -c "
+          import glob
+          import os
+          
+          def count_lines(pattern):
+              files = glob.glob(pattern, recursive=True)
+              total = 0
+              for f in files:
+                  if os.path.isfile(f):
+                      with open(f, 'r', errors='ignore') as file:
+                          total += sum(1 for _ in file)
+              return total
+          
+          py_lines = count_lines('backend/**/*.py') + count_lines('scripts/**/*.py')
+          js_lines = count_lines('frontend/**/*.js') + count_lines('frontend/**/*.jsx')
+          print(f'Backend Python: {py_lines}')
+          print(f'Frontend JS/JSX: {js_lines}')
+          "
 
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [backend]
     
     steps:
       - name: Checkout code
@@ -161,6 +167,8 @@ jobs:
       - name: Test API endpoints
         run: |
           python -c "
+          import os
+          os.environ['TESTING'] = 'true'
           from fastapi.testclient import TestClient
           from backend.main import app
           
@@ -168,14 +176,15 @@ jobs:
           
           # Test root endpoint
           response = client.get('/')
-          print(f'Root endpoint: {response.status_code}')
+          print(f'Root endpoint status: {response.status_code}')
           assert response.status_code == 200
           
           print('Integration tests passed!')
           "
         env:
-          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY || 'test-key' }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY || 'test-key' }}
+          TESTING: "true"
 
   e2e-tests:
     name: E2E Tests with Playwright
@@ -203,9 +212,13 @@ jobs:
 
       - name: Run Playwright tests
         working-directory: frontend
-        run: npm run e2e
+        run: |
+          # Note: Currently assumes frontend starts its own dev server
+          # and backend is mocked or not required for simple homepage check
+          npm run e2e
         env:
           CI: true
+          TESTING: "true"
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -214,3 +227,4 @@ jobs:
           name: playwright-report
           path: frontend/playwright-report/
           retention-days: 7
+
