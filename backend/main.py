@@ -120,7 +120,7 @@ def api_search(
 
         if q.strip():
             # Semantic search mode
-            query_vector = model.encode(q.strip()).tolist()
+            query_vector = [float(x) for x in model.encode(q.strip())]
         else:
             # Browse mode — non-zero dummy vector (cosine needs non-zero magnitude)
             query_vector = [0.1] * 384
@@ -180,7 +180,7 @@ def search_movies(req: SearchRequest):
     """
     try:
         # 1. Convert text to numbers
-        query_vector = model.encode(req.query).tolist()
+        query_vector = [float(x) for x in model.encode(req.query)]
         
         # 2. Query Pinecone with vectors for similarity calculation
         results = index.query(

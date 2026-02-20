@@ -170,7 +170,17 @@ export default function Home() {
         return connectedNodeIds.has(sourceId) && connectedNodeIds.has(targetId);
       });
 
-      console.log('Filtered nodes:', filteredNodes.length, 'Filtered links:', filteredLinks.length);
+      console.log('Filtered nodes before adding search results:', filteredNodes.length);
+
+      // Add search results that aren't already in the filtered nodes
+      // This ensures all semantic search matches are displayed, even if not in the initial graph
+      searchNodes.forEach(searchNode => {
+        if (!filteredNodes.find(n => n.id === searchNode.id)) {
+          filteredNodes.push(searchNode);
+        }
+      });
+
+      console.log('Filtered nodes after adding search results:', filteredNodes.length, 'Filtered links:', filteredLinks.length);
 
       // Mark search result nodes and preserve search data
       filteredNodes.forEach(node => {
@@ -183,7 +193,15 @@ export default function Home() {
         }
       });
 
-      setFilteredData({ nodes: filteredNodes, links: filteredLinks });
+      // Filter links to only include those between nodes that exist in filteredNodes
+      const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
+      const finalLinks = filteredLinks.filter(l => {
+        const sourceId = l.source.id || l.source;
+        const targetId = l.target.id || l.target;
+        return filteredNodeIds.has(sourceId) && filteredNodeIds.has(targetId);
+      });
+
+      setFilteredData({ nodes: filteredNodes, links: finalLinks });
       setIsSearchView(true);
 
       // Auto-select THE TOP SEARCH RESULT (from backend search results, not filtered nodes)
