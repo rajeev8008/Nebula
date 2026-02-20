@@ -5,7 +5,6 @@ import Hero from '@/components/ui/animated-shader-hero';
 import NebulaGraph from '@/components/NebulaGraph';
 import BrowseMovies from '@/components/BrowseMovies';
 import CommandPalette from '@/components/CommandPalette';
-import { generateMockMovies } from '@/lib/mockMovies';
 import axios from 'axios';
 
 export default function Home() {
@@ -95,17 +94,9 @@ export default function Home() {
     }
   };
 
-  const launchBrowse = async () => {
-    // Show BROWSE view immediately with loading skeletons
+  const launchBrowse = () => {
+    // BrowseMovies is now self-contained — fetches its own data
     setView('BROWSE');
-    setLoading(true);
-    const movies = await fetchMovies();
-    // If backend fails, fall back to 500 mock movies for demo
-    if (!movies || movies.length === 0) {
-      const mockData = generateMockMovies(500);
-      setAllMoviesCache(mockData);
-    }
-    setLoading(false);
   };
 
   const launchGraph = async (preSelectedMovieId = null) => {
@@ -672,8 +663,6 @@ export default function Home() {
     return (
       <Suspense>
         <BrowseMovies
-          movies={allMoviesCache}
-          loading={loading}
           onBack={() => setView('LANDING')}
           onLaunchEngine={() => launchGraph()}
           onMovieClick={(movie) => {
@@ -681,7 +670,6 @@ export default function Home() {
           }}
         />
         <CommandPalette
-          movies={allMoviesCache || []}
           onSelectMovie={(movie) => {
             launchGraph(movie.id);
           }}
@@ -715,7 +703,6 @@ export default function Home() {
         }}
       />
       <CommandPalette
-        movies={allMoviesCache || []}
         onSelectMovie={(movie) => {
           launchGraph(movie.id);
         }}

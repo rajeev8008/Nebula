@@ -1,10 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Command } from 'cmdk';
+import { fetchMovies } from '@/lib/api';
 
-const CommandPalette = ({ movies = [], onSelectMovie }) => {
+const CommandPalette = ({ onSelectMovie }) => {
     const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const debounceRef = useRef(null);
 
     // Global Cmd/Ctrl+K listener
     useEffect(() => {
@@ -22,16 +27,51 @@ const CommandPalette = ({ movies = [], onSelectMovie }) => {
         return () => document.removeEventListener('keydown', handleKeyDown);
     }, []);
 
-    // Prepare searchable movies with lowercase cache for perf
-    const searchableMovies = useMemo(
-        () =>
-            movies.slice(0, 500).map((m) => ({
-                ...m,
-                _searchTitle: m.title?.toLowerCase() || '',
-                _searchGenres: m.genres?.toLowerCase() || '',
-            })),
-        [movies]
-    );
+    // Debounced search
+    const searchMovies = useCallback(async (searchQuery) => {
+        if (!searchQuery || searchQuery.trim().length < 2) {
+            setResults([]);
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const data = await fetchMovies({ q: searchQuery.trim(), limit: 20 });
+            setResults(data.movies || []);
+        } catch (err) {
+            console.error('Command palette search failed:', err);
+            setResults([]);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    // Handle input change with debounce
+    const handleInputChange = useCallback((value) => {
+        setQuery(value);
+
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            searchMovies(value);
+        }, 300);
+    }, [searchMovies]);
+
+    // Cleanup debounce on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, []);
+
+    // Reset on close
+    useEffect(() => {
+        if (!open) {
+            setQuery('');
+            setResults([]);
+            setLoading(false);
+        }
+    }, [open]);
 
     const handleSelect = useCallback(
         (movie) => {
@@ -83,7 +123,7 @@ const CommandPalette = ({ movies = [], onSelectMovie }) => {
                     animation: 'cmdkDialogIn 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
             >
-                <Command label="Search movies" shouldFilter={true}>
+                <Command label="Search movies" shouldFilter={false}>
                     {/* Search Input */}
                     <div
                         style={{
@@ -110,8 +150,10 @@ const CommandPalette = ({ movies = [], onSelectMovie }) => {
                         </svg>
 
                         <Command.Input
-                            placeholder="Search movies by title or genre..."
+                            placeholder="Search movies by title or vibe..."
                             autoFocus
+                            value={query}
+                            onValueChange={handleInputChange}
                             style={{
                                 flex: 1,
                                 background: 'transparent',
@@ -124,6 +166,18 @@ const CommandPalette = ({ movies = [], onSelectMovie }) => {
                                 letterSpacing: '0.2px',
                             }}
                         />
+
+                        {/* Loading spinner */}
+                        {loading && (
+                            <div style={{
+                                width: '18px',
+                                height: '18px',
+                                borderRadius: '50%',
+                                border: '2px solid rgba(249,115,22,0.2)',
+                                borderTopColor: '#f97316',
+                                animation: 'spin 0.8s linear infinite',
+                            }} />
+                        )}
 
                         {/* Shortcut hint */}
                         <kbd
@@ -150,21 +204,24 @@ const CommandPalette = ({ movies = [], onSelectMovie }) => {
                             padding: '8px',
                         }}
                     >
-                        <Command.Empty
-                            style={{
-                                padding: '40px 20px',
-                                textAlign: 'center',
-                                color: '#6b7280',
-                                fontSize: '14px',
-                            }}
-                        >
-                            No movies found.
-                        </Command.Empty>
+                        {/* Empty / prompt state */}
+                        {!loading && results.length === 0 && (
+                            <Command.Empty
+                                style={{
+                                    padding: '40px 20px',
+                                    textAlign: 'center',
+                                    color: '#6b7280',
+                                    fontSize: '14px',
+                                }}
+                            >
+                                {query.length >= 2 ? 'No movies found.' : 'Type to search movies...'}
+                            </Command.Empty>
+                        )}
 
-                        {searchableMovies.map((movie) => (
+                        {results.map((movie) => (
                             <Command.Item
                                 key={movie.id}
-                                value={`${movie.title} ${movie.genres}`}
+                                value={movie.id}
                                 onSelect={() => handleSelect(movie)}
                                 style={{
                                     display: 'flex',
@@ -238,7 +295,7 @@ const CommandPalette = ({ movies = [], onSelectMovie }) => {
                                 </div>
 
                                 {/* Rating */}
-                                {movie.rating && (
+                                {movie.rating > 0 && (
                                     <div
                                         style={{
                                             display: 'flex',
@@ -275,9 +332,13 @@ const CommandPalette = ({ movies = [], onSelectMovie }) => {
                             <kbd style={{ padding: '2px 5px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', fontFamily: 'monospace', marginLeft: '12px', marginRight: '4px' }}>↵</kbd>
                             Select
                         </span>
-                        <span>{movies.length} movies indexed</span>
+                        <span>
+                            {loading ? 'Searching...' : results.length > 0 ? `${results.length} results` : 'Powered by Nebula'}
+                        </span>
                     </div>
                 </Command>
+
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
             </div>
         </div>
     );

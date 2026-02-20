@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -55,11 +55,121 @@ class MovieResponse(BaseModel):
     overview: Optional[str] = None
     rating: float
 
+# --- Helper: Build Pinecone metadata filter ---
+def build_metadata_filter(genre: Optional[str], decade: Optional[str], rating: Optional[float]):
+    """Convert query params into a Pinecone metadata filter dict."""
+    conditions = []
+
+    if genre:
+        # genres is stored as comma-separated string; use $eq for exact substring match
+        # Pinecone string filter matches if the metadata field contains the value
+        conditions.append({"genres": {"$eq": genre}})
+
+    if rating is not None and rating > 0:
+        conditions.append({"rating": {"$gte": rating}})
+
+    if decade:
+        year_ranges = {
+            "2020s": (2020, 2029),
+            "2010s": (2010, 2019),
+            "2000s": (2000, 2009),
+            "1990s": (1990, 1999),
+            "Earlier": (1900, 1989),
+        }
+        if decade in year_ranges:
+            start_year, end_year = year_ranges[decade]
+            # Filter by release_date string range (YYYY-MM-DD format)
+            conditions.append({"release_date": {"$gte": f"{start_year}-01-01"}})
+            conditions.append({"release_date": {"$lte": f"{end_year}-12-31"}})
+
+    if not conditions:
+        return None
+    if len(conditions) == 1:
+        return conditions[0]
+    return {"$and": conditions}
+
+
 # --- Endpoints ---
 
 @app.get("/")
 def home():
     return {"message": "Nebula API is running. Go to /docs for swagger UI."}
+
+
+@app.get("/api/search")
+def api_search(
+    q: str = Query("", description="Search query text"),
+    genre: Optional[str] = Query(None, description="Filter by genre name"),
+    decade: Optional[str] = Query(None, description="Filter by decade (e.g., '2020s')"),
+    rating: Optional[float] = Query(None, description="Minimum rating filter"),
+    page: int = Query(1, ge=1, description="Page number (1-indexed)"),
+    limit: int = Query(20, ge=1, le=100, description="Results per page"),
+):
+    """
+    Unified search + browse endpoint.
+    - With `q`: semantic search using vector similarity + optional metadata filters.
+    - Without `q`: browse mode using a dummy vector + metadata filters.
+    Returns paginated results.
+    """
+    try:
+        # Build metadata filter
+        metadata_filter = build_metadata_filter(genre, decade, rating)
+
+        # Determine query vector
+        fetch_top_k = 200  # Fetch a large pool for pagination slicing
+
+        if q.strip():
+            # Semantic search mode
+            query_vector = model.encode(q.strip()).tolist()
+        else:
+            # Browse mode — non-zero dummy vector (cosine needs non-zero magnitude)
+            query_vector = [0.1] * 384
+
+        # Query Pinecone
+        query_kwargs = {
+            "vector": query_vector,
+            "top_k": fetch_top_k,
+            "include_metadata": True,
+        }
+        if metadata_filter:
+            query_kwargs["filter"] = metadata_filter
+
+        results = index.query(**query_kwargs)
+
+        # Format all results
+        all_movies = []
+        for match in results.matches:
+            all_movies.append({
+                "id": match.id,
+                "title": match.metadata.get("title", "Unknown"),
+                "poster": match.metadata.get("poster_path", ""),
+                "overview": match.metadata.get("overview", ""),
+                "rating": match.metadata.get("rating", 0.0),
+                "genres": match.metadata.get("genres", "Unknown"),
+                "release_date": match.metadata.get("release_date", "Unknown"),
+                "language": match.metadata.get("original_language", "en"),
+                "popularity": match.metadata.get("popularity", 0.0),
+                "score": float(match.score),
+            })
+
+        # Paginate
+        total = len(all_movies)
+        start_idx = (page - 1) * limit
+        end_idx = start_idx + limit
+        page_movies = all_movies[start_idx:end_idx]
+        has_more = end_idx < total
+
+        return {
+            "movies": page_movies,
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "hasMore": has_more,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @app.post("/search")
 def search_movies(req: SearchRequest):
@@ -141,22 +251,25 @@ def get_movies():
     Frontend handles both graph construction and browse categorization.
     """
     try:
-        # Fetch top 250 movies with full metadata
+        # Fetch top 500 movies with full metadata
         dummy_vec = [0.1] * 384
         results = index.query(
             vector=dummy_vec,
-            top_k=250,
+            top_k=500,
             include_metadata=True,
             include_values=True  # Include vectors for graph construction
         )
         
-        # Format movies with all necessary data
+        # Format movies with all necessary data (skip movies without posters)
         movies = []
         for match in results.matches:
+            poster = match.metadata.get("poster_path", "")
+            if not poster or not poster.strip():
+                continue  # Skip — renders as orange ball in graph
             movies.append({
                 "id": match.id,
                 "title": match.metadata.get("title", "Unknown"),
-                "poster": match.metadata.get("poster_path", ""),
+                "poster": poster,
                 "overview": match.metadata.get("overview", ""),
                 "rating": match.metadata.get("rating", 0.0),
                 "genres": match.metadata.get("genres", "Unknown"),
@@ -166,7 +279,7 @@ def get_movies():
                 "vector": match.values  # For graph similarity calculation
             })
         
-        print(f"Movies endpoint: returned {len(movies)} movies")
+        print(f"Movies endpoint: returned {len(movies)} movies (with posters)")
         return {"movies": movies, "total": len(movies)}
         
     except Exception as e:

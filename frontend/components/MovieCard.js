@@ -1,18 +1,43 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
-// --- Mock Watchlist API (30% failure rate) ---
-const mockToggleWatchlist = (movieId, adding) =>
-    new Promise((resolve, reject) => {
-        setTimeout(() => {
-            if (Math.random() < 0.3) {
-                reject(new Error(`Failed to ${adding ? 'add' : 'remove'} movie #${movieId} from watchlist`));
-            } else {
-                resolve({ success: true });
-            }
-        }, 800 + Math.random() * 400);
-    });
+// ─── localStorage Watchlist Store ───
+const WATCHLIST_KEY = 'nebula-watchlist';
+
+function getWatchlist() {
+    if (typeof window === 'undefined') return new Set();
+    try {
+        const stored = localStorage.getItem(WATCHLIST_KEY);
+        return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+        return new Set();
+    }
+}
+
+function saveWatchlist(watchlistSet) {
+    try {
+        localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlistSet]));
+    } catch (e) {
+        console.error('Failed to save watchlist:', e);
+    }
+}
+
+function toggleWatchlistItem(movieId) {
+    const watchlist = getWatchlist();
+    const id = String(movieId);
+    if (watchlist.has(id)) {
+        watchlist.delete(id);
+    } else {
+        watchlist.add(id);
+    }
+    saveWatchlist(watchlist);
+    return watchlist.has(id);
+}
+
+function isInWatchlist(movieId) {
+    return getWatchlist().has(String(movieId));
+}
 
 // --- Bookmark SVG Icons ---
 const BookmarkOutline = () => (
@@ -34,6 +59,11 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
     const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
     const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
     const cardRef = useRef(null);
+
+    // Initialize bookmark state from localStorage
+    useEffect(() => {
+        setIsBookmarked(isInWatchlist(movie.id));
+    }, [movie.id]);
 
     // --- 3D Tilt & Glare ---
     const handleMouseMove = useCallback((e) => {
@@ -60,24 +90,18 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
         setGlare({ x: 50, y: 50, opacity: 0 });
     }, []);
 
-    // --- Optimistic Bookmark ---
-    const handleBookmark = useCallback(async (e) => {
+    // --- Optimistic Bookmark with localStorage ---
+    const handleBookmark = useCallback((e) => {
         e.stopPropagation();
-        const wasBookmarked = isBookmarked;
-        const newState = !wasBookmarked;
 
-        // Optimistic update
+        // Optimistic update — toggle immediately
+        const newState = !isBookmarked;
         setIsBookmarked(newState);
         setBookmarkAnimating(true);
         setTimeout(() => setBookmarkAnimating(false), 350);
 
-        try {
-            await mockToggleWatchlist(movie.id, newState);
-        } catch (err) {
-            // Revert on failure
-            setIsBookmarked(wasBookmarked);
-            console.error(err.message);
-        }
+        // Persist to localStorage (synchronous, no rollback needed)
+        toggleWatchlistItem(movie.id);
     }, [isBookmarked, movie.id]);
 
     return (
