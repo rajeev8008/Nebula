@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Hero from '@/components/ui/animated-shader-hero';
 import NebulaGraph from '@/components/NebulaGraph';
 import BrowseMovies from '@/components/BrowseMovies';
+import CommandPalette from '@/components/CommandPalette';
+import { generateMockMovies } from '@/lib/mockMovies';
 import axios from 'axios';
 
 export default function Home() {
@@ -94,10 +96,16 @@ export default function Home() {
   };
 
   const launchBrowse = async () => {
+    // Show BROWSE view immediately with loading skeletons
+    setView('BROWSE');
+    setLoading(true);
     const movies = await fetchMovies();
-    if (movies.length > 0) {
-      setView('BROWSE');
+    // If backend fails, fall back to 500 mock movies for demo
+    if (!movies || movies.length === 0) {
+      const mockData = generateMockMovies(500);
+      setAllMoviesCache(mockData);
     }
+    setLoading(false);
   };
 
   const launchGraph = async (preSelectedMovieId = null) => {
@@ -662,40 +670,56 @@ export default function Home() {
   // BROWSE VIEW
   if (view === 'BROWSE') {
     return (
-      <BrowseMovies
-        movies={allMoviesCache}
-        onBack={() => setView('LANDING')}
-        onLaunchEngine={() => launchGraph()}
-        onMovieClick={(movie) => {
-          // Deep link: Navigate to graph with this movie pre-selected
-          launchGraph(movie.id);
-        }}
-      />
+      <Suspense>
+        <BrowseMovies
+          movies={allMoviesCache}
+          loading={loading}
+          onBack={() => setView('LANDING')}
+          onLaunchEngine={() => launchGraph()}
+          onMovieClick={(movie) => {
+            launchGraph(movie.id);
+          }}
+        />
+        <CommandPalette
+          movies={allMoviesCache || []}
+          onSelectMovie={(movie) => {
+            launchGraph(movie.id);
+          }}
+        />
+      </Suspense>
     );
   }
 
   // LANDING VIEW
   return (
-    <Hero
-      trustBadge={{
-        text: "Powered by AI & Vector Embeddings",
-        icons: []
-      }}
-      headline={{
-        line1: "Project",
-        line2: "Nebula"
-      }}
-      subtitle="The Semantic Search Engine for Cinema. Search by vibe, emotion, and plot using our 3D Constellation Engine."
-      buttons={{
-        primary: {
-          text: loading ? "Launching..." : "Launch Engine",
-          onClick: launchGraph
-        },
-        secondary: {
-          text: loading ? "Loading..." : "Browse Movies",
-          onClick: launchBrowse
-        }
-      }}
-    />
+    <>
+      <Hero
+        trustBadge={{
+          text: "Powered by AI & Vector Embeddings",
+          icons: []
+        }}
+        headline={{
+          line1: "Project",
+          line2: "Nebula"
+        }}
+        subtitle="The Semantic Search Engine for Cinema. Search by vibe, emotion, and plot using our 3D Constellation Engine."
+        buttons={{
+          primary: {
+            text: loading ? "Launching..." : "Launch Engine",
+            onClick: launchGraph
+          },
+          secondary: {
+            text: loading ? "Loading..." : "Browse Movies",
+            onClick: launchBrowse
+          }
+        }}
+      />
+      <CommandPalette
+        movies={allMoviesCache || []}
+        onSelectMovie={(movie) => {
+          launchGraph(movie.id);
+        }}
+      />
+    </>
   );
 }

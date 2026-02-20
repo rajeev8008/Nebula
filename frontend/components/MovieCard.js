@@ -1,12 +1,88 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
+
+// --- Mock Watchlist API (30% failure rate) ---
+const mockToggleWatchlist = (movieId, adding) =>
+    new Promise((resolve, reject) => {
+        setTimeout(() => {
+            if (Math.random() < 0.3) {
+                reject(new Error(`Failed to ${adding ? 'add' : 'remove'} movie #${movieId} from watchlist`));
+            } else {
+                resolve({ success: true });
+            }
+        }, 800 + Math.random() * 400);
+    });
+
+// --- Bookmark SVG Icons ---
+const BookmarkOutline = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+);
+
+const BookmarkFilled = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+);
 
 const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [bookmarkAnimating, setBookmarkAnimating] = useState(false);
+    const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
+    const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
+    const cardRef = useRef(null);
+
+    // --- 3D Tilt & Glare ---
+    const handleMouseMove = useCallback((e) => {
+        if (!cardRef.current) return;
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width; // 0..1
+        const y = (e.clientY - rect.top) / rect.height; // 0..1
+
+        // Rotate: max ±12deg, inverted for natural feel
+        const rotateX = (0.5 - y) * 24;
+        const rotateY = (x - 0.5) * 24;
+
+        setTilt({ rotateX, rotateY });
+        setGlare({ x: x * 100, y: y * 100, opacity: 0.25 });
+    }, []);
+
+    const handleMouseEnter = useCallback(() => {
+        setIsHovered(true);
+    }, []);
+
+    const handleMouseLeave = useCallback(() => {
+        setIsHovered(false);
+        setTilt({ rotateX: 0, rotateY: 0 });
+        setGlare({ x: 50, y: 50, opacity: 0 });
+    }, []);
+
+    // --- Optimistic Bookmark ---
+    const handleBookmark = useCallback(async (e) => {
+        e.stopPropagation();
+        const wasBookmarked = isBookmarked;
+        const newState = !wasBookmarked;
+
+        // Optimistic update
+        setIsBookmarked(newState);
+        setBookmarkAnimating(true);
+        setTimeout(() => setBookmarkAnimating(false), 350);
+
+        try {
+            await mockToggleWatchlist(movie.id, newState);
+        } catch (err) {
+            // Revert on failure
+            setIsBookmarked(wasBookmarked);
+            console.error(err.message);
+        }
+    }, [isBookmarked, movie.id]);
 
     return (
         <div
+            ref={cardRef}
             className="scroll-item"
             style={{
                 position: 'relative',
@@ -16,15 +92,23 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
                 cursor: 'pointer',
                 borderRadius: '12px',
                 overflow: 'hidden',
-                transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                transform: isHovered ? 'scale(1.15)' : 'scale(1)',
+                transformStyle: 'preserve-3d',
+                perspective: '800px',
+                transform: isHovered
+                    ? `perspective(800px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale(1.08)`
+                    : 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)',
+                transition: isHovered
+                    ? 'transform 0.1s ease-out'
+                    : 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
                 zIndex: isHovered ? 10 : 1,
+                willChange: 'transform',
             }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             onClick={() => onClick && onClick(movie)}
         >
-            {/* Poster Image with priority loading */}
+            {/* Poster Image */}
             {movie.poster ? (
                 <img
                     src={`https://image.tmdb.org/t/p/w300${movie.poster}`}
@@ -42,17 +126,34 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
                     style={{
                         width: '100%',
                         height: '100%',
-                        background: 'linear-gradient(135deg, rgba(249,115,22,0.2), rgba(0,0,0,0.8))',
+                        background: 'linear-gradient(135deg, rgba(249,115,22,0.15) 0%, rgba(15,23,42,0.95) 60%, rgba(0,0,0,0.9) 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        color: '#9ca3af',
-                        fontSize: '14px',
+                        flexDirection: 'column',
+                        gap: '8px',
                     }}
                 >
-                    No Poster
+                    <span style={{ fontSize: '32px', opacity: 0.4 }}>🎬</span>
+                    <span style={{ color: '#6b7280', fontSize: '11px', fontWeight: 500 }}>
+                        {movie.title}
+                    </span>
                 </div>
             )}
+
+            {/* Glare/Sheen Overlay */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,${glare.opacity}) 0%, transparent 60%)`,
+                    pointerEvents: 'none',
+                    mixBlendMode: 'overlay',
+                    borderRadius: '12px',
+                    transition: isHovered ? 'none' : 'opacity 0.5s ease-out',
+                    opacity: isHovered ? 1 : 0,
+                }}
+            />
 
             {/* Orange Glow Border on Hover */}
             <div
@@ -61,12 +162,47 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
                     inset: 0,
                     border: '2px solid rgba(249,115,22,0.6)',
                     borderRadius: '12px',
-                    boxShadow: isHovered ? '0 0 30px rgba(249,115,22,0.8)' : 'none',
+                    boxShadow: isHovered
+                        ? '0 0 30px rgba(249,115,22,0.6), inset 0 0 30px rgba(249,115,22,0.08)'
+                        : 'none',
                     pointerEvents: 'none',
                     transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                     opacity: isHovered ? 1 : 0,
                 }}
             />
+
+            {/* Bookmark Button */}
+            <button
+                onClick={handleBookmark}
+                style={{
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: isBookmarked
+                        ? 'rgba(249,115,22,0.9)'
+                        : 'rgba(0,0,0,0.6)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid',
+                    borderColor: isBookmarked
+                        ? 'rgba(249,115,22,1)'
+                        : 'rgba(255,255,255,0.15)',
+                    color: isBookmarked ? '#000' : '#e5e7eb',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                    opacity: isHovered || isBookmarked ? 1 : 0,
+                    transform: isHovered || isBookmarked ? 'scale(1)' : 'scale(0.8)',
+                    zIndex: 20,
+                }}
+                className={bookmarkAnimating ? 'bookmark-pop' : ''}
+            >
+                {isBookmarked ? <BookmarkFilled /> : <BookmarkOutline />}
+            </button>
 
             {/* Details Overlay on Hover */}
             <div
