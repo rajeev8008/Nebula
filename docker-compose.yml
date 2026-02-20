@@ -11,8 +11,15 @@ services:
     environment:
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - TMDB_API_KEY=${TMDB_API_KEY}
+      - DATABASE_URL=postgresql+asyncpg://nebula:nebula_secret@postgres:5432/nebula_db
+      - REDIS_URL=redis://redis:6379/0
     env_file:
       - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - nebula-network
     healthcheck:
@@ -39,6 +46,48 @@ services:
       - nebula-network
     restart: unless-stopped
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: nebula-postgres
+    environment:
+      POSTGRES_USER: nebula
+      POSTGRES_PASSWORD: nebula_secret
+      POSTGRES_DB: nebula_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - nebula-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nebula -d nebula_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: nebula-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nebula-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    restart: unless-stopped
+
 networks:
   nebula-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
