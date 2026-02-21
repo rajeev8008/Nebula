@@ -8,6 +8,7 @@ import NebulaGraph from '@/components/NebulaGraph';
 import EngineDrawer from '@/components/EngineDrawer';
 import BrowseMovies from '@/components/BrowseMovies';
 import CommandPalette from '@/components/CommandPalette';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import axios from 'axios';
 
 // ─── Cosine Similarity Helper (semantic link calculation) ───
@@ -414,12 +415,24 @@ export default function Home() {
           </div>
 
           {/* Graph */}
-          <NebulaGraph
-            nodes={filteredData.nodes}
-            links={filteredData.links}
-            onNodeClick={setSelectedMovie}
-            selectedNode={selectedMovie}
-          />
+          <ErrorBoundary>
+            <NebulaGraph
+              nodes={filteredData.nodes}
+              links={filteredData.links}
+              onNodeClick={setSelectedMovie}
+              selectedNode={selectedMovie}
+            />
+            {/* A11y Hidden DOM Layer for Screen Readers */}
+            <ul className="sr-only">
+              {filteredData.nodes?.map((node) => (
+                <li key={node.id}>
+                  <button onClick={() => setSelectedMovie(node)}>
+                    {node.title}{node.score ? ` - Similarity Score: ${Math.round(node.score * 100)}%` : ''}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </ErrorBoundary>
 
           {/* Loading State */}
           {loading && (
