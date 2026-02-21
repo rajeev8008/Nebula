@@ -77,6 +77,24 @@ export default function NebulaGraph({ nodes, links, onNodeClick, selectedNode })
     return map;
   }, [links]);
 
+  /* ── Tighten force layout to reduce empty space ────── */
+  useEffect(() => {
+    const fg = graphRef.current;
+    if (!fg || !nodes?.length) return;
+    // Small timeout ensures the simulation is initialised before we touch it
+    const t = setTimeout(() => {
+      // Weaker charge → less repulsion between clusters
+      fg.d3Force('charge')?.strength(-15);
+      // Shorter link distance, inversely proportional to similarity
+      fg.d3Force('link')?.distance((link) => {
+        const sim = link.similarity || link.value || 0.5;
+        return 20 / sim;
+      });
+      fg.d3ReheatSimulation();
+    }, 300);
+    return () => clearTimeout(t);
+  }, [nodes, links]);
+
   /* ── Camera fly-to on node select ──────────────────── */
   useEffect(() => {
     if (selectedNode && graphRef.current) {

@@ -9,6 +9,23 @@ import BrowseMovies from '@/components/BrowseMovies';
 import CommandPalette from '@/components/CommandPalette';
 import axios from 'axios';
 
+// ─── Cosine Similarity Helper (semantic link calculation) ───
+function cosineSimilarity(vecA, vecB) {
+  if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
+  let dot = 0;
+  let magA = 0;
+  let magB = 0;
+  for (let i = 0, len = vecA.length; i < len; i++) {
+    const a = vecA[i];
+    const b = vecB[i];
+    dot += a * b;
+    magA += a * a;
+    magB += b * b;
+  }
+  const denom = Math.sqrt(magA) * Math.sqrt(magB);
+  return denom === 0 ? 0 : dot / denom;
+}
+
 export default function Home() {
   const [view, setView] = useState('LANDING');
   const [graphData, setGraphData] = useState({ nodes: [], links: [] }); // Full graph
@@ -48,23 +65,17 @@ export default function Home() {
       release_date: movie.release_date,
       language: movie.language,
       popularity: movie.popularity,
+      vector: movie.vector,
       group: 1,
     }));
 
-    // Calculate links based on genre similarity (Jaccard index)
+    // Calculate links based on semantic cosine similarity
     const links = [];
-    const threshold = 0.25;
-
-    // Pre-parse genre sets for all movies
-    const genreSets = movies.slice(0, nodes.length).map(
-      (m) => new Set(m.genres?.split(', ').filter(Boolean) || [])
-    );
+    const threshold = 0.65;
 
     for (let i = 0; i < nodes.length; i++) {
       for (let j = i + 1; j < nodes.length; j++) {
-        const intersection = [...genreSets[i]].filter((g) => genreSets[j].has(g)).length;
-        const union = new Set([...genreSets[i], ...genreSets[j]]).size;
-        const similarity = union > 0 ? intersection / union : 0;
+        const similarity = cosineSimilarity(nodes[i].vector, nodes[j].vector);
 
         if (similarity > threshold) {
           links.push({
@@ -77,7 +88,7 @@ export default function Home() {
       }
     }
 
-    // Rescue orphan nodes — connect any node with 0 links to its most similar neighbor
+    // Rescue orphan nodes — connect any node with 0 links to its nearest semantic neighbor
     const connectedIds = new Set(links.flatMap((l) => [l.source, l.target]));
     nodes.forEach((node, i) => {
       if (connectedIds.has(node.id)) return;
@@ -85,9 +96,7 @@ export default function Home() {
       let bestSim = -1;
       for (let j = 0; j < nodes.length; j++) {
         if (j === i) continue;
-        const intersection = [...genreSets[i]].filter((g) => genreSets[j].has(g)).length;
-        const union = new Set([...genreSets[i], ...genreSets[j]]).size;
-        const sim = union > 0 ? intersection / union : 0;
+        const sim = cosineSimilarity(nodes[i].vector, nodes[j].vector);
         if (sim > bestSim) { bestSim = sim; bestJ = j; }
       }
       if (bestJ >= 0) {
