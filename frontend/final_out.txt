@@ -1,0 +1,15 @@
+[2m[WebServer] [22m[33m[1m⚠[22m[39m Warning: Next.js inferred your workspace root, but it may not be correct.
+[2m[WebServer] [22m We detected multiple lockfiles and selected the directory of C:\Users\mjeni\package-lock.json as the root directory.
+[2m[WebServer] [22m To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+[2m[WebServer] [22m   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+[2m[WebServer] [22m Detected additional lockfiles: 
+[2m[WebServer] [22m   * C:\Users\mjeni\OneDrive\Desktop\Own Projects\Nebula\frontend\package-lock.json
+[2m[WebServer] [22m   * C:\Users\mjeni\OneDrive\Desktop\Own Projects\Nebula\package-lock.json
+[2m[WebServer] [22m
+
+Running 2 tests using 2 workers
+
+  ✓  2 [chromium] › e2e\app.spec.js:4:7 › Nebula Core User Flows › Load the root URL and assert the "Project Nebula" hero title is visible (4.4s)
+  ✓  1 [chromium] › e2e\app.spec.js:12:7 › Nebula Core User Flows › Click the "Browse Movies" button, wait for BROWSE view, and assert movie grid renders (5.4s)
+
+  2 passed (10.1s)

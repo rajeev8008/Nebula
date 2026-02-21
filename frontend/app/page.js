@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '@/store/useAppStore';
 import Hero from '@/components/ui/animated-shader-hero';
@@ -51,9 +51,10 @@ export default function Home() {
   const setSearchQuery = useAppStore((state) => state.setSearchQuery);
   const isSearchView = useAppStore((state) => state.isSearchView);
   const setIsSearchView = useAppStore((state) => state.setIsSearchView);
-
-  const [error, setError] = useState(null);
-  const [searchLoading, setSearchLoading] = useState(false);
+  const error = useAppStore((state) => state.error);
+  const setError = useAppStore((state) => state.setError);
+  const searchLoading = useAppStore((state) => state.searchLoading);
+  const setSearchLoading = useAppStore((state) => state.setSearchLoading);
 
   // ─── TanStack Query: fetch all movies for graph ───
   const {
@@ -142,7 +143,12 @@ export default function Home() {
 
     const graph = buildGraphFromMovies(movies);
     setGraphData(graph);
-    setFilteredData(graph);
+
+    // Shallow copy fix to prevent ForceGraph3D from mutating global graph nodes
+    setFilteredData({
+      nodes: graph.nodes.map(n => ({ ...n })),
+      links: graph.links.map(l => ({ ...l }))
+    });
     setView('GRAPH');
     setIsSearchView(false);
 
@@ -267,7 +273,11 @@ export default function Home() {
   };
 
   const handleViewAll = () => {
-    setFilteredData(graphData);
+    // Shallow copy fix to prevent ForceGraph3D from mutating global graph nodes
+    setFilteredData({
+      nodes: graphData.nodes.map(n => ({ ...n })),
+      links: graphData.links.map(l => ({ ...l }))
+    });
     setIsSearchView(false);
     setSelectedMovie(null);
     setSearchQuery("");
@@ -425,7 +435,7 @@ export default function Home() {
               selectedNode={selectedMovie}
             />
             {/* A11y Hidden DOM Layer for Screen Readers */}
-            <ul className="opacity-0 focus-within:opacity-100 absolute top-0 left-0 z-50 bg-black">
+            <ul className="sr-only">
               {filteredData.nodes?.map((node) => (
                 <li key={node.id}>
                   <button onClick={() => setSelectedMovie(node)}>

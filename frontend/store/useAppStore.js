@@ -18,4 +18,10 @@ export const useAppStore = create((set) => ({
 
     isSearchView: false,
     setIsSearchView: (isSearchView) => set({ isSearchView }),
+
+    error: null,
+    setError: (error) => set({ error }),
+
+    searchLoading: false,
+    setSearchLoading: (searchLoading) => set({ searchLoading }),
 }));
