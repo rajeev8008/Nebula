@@ -1,4 +1,5 @@
 import './globals.css';
+import QueryProvider from '@/components/QueryProvider';
 
 export const metadata = {
   title: 'Nebula - Semantic Movie Search',
@@ -9,7 +10,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body suppressHydrationWarning>
-        {children}
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useInView } from 'react-intersection-observer';
 import MovieCard from './MovieCard';
 import MovieRow from './MovieRow';
 import { SkeletonSection } from './ui/skeleton';
@@ -65,27 +67,23 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     const activeMinYear = searchParams.get('min_year') || '';
     const hasActiveFilters = activeGenre || activeDecade || activeRating || activeMinYear;
 
-    // Data state
-    const [movies, setMovies] = useState([]);
-    const [groupedData, setGroupedData] = useState({});
-    const [loading, setLoading] = useState(true);
-    const [loadingMore, setLoadingMore] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [hasMore, setHasMore] = useState(false);
-    const [totalCount, setTotalCount] = useState(0);
-    const [error, setError] = useState(null);
-
     // Scroll container ref for virtualizer
     const scrollRef = useRef(null);
 
-    // 1. Fetch Grouped Data (Landing state)
-    const loadGroupedData = useCallback(async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            // New Releases: 2024+
-            // Genres: Main ones
-            // Decades: Decades list
+    // ─── Intersection Observer sentinel for infinite scroll ───
+    const { ref: sentinelRef, inView } = useInView({
+        threshold: 0,
+        rootMargin: '600px',
+    });
+
+    // ─── 1. Grouped Data (Landing — no filters) via useQuery ───
+    const {
+        data: groupedData = {},
+        isLoading: groupedLoading,
+        error: groupedError,
+    } = useQuery({
+        queryKey: ['browse-grouped'],
+        queryFn: async () => {
             const genrePromises = MAIN_GENRES.slice(0, 5).map(g => fetchMovies({ genre: g, limit: 12 }));
             const decadePromises = DECADES.slice(0, 3).map(d => fetchMovies({ decade: d, limit: 12 }));
 
@@ -98,67 +96,63 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
             const genreResults = rest.slice(0, genrePromises.length);
             const decadeResults = rest.slice(genrePromises.length);
 
-            const newGrouped = {
-                'New Releases': newReleases.movies
-            };
+            const grouped = { 'New Releases': newReleases.movies };
 
             MAIN_GENRES.slice(0, 5).forEach((g, i) => {
-                newGrouped[g] = genreResults[i].movies;
+                grouped[g] = genreResults[i].movies;
             });
 
             DECADES.slice(0, 3).forEach((d, i) => {
-                newGrouped[d] = decadeResults[i].movies;
+                grouped[d] = decadeResults[i].movies;
             });
 
-            setGroupedData(newGrouped);
-        } catch (err) {
-            console.error('Failed to load grouped movies:', err);
-            setError("Failed to load movie categories.");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+            return grouped;
+        },
+        enabled: !hasActiveFilters, // Only fetch when no filters are active
+    });
 
-    // 2. Fetch Filtered Data (Grid state)
-    const loadFilteredMovies = useCallback(async (page = 1, append = false) => {
-        if (page === 1) setLoading(true);
-        else setLoadingMore(true);
-        setError(null);
+    // ─── 2. Filtered Grid via useInfiniteQuery ───
+    const filterKey = useMemo(
+        () => ({ genre: activeGenre, decade: activeDecade, rating: activeRating, minYear: activeMinYear }),
+        [activeGenre, activeDecade, activeRating, activeMinYear]
+    );
 
-        try {
-            const params = { page, limit: PAGE_LIMIT };
+    const {
+        data: filteredData,
+        isLoading: filteredLoading,
+        error: filteredError,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+    } = useInfiniteQuery({
+        queryKey: ['browse-filtered', filterKey],
+        queryFn: async ({ pageParam = 1 }) => {
+            const params = { page: pageParam, limit: PAGE_LIMIT };
             if (activeGenre) params.genre = activeGenre;
             if (activeDecade) params.decade = activeDecade;
             if (activeRating) params.rating = parseFloat(activeRating);
             if (activeMinYear) params.minYear = parseInt(activeMinYear);
+            return fetchMovies(params);
+        },
+        initialPageParam: 1,
+        getNextPageParam: (lastPage) =>
+            lastPage.hasMore ? lastPage.page + 1 : undefined,
+        enabled: !!hasActiveFilters, // Only fetch when filters are active
+    });
 
-            const data = await fetchMovies(params);
+    // Flatten pages into a single movie array
+    const movies = useMemo(
+        () => filteredData?.pages?.flatMap(p => p.movies) ?? [],
+        [filteredData]
+    );
+    const totalCount = filteredData?.pages?.[0]?.total ?? 0;
 
-            if (append) {
-                setMovies((prev) => [...prev, ...data.movies]);
-            } else {
-                setMovies(data.movies);
-            }
-            setTotalCount(data.total);
-            setHasMore(data.hasMore);
-            setCurrentPage(page);
-        } catch (err) {
-            console.error('Failed to load filtered movies:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-            setLoadingMore(false);
-        }
-    }, [activeGenre, activeDecade, activeRating, activeMinYear]);
-
-    // Choose which load function to run
+    // ─── Auto-fetch next page when sentinel is in view ───
     useEffect(() => {
-        if (hasActiveFilters) {
-            loadFilteredMovies(1, false);
-        } else {
-            loadGroupedData();
+        if (inView && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
         }
-    }, [hasActiveFilters, loadFilteredMovies, loadGroupedData]);
+    }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     // Update URL params
     const updateFilter = useCallback(
@@ -215,19 +209,9 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
         overscan: 3,
     });
 
-    // Infinite scroll for filtered grid
-    useEffect(() => {
-        if (!scrollRef.current || !hasMore || loadingMore || !hasActiveFilters) return;
-        const el = scrollRef.current;
-        const handleScroll = () => {
-            const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 600;
-            if (nearBottom && hasMore && !loadingMore) {
-                loadFilteredMovies(currentPage + 1, true);
-            }
-        };
-        el.addEventListener('scroll', handleScroll, { passive: true });
-        return () => el.removeEventListener('scroll', handleScroll);
-    }, [hasMore, loadingMore, currentPage, loadFilteredMovies, hasActiveFilters]);
+    // Derive unified loading / error
+    const loading = hasActiveFilters ? filteredLoading : groupedLoading;
+    const error = hasActiveFilters ? filteredError : groupedError;
 
     return (
         <div
@@ -412,11 +396,11 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                                 <SkeletonSection cardCount={8} />
                             </div>
                         ) : (
-                            Object.entries(groupedData).map(([title, movies]) => (
+                            Object.entries(groupedData).map(([title, sectionMovies]) => (
                                 <MovieRow
                                     key={title}
                                     title={title}
-                                    movies={movies}
+                                    movies={sectionMovies}
                                     loading={loading}
                                     onMovieClick={onMovieClick}
                                     onViewAll={() => handleViewAll(title)}
@@ -439,7 +423,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                             </p>
                         </div>
 
-                        {loading && movies.length === 0 ? (
+                        {filteredLoading && movies.length === 0 ? (
                             <SkeletonSection cardCount={8} />
                         ) : movies.length > 0 ? (
                             <div
@@ -482,7 +466,10 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                             </div>
                         )}
 
-                        {loadingMore && (
+                        {/* Intersection Observer Sentinel — triggers fetchNextPage */}
+                        <div ref={sentinelRef} style={{ height: '1px', width: '100%' }} />
+
+                        {isFetchingNextPage && (
                             <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
                                 <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid rgba(249,115,22,0.2)', borderTopColor: '#f97316', animation: 'spin 0.8s linear infinite' }} />
                                 <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -495,8 +482,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                 {error && (
                     <div style={{ textAlign: 'center', padding: '80px 24px', color: '#f87171' }}>
                         <p style={{ fontSize: '16px', fontWeight: 600, marginBottom: '8px' }}>Failed to load movies</p>
-                        <p style={{ fontSize: '13px', color: '#9ca3af' }}>{error}</p>
-                        <button onClick={() => hasActiveFilters ? loadFilteredMovies(1, false) : loadGroupedData()} style={{ marginTop: '16px', padding: '10px 24px', borderRadius: '12px', background: 'linear-gradient(135deg, #f97316, #f59e0b)', border: 'none', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Retry</button>
+                        <p style={{ fontSize: '13px', color: '#9ca3af' }}>{error.message || String(error)}</p>
                     </div>
                 )}
             </div>

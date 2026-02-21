@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Hero from '@/components/ui/animated-shader-hero';
 import NebulaGraph from '@/components/NebulaGraph';
 import EngineDrawer from '@/components/EngineDrawer';
@@ -12,13 +13,25 @@ export default function Home() {
   const [view, setView] = useState('LANDING');
   const [graphData, setGraphData] = useState({ nodes: [], links: [] }); // Full graph
   const [filteredData, setFilteredData] = useState({ nodes: [], links: [] }); // Filtered for search
-  const [browseData, setBrowseData] = useState(null); // Browse movies data
-  const [allMoviesCache, setAllMoviesCache] = useState(null); // Cached movie data
-  const [loading, setLoading] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState(null);
   const [isSearchView, setIsSearchView] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  // ─── TanStack Query: fetch all movies for graph ───
+  const {
+    data: moviesData,
+    isLoading: moviesLoading,
+    error: moviesError,
+  } = useQuery({
+    queryKey: ['movies'],
+    queryFn: async () => {
+      const res = await axios.get('http://127.0.0.1:8000/movies');
+      return res.data.movies || [];
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes — heavy payload
+  });
 
   // Helper to build graph from flat movie list
   const buildGraphFromMovies = (movies) => {
@@ -90,53 +103,26 @@ export default function Home() {
     return { nodes, links };
   };
 
-  const fetchMovies = async () => {
-    // Use cached data if available
-    if (allMoviesCache) {
-      return allMoviesCache;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await axios.get('http://127.0.0.1:8000/movies');
-      console.log('Movies data received:', res.data);
-      const movies = res.data.movies || [];
-      setAllMoviesCache(movies); // Cache for reuse
-      return movies;
-    } catch (e) {
-      if (e.message === 'Network Error') {
-        setError("Backend unreachable. Check CORS or if Uvicorn is running on 127.0.0.1:8000.");
-      } else {
-        setError("Fetch Error: " + (e.response?.data?.detail || e.message));
-      }
-      console.error(e);
-      return [];
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const launchBrowse = () => {
     // BrowseMovies is now self-contained — fetches its own data
     setView('BROWSE');
   };
 
-  const launchGraph = async (preSelectedMovieId = null) => {
-    const movies = await fetchMovies();
-    if (movies.length > 0) {
-      const graphData = buildGraphFromMovies(movies);
-      setGraphData(graphData);
-      setFilteredData(graphData);
-      setView('GRAPH');
-      setIsSearchView(false);
+  const launchGraph = (preSelectedMovieId = null) => {
+    const movies = moviesData;
+    if (!movies || movies.length === 0) return;
 
-      // Pre-select movie if provided (deep link from browse)
-      if (preSelectedMovieId) {
-        const movie = graphData.nodes.find(n => n.id === preSelectedMovieId);
-        if (movie) {
-          setTimeout(() => setSelectedMovie(movie), 100);
-        }
+    const graph = buildGraphFromMovies(movies);
+    setGraphData(graph);
+    setFilteredData(graph);
+    setView('GRAPH');
+    setIsSearchView(false);
+
+    // Pre-select movie if provided (deep link from browse)
+    if (preSelectedMovieId) {
+      const movie = graph.nodes.find(n => n.id === preSelectedMovieId);
+      if (movie) {
+        setTimeout(() => setSelectedMovie(movie), 100);
       }
     }
   };
@@ -151,7 +137,7 @@ export default function Home() {
       return;
     }
 
-    setLoading(true);
+    setSearchLoading(true);
     setError(null);
     try {
       const res = await axios.post('http://127.0.0.1:8000/search', {
@@ -244,7 +230,7 @@ export default function Home() {
       }
       console.error(e);
     }
-    setLoading(false);
+    setSearchLoading(false);
   };
 
   const handleViewAll = () => {
@@ -253,6 +239,9 @@ export default function Home() {
     setSelectedMovie(null);
     setSearchQuery("");
   };
+
+  // Derive loading state: either TanStack Query is fetching movies or a search is running
+  const loading = moviesLoading || searchLoading;
 
   // GRAPH VIEW
   if (view === 'GRAPH') {
@@ -391,7 +380,7 @@ export default function Home() {
                 </button>
               )}
             </form>
-            {error && <p style={{ color: '#f87171', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>{error}</p>}
+            {(error || moviesError) && <p style={{ color: '#f87171', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>{error || moviesError?.message}</p>}
           </div>
 
           {/* Graph */}
@@ -458,7 +447,7 @@ export default function Home() {
             onClick: launchGraph
           },
           secondary: {
-            text: loading ? "Loading..." : "Browse Movies",
+            text: "Browse Movies",
             onClick: launchBrowse
           }
         }}

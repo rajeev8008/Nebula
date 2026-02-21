@@ -1,4 +1,5 @@
 import os
+import asyncio
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import FastAPI, HTTPException, Query
@@ -176,23 +177,29 @@ def api_search(
 
 
 @app.post("/search")
-def search_movies(req: SearchRequest):
+async def search_movies(req: SearchRequest):
     """
     Takes a user query (e.g., "sad robots"), converts to vector, 
     and finds matching movies in Pinecone.
     Returns a graph structure (nodes + links) instead of just a list.
+    
+    All blocking operations (model.encode, index.query, cosine_similarity)
+    are offloaded to threads via asyncio.to_thread() to keep the
+    async event loop unblocked for concurrent requests.
     """
     try:
-        # 1. Convert text to numbers
-        query_vector = [float(x) for x in model.encode(req.query)]
+        # 1. Convert text to numbers — CPU-bound, offload to thread
+        raw_vector = await asyncio.to_thread(model.encode, req.query)
+        query_vector = [float(x) for x in raw_vector]
         
-        # 2. Query Pinecone with vectors for similarity calculation
-        results = index.query(
-            vector=query_vector, 
-            top_k=req.top_k, 
-            include_metadata=True,
-            include_values=True  # CRITICAL: Need vectors to calculate links
-        )
+        # 2. Query Pinecone — synchronous I/O, offload to thread
+        query_kwargs = {
+            "vector": query_vector,
+            "top_k": req.top_k,
+            "include_metadata": True,
+            "include_values": True,  # CRITICAL: Need vectors to calculate links
+        }
+        results = await asyncio.to_thread(index.query, **query_kwargs)
         
         # 3. Build nodes and collect vectors
         nodes = []
@@ -218,11 +225,11 @@ def search_movies(req: SearchRequest):
             vectors.append(match.values)
             id_map[i] = match.id
         
-        # 4. Calculate similarity between search results to create links
+        # 4. Calculate similarity — CPU-bound matrix math, offload to thread
         links = []
         if len(vectors) > 1:
             vec_matrix = np.array(vectors)
-            sim_matrix = cosine_similarity(vec_matrix)
+            sim_matrix = await asyncio.to_thread(cosine_similarity, vec_matrix)
             
             # Create links for highly similar search results
             threshold = 0.5  # Higher threshold for search results
