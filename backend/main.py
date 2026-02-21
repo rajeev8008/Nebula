@@ -2,7 +2,8 @@ import os
 import asyncio
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends, Request
+from backend.dependencies import rate_limiter, get_model, get_index
 from backend.cache import get_cached_search, set_cached_search
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -43,6 +44,10 @@ else:
     model = None
     pc = None
     index = None
+
+# Attach to app.state so getters can inject them without circular imports
+app.state.model = model
+app.state.index = index
 
 # --- Data Models ---
 class SearchRequest(BaseModel):
@@ -178,7 +183,13 @@ def api_search(
 
 
 @app.post("/search")
-async def search_movies(req: SearchRequest, background_tasks: BackgroundTasks):
+async def search_movies(
+    req: SearchRequest, 
+    background_tasks: BackgroundTasks,
+    _: None = Depends(rate_limiter),
+    model = Depends(get_model),
+    index = Depends(get_index)
+):
     """
     Takes a user query (e.g., "sad robots"), converts to vector,
     and finds matching movies in Pinecone.

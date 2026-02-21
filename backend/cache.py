@@ -74,8 +74,6 @@ async def get_cached_search(query: str) -> dict | None:
     except Exception as exc:
         logger.warning("Redis GET failed (treating as cache miss): %s", exc)
         return None
-    finally:
-        await redis.aclose()
 
 
 async def set_cached_search(
@@ -99,5 +97,3 @@ async def set_cached_search(
         )
     except Exception as exc:
         logger.warning("Redis SET failed (skipping cache write): %s", exc)
-    finally:
-        await redis.aclose()
