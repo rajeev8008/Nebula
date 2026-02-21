@@ -79,6 +79,12 @@ def process_and_upload():
         genres = get_genre_names(movie.get('genre_ids', []))
         genre_str = ", ".join(genres) if genres else "Unknown"
         release_date = movie.get('release_date', 'Unknown')
+        rel_year = 0
+        if release_date and release_date != "Unknown":
+            try:
+                rel_year = int(release_date.split("-")[0])
+            except:
+                pass
         original_language = movie.get('original_language', 'en')
         popularity = movie.get('popularity', 0.0)
         adult = movie.get('adult', False)
@@ -98,6 +104,7 @@ def process_and_upload():
             "rating": movie['vote_average'],
             "genres": genre_str,
             "release_date": release_date,
+            "year": rel_year,
             "original_language": original_language,
             "popularity": popularity,
             "adult": adult

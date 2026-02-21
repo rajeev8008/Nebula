@@ -101,6 +101,15 @@ def fetch_from_tmdb(target_count):
                 genre_names = [GENRE_MAP.get(gid) for gid in genre_ids]
                 genre_str = ", ".join(g for g in genre_names if g) or "Unknown"
 
+                # Extract numeric year
+                rel_date = movie.get("release_date", "Unknown") or "Unknown"
+                rel_year = 0
+                if rel_date != "Unknown":
+                    try:
+                        rel_year = int(rel_date.split("-")[0])
+                    except:
+                        pass
+
                 movies.append({
                     "id": mid,
                     "title": title,
@@ -108,7 +117,8 @@ def fetch_from_tmdb(target_count):
                     "overview": overview,
                     "rating": float(movie.get("vote_average", 0) or 0),
                     "genres": genre_str,
-                    "release_date": movie.get("release_date", "Unknown") or "Unknown",
+                    "release_date": rel_date,
+                    "year": rel_year,
                     "original_language": movie.get("original_language", "en") or "en",
                     "popularity": float(movie.get("popularity", 0) or 0),
                 })
@@ -165,6 +175,7 @@ def upsert_to_pinecone(index, movies, embeddings, batch_size=UPSERT_BATCH_SIZE):
                 "rating": movie["rating"],
                 "genres": movie["genres"],
                 "release_date": movie["release_date"],
+                "year": movie["year"],
                 "original_language": movie["original_language"],
                 "popularity": movie["popularity"],
             }

@@ -56,7 +56,7 @@ class MovieResponse(BaseModel):
     rating: float
 
 # --- Helper: Build Pinecone metadata filter ---
-def build_metadata_filter(genre: Optional[str], decade: Optional[str], rating: Optional[float]):
+def build_metadata_filter(genre: Optional[str], decade: Optional[str], rating: Optional[float], min_year: Optional[int] = None):
     """Convert query params into a Pinecone metadata filter dict."""
     conditions = []
 
@@ -68,6 +68,9 @@ def build_metadata_filter(genre: Optional[str], decade: Optional[str], rating: O
     if rating is not None and rating > 0:
         conditions.append({"rating": {"$gte": rating}})
 
+    if min_year:
+        conditions.append({"year": {"$gte": min_year}})
+
     if decade:
         year_ranges = {
             "2020s": (2020, 2029),
@@ -78,9 +81,9 @@ def build_metadata_filter(genre: Optional[str], decade: Optional[str], rating: O
         }
         if decade in year_ranges:
             start_year, end_year = year_ranges[decade]
-            # Filter by release_date string range (YYYY-MM-DD format)
-            conditions.append({"release_date": {"$gte": f"{start_year}-01-01"}})
-            conditions.append({"release_date": {"$lte": f"{end_year}-12-31"}})
+            # Use numeric year field (requires numeric metadata in Pinecone)
+            conditions.append({"year": {"$gte": start_year}})
+            conditions.append({"year": {"$lte": end_year}})
 
     if not conditions:
         return None
@@ -102,6 +105,7 @@ def api_search(
     genre: Optional[str] = Query(None, description="Filter by genre name"),
     decade: Optional[str] = Query(None, description="Filter by decade (e.g., '2020s')"),
     rating: Optional[float] = Query(None, description="Minimum rating filter"),
+    min_year: Optional[int] = Query(None, description="Minimum release year"),
     page: int = Query(1, ge=1, description="Page number (1-indexed)"),
     limit: int = Query(20, ge=1, le=100, description="Results per page"),
 ):
@@ -113,7 +117,7 @@ def api_search(
     """
     try:
         # Build metadata filter
-        metadata_filter = build_metadata_filter(genre, decade, rating)
+        metadata_filter = build_metadata_filter(genre, decade, rating, min_year)
 
         # Determine query vector
         fetch_top_k = 200  # Fetch a large pool for pagination slicing
