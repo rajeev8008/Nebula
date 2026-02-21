@@ -2,7 +2,8 @@ import os
 import asyncio
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
+from backend.cache import get_cached_search, set_cached_search
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -177,21 +178,30 @@ def api_search(
 
 
 @app.post("/search")
-async def search_movies(req: SearchRequest):
+async def search_movies(req: SearchRequest, background_tasks: BackgroundTasks):
     """
-    Takes a user query (e.g., "sad robots"), converts to vector, 
+    Takes a user query (e.g., "sad robots"), converts to vector,
     and finds matching movies in Pinecone.
     Returns a graph structure (nodes + links) instead of just a list.
-    
+
     All blocking operations (model.encode, index.query, cosine_similarity)
     are offloaded to threads via asyncio.to_thread() to keep the
     async event loop unblocked for concurrent requests.
+
+    Results are cached in Redis keyed by normalized query string.
+    Cache writes happen in the background so the client never waits.
     """
+    # ── Cache check (before any heavy work) ──────────────────────────
+    cached = await get_cached_search(req.query)
+    if cached is not None:
+        cached["cached"] = True
+        return cached
+
     try:
         # 1. Convert text to numbers — CPU-bound, offload to thread
         raw_vector = await asyncio.to_thread(model.encode, req.query)
         query_vector = [float(x) for x in raw_vector]
-        
+
         # 2. Query Pinecone — synchronous I/O, offload to thread
         query_kwargs = {
             "vector": query_vector,
@@ -200,12 +210,12 @@ async def search_movies(req: SearchRequest):
             "include_values": True,  # CRITICAL: Need vectors to calculate links
         }
         results = await asyncio.to_thread(index.query, **query_kwargs)
-        
+
         # 3. Build nodes and collect vectors
         nodes = []
         vectors = []
         id_map = {}
-        
+
         for i, match in enumerate(results.matches):
             nodes.append({
                 "id": match.id,
@@ -224,13 +234,13 @@ async def search_movies(req: SearchRequest):
             })
             vectors.append(match.values)
             id_map[i] = match.id
-        
+
         # 4. Calculate similarity — CPU-bound matrix math, offload to thread
         links = []
         if len(vectors) > 1:
             vec_matrix = np.array(vectors)
             sim_matrix = await asyncio.to_thread(cosine_similarity, vec_matrix)
-            
+
             # Create links for highly similar search results
             threshold = 0.5  # Higher threshold for search results
             rows, cols = sim_matrix.shape
@@ -244,14 +254,20 @@ async def search_movies(req: SearchRequest):
                             "value": float(score),
                             "similarity": float(score)
                         })
-        
-        return {
+
+        result = {
             "nodes": nodes,
             "links": links,
             "query": req.query,
-            "totalResults": len(nodes)
+            "totalResults": len(nodes),
+            "cached": False
         }
-        
+
+        # ── Background cache write (client doesn't wait) ────────────
+        background_tasks.add_task(set_cached_search, req.query, result)
+
+        return result
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

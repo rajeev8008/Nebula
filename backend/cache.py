@@ -1,95 +1,103 @@
 """
 backend/cache.py
 ----------------
-Semantic caching layer using Redis.
+Query-string-based semantic caching layer using Redis + orjson.
 
-Provides utilities to check for and store cached search results keyed
-by a hash of the query embedding vector.  This avoids redundant calls
-to the Pinecone vector database for near-identical queries.
+Normalises the incoming query (lowercase, strip whitespace) and hashes
+it with SHA-256 to produce a deterministic Redis key.  All Redis
+operations are wrapped in try/except for **graceful degradation** — if
+Redis is down the app treats every call as a cache miss and continues
+to function normally.
 
 Usage:
-    from backend.cache import check_semantic_cache, set_semantic_cache
+    from backend.cache import get_cached_search, set_cached_search
 
-    cached = await check_semantic_cache(query_embedding)
+    cached = await get_cached_search("sad robots")
     if cached is not None:
-        return cached  # cache hit
+        return cached          # cache hit
 
-    results = await pinecone_search(...)
-    await set_semantic_cache(query_embedding, results)
+    results = run_search(...)
+    await set_cached_search("sad robots", results)
 """
 
-import json
 import hashlib
-from typing import Any
+import logging
+
+import orjson
+import redis.asyncio as aioredis
 
 from backend.database import get_redis
 
+logger = logging.getLogger(__name__)
+
 # Default time-to-live for cached results (seconds)
 DEFAULT_TTL: int = 3600  # 1 hour
-CACHE_KEY_PREFIX: str = "nebula:semantic_cache:"
+CACHE_KEY_PREFIX: str = "nebula:search_cache:"
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _hash_embedding(embedding: list[float]) -> str:
+def _normalise_key(query: str) -> str:
     """
-    Deterministically hash a float embedding vector into a cache key.
+    Produce a deterministic Redis key from a raw user query.
 
-    Current implementation: SHA-256 of the rounded, serialised vector.
-
-    TODO: Replace with a locality-sensitive hash (e.g. SimHash or random
-          hyperplane projection) so that *similar* embeddings also hit the
-          cache.  The current exact-match hash only deduplicates identical
-          queries.
+    Steps: lowercase → strip whitespace → SHA-256 hash.
+    This ensures that "Sad Robots", "  sad robots  ", and "SAD ROBOTS"
+    all resolve to the same cache entry.
     """
-    # Round to 6 decimal places to absorb trivial floating-point jitter
-    rounded = [round(v, 6) for v in embedding]
-    raw = json.dumps(rounded, separators=(",", ":"))
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    normalised = query.lower().strip()
+    return CACHE_KEY_PREFIX + hashlib.sha256(
+        normalised.encode("utf-8")
+    ).hexdigest()
 
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
-async def check_semantic_cache(
-    query_embedding: list[float],
-) -> list[dict[str, Any]] | None:
+async def get_cached_search(query: str) -> dict | None:
     """
-    Look up the cache for a previous result matching this embedding.
+    Look up cached search results for *query*.
 
-    Returns:
-        The cached list of result dicts, or ``None`` on a cache miss.
+    Returns the cached response dict on a hit, or ``None`` on a miss.
+    If Redis is unreachable the exception is swallowed and ``None``
+    is returned so the search endpoint falls through to live results.
     """
-    redis = get_redis()
+    redis: aioredis.Redis = get_redis()
     try:
-        key = CACHE_KEY_PREFIX + _hash_embedding(query_embedding)
-        cached_raw = await redis.get(key)
-        if cached_raw is not None:
-            return json.loads(cached_raw)
+        raw: bytes | None = await redis.get(_normalise_key(query))
+        if raw is not None:
+            return orjson.loads(raw)
+        return None
+    except Exception as exc:
+        logger.warning("Redis GET failed (treating as cache miss): %s", exc)
         return None
     finally:
         await redis.aclose()
 
 
-async def set_semantic_cache(
-    query_embedding: list[float],
-    results: list[dict[str, Any]],
+async def set_cached_search(
+    query: str,
+    data: dict,
     ttl: int = DEFAULT_TTL,
 ) -> None:
     """
-    Store search results in the cache keyed by the embedding hash.
+    Store *data* in Redis keyed by the normalised *query* hash.
 
-    Args:
-        query_embedding: The float vector used for the search.
-        results:         The list of result dicts to cache.
-        ttl:             Time-to-live in seconds (default 1 hour).
+    Uses ``orjson.dumps`` for fast serialisation. If Redis is
+    unreachable the write is silently skipped — the next request will
+    simply re-compute the results.
     """
-    redis = get_redis()
+    redis: aioredis.Redis = get_redis()
     try:
-        key = CACHE_KEY_PREFIX + _hash_embedding(query_embedding)
-        await redis.set(key, json.dumps(results), ex=ttl)
+        await redis.set(
+            _normalise_key(query),
+            orjson.dumps(data),
+            ex=ttl,
+        )
+    except Exception as exc:
+        logger.warning("Redis SET failed (skipping cache write): %s", exc)
     finally:
         await redis.aclose()
