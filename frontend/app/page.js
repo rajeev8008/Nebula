@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useAppStore } from '@/store/useAppStore';
 import Hero from '@/components/ui/animated-shader-hero';
 import NebulaGraph from '@/components/NebulaGraph';
 import EngineDrawer from '@/components/EngineDrawer';
@@ -37,13 +38,20 @@ function getSimilarMovies(targetMovie, allMovies, limit = 6) {
 }
 
 export default function Home() {
-  const [view, setView] = useState('LANDING');
-  const [graphData, setGraphData] = useState({ nodes: [], links: [] }); // Full graph
-  const [filteredData, setFilteredData] = useState({ nodes: [], links: [] }); // Filtered for search
-  const [selectedMovie, setSelectedMovie] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const view = useAppStore((state) => state.view);
+  const setView = useAppStore((state) => state.setView);
+  const graphData = useAppStore((state) => state.graphData);
+  const setGraphData = useAppStore((state) => state.setGraphData);
+  const filteredData = useAppStore((state) => state.filteredData);
+  const setFilteredData = useAppStore((state) => state.setFilteredData);
+  const selectedMovie = useAppStore((state) => state.selectedMovie);
+  const setSelectedMovie = useAppStore((state) => state.setSelectedMovie);
+  const searchQuery = useAppStore((state) => state.searchQuery);
+  const setSearchQuery = useAppStore((state) => state.setSearchQuery);
+  const isSearchView = useAppStore((state) => state.isSearchView);
+  const setIsSearchView = useAppStore((state) => state.setIsSearchView);
+
   const [error, setError] = useState(null);
-  const [isSearchView, setIsSearchView] = useState(false);
   const [searchLoading, setSearchLoading] = useState(false);
 
   // ─── TanStack Query: fetch all movies for graph ───
