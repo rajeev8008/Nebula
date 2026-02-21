@@ -200,7 +200,9 @@ export default function Home() {
       console.log('Connected node IDs:', Array.from(connectedNodeIds));
 
       // Filter full graph data to include only connected nodes
-      const filteredNodes = graphData.nodes.filter(n => connectedNodeIds.has(n.id));
+      const filteredNodes = graphData.nodes
+        .filter(n => connectedNodeIds.has(n.id))
+        .map(n => ({ ...n }));
       const filteredLinks = graphData.links.filter(l => {
         const sourceId = l.source.id || l.source;
         const targetId = l.target.id || l.target;
@@ -423,7 +425,7 @@ export default function Home() {
               selectedNode={selectedMovie}
             />
             {/* A11y Hidden DOM Layer for Screen Readers */}
-            <ul className="sr-only">
+            <ul className="opacity-0 focus-within:opacity-100 absolute top-0 left-0 z-50 bg-black">
               {filteredData.nodes?.map((node) => (
                 <li key={node.id}>
                   <button onClick={() => setSelectedMovie(node)}>
