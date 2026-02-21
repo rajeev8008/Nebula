@@ -26,6 +26,16 @@ function cosineSimilarity(vecA, vecB) {
   return denom === 0 ? 0 : dot / denom;
 }
 
+// ─── Similar Movies Helper (on-the-fly recommendations) ───
+function getSimilarMovies(targetMovie, allMovies, limit = 6) {
+  if (!targetMovie || !allMovies || allMovies.length === 0) return [];
+  return allMovies
+    .filter((m) => m.id !== targetMovie.id && m.vector && targetMovie.vector)
+    .map((m) => ({ ...m, _similarity: cosineSimilarity(targetMovie.vector, m.vector) }))
+    .sort((a, b) => b._similarity - a._similarity)
+    .slice(0, limit);
+}
+
 export default function Home() {
   const [view, setView] = useState('LANDING');
   const [graphData, setGraphData] = useState({ nodes: [], links: [] }); // Full graph
@@ -151,7 +161,7 @@ export default function Home() {
     try {
       const res = await axios.post('http://127.0.0.1:8000/search', {
         query: searchQuery,
-        top_k: 5  // Get top 5 most relevant movies
+        top_k: 25  // Rich semantic cluster
       });
       console.log('Search results:', res.data);
 
@@ -208,6 +218,9 @@ export default function Home() {
         if (searchNode) {
           node.score = searchNode.score;
           node.relevanceRank = searchNode.relevanceRank;
+          if (searchNode.vector) {
+            node.vector = searchNode.vector;
+          }
         }
       });
 
@@ -412,7 +425,12 @@ export default function Home() {
         </div>
 
         {/* Movie Detail Drawer */}
-        <EngineDrawer selectedMovie={selectedMovie} onClose={() => setSelectedMovie(null)} />
+        <EngineDrawer
+          selectedMovie={selectedMovie}
+          onClose={() => setSelectedMovie(null)}
+          similarMovies={selectedMovie ? getSimilarMovies(selectedMovie, graphData.nodes) : []}
+          onSelectMovie={setSelectedMovie}
+        />
       </>
     );
   }

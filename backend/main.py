@@ -229,6 +229,7 @@ async def search_movies(req: SearchRequest, background_tasks: BackgroundTasks):
                 "release_date": match.metadata.get("release_date", "Unknown"),
                 "language": match.metadata.get("original_language", "en"),
                 "popularity": match.metadata.get("popularity", 0.0),
+                "vector": match.values,
                 "isSearchResult": True,
                 "relevanceRank": i + 1
             })

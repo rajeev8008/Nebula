@@ -1,7 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function EngineDrawer({ selectedMovie, onClose }) {
+export default function EngineDrawer({ selectedMovie, onClose, similarMovies = [], onSelectMovie }) {
     return (
         <AnimatePresence>
             {selectedMovie && (
@@ -283,6 +283,97 @@ export default function EngineDrawer({ selectedMovie, onClose }) {
                                             borderRadius: '3px',
                                         }}
                                     />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Similar Movies ───────────────────────────── */}
+                        {similarMovies.length > 0 && (
+                            <div style={{ marginTop: '4px' }}>
+                                <h3 style={{
+                                    fontSize: '11px', fontWeight: 700, color: '#fb923c',
+                                    marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px',
+                                }}>Similar Movies</h3>
+                                <div
+                                    className="hide-scrollbar"
+                                    style={{
+                                        display: 'flex',
+                                        gap: '12px',
+                                        overflowX: 'auto',
+                                        paddingBottom: '4px',
+                                    }}
+                                >
+                                    {similarMovies.map((movie) => (
+                                        <div
+                                            key={movie.id}
+                                            onClick={() => onSelectMovie && onSelectMovie(movie)}
+                                            style={{
+                                                flexShrink: 0,
+                                                width: '100px',
+                                                cursor: 'pointer',
+                                                borderRadius: '10px',
+                                                overflow: 'hidden',
+                                                background: 'rgba(255,255,255,0.04)',
+                                                border: '1px solid rgba(249,115,22,0.12)',
+                                                transition: 'all 0.3s ease',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.border = '1px solid rgba(249,115,22,0.5)';
+                                                e.currentTarget.style.transform = 'translateY(-3px) scale(1.03)';
+                                                e.currentTarget.style.boxShadow = '0 6px 20px rgba(249,115,22,0.15)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.border = '1px solid rgba(249,115,22,0.12)';
+                                                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            {movie.poster ? (
+                                                <img
+                                                    src={`https://image.tmdb.org/t/p/w200${movie.poster}`}
+                                                    alt={movie.title}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '140px',
+                                                        objectFit: 'cover',
+                                                        display: 'block',
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div style={{
+                                                    width: '100%',
+                                                    height: '140px',
+                                                    background: 'linear-gradient(135deg, rgba(249,115,22,0.15), rgba(0,0,0,0.4))',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    fontSize: '28px',
+                                                }}>🎬</div>
+                                            )}
+                                            <div style={{
+                                                padding: '8px',
+                                            }}>
+                                                <p style={{
+                                                    fontSize: '11px',
+                                                    color: '#d1d5db',
+                                                    fontWeight: 600,
+                                                    margin: 0,
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    lineHeight: 1.3,
+                                                }}>{movie.title}</p>
+                                                {movie._similarity && (
+                                                    <p style={{
+                                                        fontSize: '10px',
+                                                        color: '#4ade80',
+                                                        margin: '3px 0 0',
+                                                        fontWeight: 500,
+                                                    }}>{(movie._similarity * 100).toFixed(0)}% match</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
