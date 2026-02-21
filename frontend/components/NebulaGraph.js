@@ -6,6 +6,11 @@ import { ZoomIn, ZoomOut, Locate } from 'lucide-react';
 
 const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
 
+/* ── Module-level caches for WebGL performance ───────── */
+const textureLoader = new THREE.TextureLoader().setCrossOrigin('anonymous');
+const textureCache = new Map();
+const spriteMaterialCache = new Map();
+
 /* ── HUD button style helper ───────────────────────────── */
 const hudBtnStyle = {
   width: '42px',
@@ -55,10 +60,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, selectedNode })
 
     const texture = new THREE.CanvasTexture(canvas);
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
-    const sprite = new THREE.Sprite(material);
-    sprite.scale.set(10, 5, 1);
-    sprite.renderOrder = 999;
-    return sprite;
+    return material;
   }, []);
 
   /* ── Pre-compute neighbor map whenever links change ──── */
@@ -101,12 +103,11 @@ export default function NebulaGraph({ nodes, links, onNodeClick, selectedNode })
       hoveredNodeRef.current = node || null;
       document.body.style.cursor = node ? 'pointer' : 'default';
 
-      // Clean up previous labels
+      // Clean up previous labels (materials are cached, only remove sprites from scene)
       const scene = graphRef.current?.scene();
       labelsRef.current.forEach((lbl) => {
         scene?.remove(lbl);
-        lbl.material.map?.dispose();
-        lbl.material.dispose();
+        lbl.material.dispose(); // dispose the clone, not the cached original
       });
       labelsRef.current = [];
 
@@ -157,7 +158,14 @@ export default function NebulaGraph({ nodes, links, onNodeClick, selectedNode })
           if (!neighborNode || neighborNode.x == null) return;
 
           const pct = `${(sim * 100).toFixed(0)}%`;
-          const label = createTextSprite(pct);
+          let cachedMaterial = spriteMaterialCache.get(pct);
+          if (!cachedMaterial) {
+            cachedMaterial = createTextSprite(pct);
+            spriteMaterialCache.set(pct, cachedMaterial);
+          }
+          const label = new THREE.Sprite(cachedMaterial.clone());
+          label.scale.set(10, 5, 1);
+          label.renderOrder = 999;
           const nodeScale = neighborNode.val ? neighborNode.val : 10;
           label.position.set(
             neighborNode.x,
@@ -186,10 +194,12 @@ export default function NebulaGraph({ nodes, links, onNodeClick, selectedNode })
       return new THREE.Mesh(geometry, material);
     }
 
-    const imgTexture = new THREE.TextureLoader().load(
-      `https://image.tmdb.org/t/p/w200${node.poster}`
-    );
-    imgTexture.colorSpace = THREE.SRGBColorSpace;
+    let imgTexture = textureCache.get(node.poster);
+    if (!imgTexture) {
+      imgTexture = textureLoader.load(`https://image.tmdb.org/t/p/w200${node.poster}`);
+      imgTexture.colorSpace = THREE.SRGBColorSpace;
+      textureCache.set(node.poster, imgTexture);
+    }
 
     const material = new THREE.SpriteMaterial({
       map: imgTexture,

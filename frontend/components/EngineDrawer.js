@@ -16,7 +16,8 @@ export default function EngineDrawer({ selectedMovie, onClose }) {
                         top: 0,
                         right: 0,
                         height: '100vh',
-                        width: '420px',
+                        width: '100vw',
+                        maxWidth: '420px',
                         zIndex: 9999,
                         background: 'rgba(0, 0, 0, 0.60)',
                         backdropFilter: 'blur(40px)',
@@ -56,10 +57,10 @@ export default function EngineDrawer({ selectedMovie, onClose }) {
                                 aria-label="Close drawer"
                                 style={{
                                     position: 'absolute',
-                                    top: '16px',
-                                    right: '16px',
-                                    width: '36px',
-                                    height: '36px',
+                                    top: '20px',
+                                    right: '20px',
+                                    width: '44px',
+                                    height: '44px',
                                     borderRadius: '50%',
                                     background: 'rgba(0,0,0,0.55)',
                                     backdropFilter: 'blur(8px)',
@@ -71,7 +72,7 @@ export default function EngineDrawer({ selectedMovie, onClose }) {
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     transition: 'all 0.3s ease',
-                                    zIndex: 10,
+                                    zIndex: 20,
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.background = 'rgba(249,115,22,0.8)';
