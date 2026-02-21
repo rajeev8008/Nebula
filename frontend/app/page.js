@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Hero from '@/components/ui/animated-shader-hero';
 import NebulaGraph from '@/components/NebulaGraph';
+import EngineDrawer from '@/components/EngineDrawer';
 import BrowseMovies from '@/components/BrowseMovies';
 import CommandPalette from '@/components/CommandPalette';
 import axios from 'axios';
@@ -37,32 +38,54 @@ export default function Home() {
       group: 1,
     }));
 
-    // Calculate links using cosine similarity (simplified for frontend)
+    // Calculate links based on genre similarity (Jaccard index)
     const links = [];
-    const threshold = 0.3;
+    const threshold = 0.25;
 
-    // Only calculate links if we have vectors
-    if (movies[0]?.vector) {
-      for (let i = 0; i < Math.min(nodes.length, 50); i++) {
-        for (let j = i + 1; j < Math.min(nodes.length, 50); j++) {
-          // Simple similarity based on shared genres
-          const genresA = new Set(movies[i].genres?.split(', ') || []);
-          const genresB = new Set(movies[j].genres?.split(', ') || []);
-          const intersection = [...genresA].filter(x => genresB.has(x)).length;
-          const union = new Set([...genresA, ...genresB]).size;
-          const similarity = union > 0 ? intersection / union : 0;
+    // Pre-parse genre sets for all movies
+    const genreSets = movies.slice(0, nodes.length).map(
+      (m) => new Set(m.genres?.split(', ').filter(Boolean) || [])
+    );
 
-          if (similarity > threshold) {
-            links.push({
-              source: nodes[i].id,
-              target: nodes[j].id,
-              value: similarity,
-              similarity: similarity,
-            });
-          }
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const intersection = [...genreSets[i]].filter((g) => genreSets[j].has(g)).length;
+        const union = new Set([...genreSets[i], ...genreSets[j]]).size;
+        const similarity = union > 0 ? intersection / union : 0;
+
+        if (similarity > threshold) {
+          links.push({
+            source: nodes[i].id,
+            target: nodes[j].id,
+            value: similarity,
+            similarity: similarity,
+          });
         }
       }
     }
+
+    // Rescue orphan nodes — connect any node with 0 links to its most similar neighbor
+    const connectedIds = new Set(links.flatMap((l) => [l.source, l.target]));
+    nodes.forEach((node, i) => {
+      if (connectedIds.has(node.id)) return;
+      let bestJ = -1;
+      let bestSim = -1;
+      for (let j = 0; j < nodes.length; j++) {
+        if (j === i) continue;
+        const intersection = [...genreSets[i]].filter((g) => genreSets[j].has(g)).length;
+        const union = new Set([...genreSets[i], ...genreSets[j]]).size;
+        const sim = union > 0 ? intersection / union : 0;
+        if (sim > bestSim) { bestSim = sim; bestJ = j; }
+      }
+      if (bestJ >= 0) {
+        links.push({
+          source: node.id,
+          target: nodes[bestJ].id,
+          value: Math.max(bestSim, 0.1),
+          similarity: Math.max(bestSim, 0.1),
+        });
+      }
+    });
 
     return { nodes, links };
   };
@@ -390,288 +413,8 @@ export default function Home() {
           )}
         </div>
 
-        {/* Movie Detail Side Panel - FIXED overlay */}
-        {selectedMovie && (
-          <div
-            className="animate-slide-panel-in hide-scrollbar"
-            style={{
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              height: '100vh',
-              width: '480px',
-              zIndex: 9999,
-              background: 'linear-gradient(135deg, rgba(15,23,42,0.97) 0%, rgba(10,15,30,0.99) 100%)',
-              backdropFilter: 'blur(30px)',
-              WebkitBackdropFilter: 'blur(30px)',
-              borderLeft: '1px solid rgba(249,115,22,0.25)',
-              boxShadow: '-8px 0 40px rgba(0,0,0,0.5), -2px 0 15px rgba(249,115,22,0.1)',
-              overflowY: 'auto',
-              pointerEvents: 'auto',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {/* Poster Header with Gradient Overlay */}
-            {selectedMovie.poster && (
-              <div style={{ position: 'relative', width: '100%', height: '220px', flexShrink: 0 }}>
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${selectedMovie.poster}`}
-                  alt={selectedMovie.title}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                  }}
-                />
-                {/* Gradient overlay on poster */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(to top, rgba(10,15,30,1) 0%, rgba(10,15,30,0.7) 40%, rgba(10,15,30,0.1) 100%)',
-                }}></div>
-
-                {/* Close Button */}
-                <button
-                  onClick={() => setSelectedMovie(null)}
-                  style={{
-                    position: 'absolute',
-                    top: '16px',
-                    right: '16px',
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '50%',
-                    background: 'rgba(0,0,0,0.6)',
-                    backdropFilter: 'blur(8px)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: '#e5e7eb',
-                    fontSize: '18px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'all 0.3s ease',
-                    zIndex: 10000,
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(249,115,22,0.8)';
-                    e.currentTarget.style.color = '#fff';
-                    e.currentTarget.style.transform = 'rotate(90deg) scale(1.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(0,0,0,0.6)';
-                    e.currentTarget.style.color = '#e5e7eb';
-                    e.currentTarget.style.transform = 'rotate(0deg) scale(1)';
-                  }}
-                >
-                  ✕
-                </button>
-
-                {/* Title overlaying poster bottom */}
-                <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '60px' }}>
-                  <h2 style={{
-                    fontSize: '1.75rem',
-                    fontWeight: 800,
-                    background: 'linear-gradient(135deg, #fdba74, #f97316, #fbbf24)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    lineHeight: 1.2,
-                    margin: 0,
-                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                  }}>
-                    {selectedMovie.title}
-                  </h2>
-                </div>
-              </div>
-            )}
-
-            {/* Content */}
-            <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
-
-              {/* Title (fallback if no poster) */}
-              {!selectedMovie.poster && (
-                <h2 style={{
-                  fontSize: '1.75rem',
-                  fontWeight: 800,
-                  background: 'linear-gradient(135deg, #fdba74, #f97316, #fbbf24)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  lineHeight: 1.2,
-                  margin: 0,
-                }}>
-                  {selectedMovie.title}
-                </h2>
-              )}
-
-              {/* Genre Tags */}
-              {selectedMovie.genres && selectedMovie.genres !== 'Unknown' && (
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {selectedMovie.genres.split(', ').map((genre, i) => (
-                    <span key={i} style={{
-                      padding: '4px 12px',
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      letterSpacing: '0.5px',
-                      background: 'rgba(249,115,22,0.15)',
-                      color: '#fdba74',
-                      borderRadius: '20px',
-                      border: '1px solid rgba(249,115,22,0.3)',
-                    }}>
-                      {genre}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Stats Row */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: selectedMovie.score ? '1fr 1fr' : '1fr',
-                gap: '10px',
-              }}>
-                {/* Rating */}
-                <div style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  borderRadius: '12px',
-                  padding: '14px 16px',
-                  border: '1px solid rgba(249,115,22,0.15)',
-                }}>
-                  <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Rating</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span style={{ color: '#fbbf24', fontSize: '20px' }}>★</span>
-                    <span style={{ color: '#fb923c', fontSize: '1.25rem', fontWeight: 700 }}>
-                      {selectedMovie.rating ? selectedMovie.rating.toFixed(1) : 'N/A'}
-                    </span>
-                    <span style={{ color: '#6b7280', fontSize: '13px' }}>/10</span>
-                  </div>
-                </div>
-
-                {/* Match Score */}
-                {selectedMovie.score && (
-                  <div style={{
-                    background: 'rgba(0,0,0,0.3)',
-                    borderRadius: '12px',
-                    padding: '14px 16px',
-                    border: '1px solid rgba(249,115,22,0.15)',
-                  }}>
-                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Match</div>
-                    <div style={{ color: '#4ade80', fontSize: '1.25rem', fontWeight: 700 }}>
-                      {(selectedMovie.score * 100).toFixed(0)}%
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Meta Info Row */}
-              <div style={{
-                display: 'flex',
-                gap: '12px',
-                flexWrap: 'wrap',
-              }}>
-                {selectedMovie.release_date && selectedMovie.release_date !== 'Unknown' && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: 'rgba(0,0,0,0.2)',
-                    padding: '8px 14px',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                    <span style={{ fontSize: '14px' }}>📅</span>
-                    <span style={{ fontSize: '13px', color: '#d1d5db', fontWeight: 500 }}>
-                      {new Date(selectedMovie.release_date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </span>
-                  </div>
-                )}
-                {selectedMovie.language && (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    background: 'rgba(0,0,0,0.2)',
-                    padding: '8px 14px',
-                    borderRadius: '8px',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                    <span style={{ fontSize: '14px' }}>🌐</span>
-                    <span style={{ fontSize: '13px', color: '#d1d5db', fontWeight: 500, textTransform: 'uppercase' }}>
-                      {selectedMovie.language}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Overview */}
-              {selectedMovie.overview && (
-                <div style={{
-                  background: 'rgba(0,0,0,0.25)',
-                  borderRadius: '12px',
-                  padding: '16px',
-                  border: '1px solid rgba(249,115,22,0.12)',
-                }}>
-                  <h3 style={{
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    color: '#fb923c',
-                    marginBottom: '8px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1.5px',
-                  }}>Synopsis</h3>
-                  <p style={{
-                    fontSize: '13px',
-                    color: '#d1d5db',
-                    lineHeight: 1.6,
-                    margin: 0,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 5,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}>
-                    {selectedMovie.overview}
-                  </p>
-                </div>
-              )}
-
-              {/* Popularity Bar */}
-              {selectedMovie.popularity && (
-                <div style={{
-                  background: 'rgba(0,0,0,0.25)',
-                  borderRadius: '12px',
-                  padding: '14px 16px',
-                  border: '1px solid rgba(249,115,22,0.12)',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>Popularity</span>
-                    <span style={{ fontSize: '14px', fontWeight: 700, color: '#fdba74' }}>
-                      {selectedMovie.popularity.toFixed(1)}
-                    </span>
-                  </div>
-                  <div style={{
-                    width: '100%',
-                    height: '6px',
-                    background: 'rgba(55,65,81,0.6)',
-                    borderRadius: '3px',
-                    overflow: 'hidden',
-                  }}>
-                    <div style={{
-                      width: `${Math.min(selectedMovie.popularity, 100)}%`,
-                      height: '100%',
-                      background: 'linear-gradient(90deg, #f97316, #fbbf24)',
-                      borderRadius: '3px',
-                      transition: 'width 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-                    }}></div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Movie Detail Drawer */}
+        <EngineDrawer selectedMovie={selectedMovie} onClose={() => setSelectedMovie(null)} />
       </>
     );
   }
