@@ -2,7 +2,7 @@
 
 **Semantic Movie Search Engine** - AI-powered movie discovery using natural language queries and interactive graph visualization.
 
-[![CI Pipeline](https://github.com/rajeev8008/Nebula/actions/workflows/ci.yml/badge.svg)](https://github.com/rajeev8008/Nebula/actions/workflows/ci.yml)
+[![CI Pipeline](https://github.com/rajeev8008/Nebula/actions/workflows/main.yml/badge.svg)](https://github.com/rajeev8008/Nebula/actions/workflows/main.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ## Overview
@@ -142,14 +142,10 @@ Returns all movies with similarity edges for full graph
 
 ## Testing
 
+Currently, the project focuses on end-to-end (E2E) UI testing using Playwright.
+
 ```bash
-# Backend tests (40% coverage, 8 tests)
-pytest tests/ -v --cov=backend
-
-# Frontend tests (10.71% coverage, 8 tests)
-cd frontend && npm run test:coverage
-
-# E2E tests (2 tests)
+# E2E tests (Playwright)
 cd frontend && npm run e2e
 ```
 
