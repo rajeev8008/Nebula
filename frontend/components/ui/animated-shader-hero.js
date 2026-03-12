@@ -270,7 +270,7 @@ class PointerHandler {
     element.addEventListener('mousemove', (e) => {
       const mappedPos = map(element, this.getScale(), e.clientX, e.clientY);
       this.lastCoords = mappedPos;
-      
+
       // Calculate and accumulate movement delta for shader effect
       const deltaX = mappedPos[0] - this.lastMousePos[0];
       const deltaY = mappedPos[1] - this.lastMousePos[1];
@@ -539,27 +539,27 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
           </div>
 
           {/* Subtitle */}
-            <motion.div
-              initial={{ filter: 'blur(10px)', opacity: 0 }}
-              animate={{ filter: 'blur(0px)', opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
+          <motion.div
+            initial={{ filter: 'blur(10px)', opacity: 0 }}
+            animate={{ filter: 'blur(0px)', opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            style={{
+              maxWidth: '48rem',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}
+          >
+            <p
               style={{
-                maxWidth: '48rem',
-                marginLeft: 'auto',
-                marginRight: 'auto',
+                fontSize: 'clamp(1rem, 3vw, 1.5rem)',
+                color: 'rgba(254, 243, 199, 0.9)',
+                fontWeight: 300,
+                lineHeight: 1.5,
               }}
             >
-              <p
-                style={{
-                  fontSize: 'clamp(1rem, 3vw, 1.5rem)',
-                  color: 'rgba(254, 243, 199, 0.9)',
-                  fontWeight: 300,
-                  lineHeight: 1.5,
-                }}
-              >
-                {subtitle}
-              </p>
-            </motion.div>
+              {subtitle}
+            </p>
+          </motion.div>
 
           {/* CTA Buttons */}
           {buttons && (

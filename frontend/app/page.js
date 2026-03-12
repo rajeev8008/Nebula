@@ -266,7 +266,7 @@ export default function Home() {
       <Suspense>
         <BrowseMovies
           onBack={() => setView('LANDING')}
-          onLaunchEngine={() => launchGraph()}
+          onLaunchEngine={() => launchGraph('browse')}
           onMovieClick={(movie) => {
              // For Browse view, just set the selected movie so the panel opens
              setSelectedMovie(movie);
@@ -313,7 +313,7 @@ export default function Home() {
         />
         <CommandPalette
           onSelectMovie={(movie) => {
-             launchGraph();
+             launchGraph('direct');
              handleSelectEngineMovie(movie);
           }}
         />
@@ -337,7 +337,7 @@ export default function Home() {
         buttons={{
           primary: {
             text: "Launch Engine",
-            onClick: launchGraph
+            onClick: () => launchGraph('direct')
           },
           secondary: {
             text: "Browse Movies",
@@ -347,7 +347,7 @@ export default function Home() {
       />
       <CommandPalette
         onSelectMovie={(movie) => {
-           launchGraph();
+           launchGraph('direct');
            handleSelectEngineMovie(movie);
         }}
       />
