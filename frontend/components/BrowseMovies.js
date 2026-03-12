@@ -432,29 +432,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                         Watchlist
                     </button>
 
-                    <button
-                        onClick={() => setIsDiaryOpen(true)}
-                        style={{
-                            padding: '10px 22px',
-                            borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.05)',
-                            backdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: '#e5e7eb',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            transition: 'all 0.3s ease',
-                        }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-                    >
-                        <Calendar size={18} />
-                        Diary
-                    </button>
+
 
                     <button
                         onClick={onLaunchEngine}
