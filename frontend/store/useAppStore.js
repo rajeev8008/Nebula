@@ -4,6 +4,9 @@ export const useAppStore = create((set) => ({
     view: 'LANDING',
     setView: (view) => set({ view }),
 
+    engineEntrySource: 'direct', // 'direct' | 'browse'
+    setEngineEntrySource: (source) => set({ engineEntrySource: source }),
+
     graphData: { nodes: [], links: [] },
     setGraphData: (graphData) => set({ graphData }),
 
@@ -48,4 +51,28 @@ export const useAppStore = create((set) => ({
 
     browseRuntime: '', 
     setBrowseRuntime: (browseRuntime) => set({ browseRuntime }),
+
+    // ─── Watchlist Feature ───
+    watchlist: typeof window !== 'undefined' && localStorage.getItem('nebula_watchlist') 
+        ? JSON.parse(localStorage.getItem('nebula_watchlist')) 
+        : [],
+    
+    toggleWatchlist: (movie) => set((state) => {
+        const isSaved = state.watchlist.some(m => m.id === movie.id);
+        const newWatchlist = isSaved
+            ? state.watchlist.filter(m => m.id !== movie.id)
+            : [...state.watchlist, movie];
+        
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('nebula_watchlist', JSON.stringify(newWatchlist));
+        }
+        return { watchlist: newWatchlist };
+    }),
+
+    clearWatchlist: () => set(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('nebula_watchlist');
+        }
+        return { watchlist: [] };
+    }),
 }));

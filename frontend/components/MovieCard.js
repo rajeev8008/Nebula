@@ -2,42 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-// ─── localStorage Watchlist Store ───
-const WATCHLIST_KEY = 'nebula-watchlist';
-
-function getWatchlist() {
-    if (typeof window === 'undefined') return new Set();
-    try {
-        const stored = localStorage.getItem(WATCHLIST_KEY);
-        return stored ? new Set(JSON.parse(stored)) : new Set();
-    } catch {
-        return new Set();
-    }
-}
-
-function saveWatchlist(watchlistSet) {
-    try {
-        localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlistSet]));
-    } catch (e) {
-        console.error('Failed to save watchlist:', e);
-    }
-}
-
-function toggleWatchlistItem(movieId) {
-    const watchlist = getWatchlist();
-    const id = String(movieId);
-    if (watchlist.has(id)) {
-        watchlist.delete(id);
-    } else {
-        watchlist.add(id);
-    }
-    saveWatchlist(watchlist);
-    return watchlist.has(id);
-}
-
-function isInWatchlist(movieId) {
-    return getWatchlist().has(String(movieId));
-}
+import { useAppStore } from '@/store/useAppStore';
 
 // --- Bookmark SVG Icons ---
 const BookmarkOutline = () => (
@@ -54,16 +19,16 @@ const BookmarkFilled = () => (
 
 const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
     const [isHovered, setIsHovered] = useState(false);
-    const [isBookmarked, setIsBookmarked] = useState(false);
+    const watchlist = useAppStore((state) => state.watchlist);
+    const toggleWatchlist = useAppStore((state) => state.toggleWatchlist);
+    
+    const isBookmarked = watchlist.some(m => m.id === movie.id);
     const [bookmarkAnimating, setBookmarkAnimating] = useState(false);
     const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
     const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
     const cardRef = useRef(null);
 
-    // Initialize bookmark state from localStorage
-    useEffect(() => {
-        setIsBookmarked(isInWatchlist(movie.id));
-    }, [movie.id]);
+
 
     // --- 3D Tilt & Glare ---
     const handleMouseMove = useCallback((e) => {
@@ -90,19 +55,13 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
         setGlare({ x: 50, y: 50, opacity: 0 });
     }, []);
 
-    // --- Optimistic Bookmark with localStorage ---
+    // --- Bookmark Toggle ---
     const handleBookmark = useCallback((e) => {
         e.stopPropagation();
-
-        // Optimistic update — toggle immediately
-        const newState = !isBookmarked;
-        setIsBookmarked(newState);
         setBookmarkAnimating(true);
         setTimeout(() => setBookmarkAnimating(false), 350);
-
-        // Persist to localStorage (synchronous, no rollback needed)
-        toggleWatchlistItem(movie.id);
-    }, [isBookmarked, movie.id]);
+        toggleWatchlist(movie);
+    }, [movie, toggleWatchlist]);
 
     return (
         <div

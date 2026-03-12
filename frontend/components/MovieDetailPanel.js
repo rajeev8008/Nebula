@@ -1,7 +1,12 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '@/store/useAppStore';
+import { Bookmark } from 'lucide-react';
 
 export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie, onLaunchEngine }) {
+    const watchlist = useAppStore((state) => state.watchlist);
+    const toggleWatchlist = useAppStore((state) => state.toggleWatchlist);
+    const isBookmarked = selectedMovie ? watchlist.some(m => m.id === selectedMovie.id) : false;
     return (
         <AnimatePresence>
             {selectedMovie && (
@@ -86,6 +91,38 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                 }}
                             >
                                 ✕
+                            </button>
+
+                            {/* Bookmark Button */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); toggleWatchlist(selectedMovie); }}
+                                style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    left: '24px', // Opposite to close button
+                                    width: '44px',
+                                    height: '44px',
+                                    borderRadius: '50%',
+                                    background: isBookmarked ? 'rgba(249,115,22,0.9)' : 'rgba(0,0,0,0.55)',
+                                    backdropFilter: 'blur(8px)',
+                                    border: '1px solid',
+                                    borderColor: isBookmarked ? 'rgba(249,115,22,1)' : 'rgba(255,255,255,0.12)',
+                                    color: isBookmarked ? '#000' : '#e5e7eb',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 0.3s ease',
+                                    zIndex: 20
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isBookmarked) e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isBookmarked) e.currentTarget.style.background = 'rgba(0,0,0,0.55)';
+                                }}
+                            >
+                                <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
                             </button>
 
                             {/* Title on poster */}

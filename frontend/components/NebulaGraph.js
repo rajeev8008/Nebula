@@ -59,7 +59,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
         if (centralNode) {
             setTimeout(() => {
                 graphRef.current.centerAt(
-                (centralNode.x || 0) - 100, 
+                (centralNode.x || 0) + 30, 
                 (centralNode.y || 0), 
                 1000
                 );
@@ -86,7 +86,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
     const centralNode = nodes.find(n => n.id === centralNodeId);
     if (centralNode && centralNode.x != null) {
         graphRef.current.centerAt(
-          (centralNode.x || 0) - 100, 
+          (centralNode.x || 0) + 30, 
           (centralNode.y || 0), 
           1000
         );
@@ -244,7 +244,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
         warmupTicks={50}
         onNodeClick={(node) => {
           graphRef.current.centerAt(
-            (node.x || 0) - 100, 
+            (node.x || 0) + 30, 
             (node.y || 0), 
             1000
           );

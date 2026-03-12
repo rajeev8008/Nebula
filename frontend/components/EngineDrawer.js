@@ -24,8 +24,18 @@ export default function EngineDrawer({ onSelectMovie }) {
     const searchLoading = useAppStore((state) => state.searchLoading);
     const engineStage = useAppStore((state) => state.engineStage);
     const hasSeenLoadingAnimation = useAppStore((state) => state.hasSeenLoadingAnimation);
+    const engineEntrySource = useAppStore((state) => state.engineEntrySource);
 
     const isFullScreen = engineStage === 'search' || engineStage === 'building';
+
+    const handleBack = () => {
+        const setView = useAppStore.getState().setView;
+        if (setView) {
+            setView(engineEntrySource === 'direct' ? 'LANDING' : 'BROWSE');
+            useAppStore.setState({ hasSeenLoadingAnimation: false });
+            useAppStore.getState().setEngineStage('search');
+        }
+    };
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
@@ -83,13 +93,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         transition={{ duration: 0.3 }}
-                        onClick={() => {
-                            const setView = useAppStore.getState().setView;
-                            if (setView) {
-                                setView('BROWSE');
-                                useAppStore.setState({ hasSeenLoadingAnimation: false });
-                            }
-                        }}
+                        onClick={handleBack}
                         style={{
                             position: 'absolute',
                             top: '24px',
@@ -111,7 +115,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                         onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
                         onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
                     >
-                        ← Back to Browse
+                        {engineEntrySource === 'direct' ? '← Back to Main Page' : '← Back to Browse Movies'}
                     </motion.button>
                 )}
             </AnimatePresence>
@@ -131,11 +135,11 @@ export default function EngineDrawer({ onSelectMovie }) {
                     padding: isFullScreen ? '0 24px' : '24px 20px',
                     borderBottom: isFullScreen ? 'none' : '1px solid rgba(255,255,255,0.05)',
                     background: isFullScreen ? 'transparent' : 'rgba(0,0,0,0.3)',
-                    pointerEvents: engineStage === 'search' ? 'auto' : 'none', // Block interaction when stage is not search
+                    pointerEvents: engineStage === 'building' ? 'none' : 'auto', // Block interaction only when building
                 }}
                 transition={{ type: "spring", bounce: 0, duration: 0.7 }}
             >
-                {/* Full Screen Form Wrapper */}
+                {/* Full Screen Form Wrapper OR State 3 Header */}
                 <motion.div 
                     layout
                     style={{ 
@@ -145,160 +149,186 @@ export default function EngineDrawer({ onSelectMovie }) {
                     initial={isFullScreen ? { y: 20, opacity: 0 } : false}
                     animate={{ y: 0, opacity: 1 }}
                 >
-                    <AnimatePresence>
-                        {isFullScreen && (
-                            <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10, transition: { duration: 0.2 } }}
-                                style={{ textAlign: 'center', marginBottom: '24px' }}
-                            >
-                                <h1 style={{
-                                    fontSize: '28px',
-                                    fontWeight: 300,
-                                    color: '#94a3b8',
-                                    letterSpacing: '0.5px'
-                                }}>
-                                    Describe the movie you're looking for
-                                </h1>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                    <AnimatePresence mode="wait">
+                        {isFullScreen ? (
+                            <motion.div key="fullscreen-search" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                <motion.div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                                    <h1 style={{
+                                        fontSize: '28px',
+                                        fontWeight: 300,
+                                        color: '#94a3b8',
+                                        letterSpacing: '0.5px'
+                                    }}>
+                                        Describe the movie you're looking for
+                                    </h1>
+                                </motion.div>
 
-                    {/* Small Header for State 3 */}
-                    <AnimatePresence>
-                        {!isFullScreen && (
-                            <motion.h2 
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                style={{
-                                    fontSize: '1.25rem',
-                                    fontWeight: 800,
-                                    marginBottom: '16px',
-                                    background: 'linear-gradient(135deg, #fdba74, #f97316)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                }}
-                            >
-                                Nebula Engine
-                            </motion.h2>
-                        )}
-                    </AnimatePresence>
-
-                    <form 
-                        onSubmit={handleSearchSubmit}
-                        style={{ position: 'relative' }}
-                    >
-                        {/* Shimmer / Glow Border Animation for State 1 */}
-                        {engineStage === 'search' && (
-                            <motion.div
-                                animate={{
-                                    boxShadow: [
-                                        '0 0 15px rgba(249,115,22,0.2)',
-                                        '0 0 35px rgba(249,115,22,0.5)',
-                                        '0 0 15px rgba(249,115,22,0.2)'
-                                    ]
-                                }}
-                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                                style={{
-                                    position: 'absolute',
-                                    inset: -2,
-                                    borderRadius: isFullScreen ? '18px' : '14px',
-                                    zIndex: -1,
-                                    background: 'linear-gradient(90deg, rgba(249,115,22,0.5), rgba(251,191,36,0.5))',
-                                    opacity: 0.5,
-                                    filter: 'blur(8px)',
-                                }}
-                            />
-                        )}
-
-                        <motion.input
-                            layout
-                            type="text"
-                            value={engineQuery}
-                            onChange={(e) => setEngineQuery(e.target.value)}
-                            placeholder={isFullScreen ? "e.g. intense car chase, psychological thriller, 90s sci-fi" : "Refine your search..."}
-                            style={{
-                                width: '100%',
-                                paddingTop: isFullScreen ? '20px' : '12px',
-                                paddingBottom: isFullScreen ? '20px' : '12px',
-                                paddingLeft: isFullScreen ? '24px' : '16px',
-                                paddingRight: '48px',
-                                background: isFullScreen ? 'rgba(10,10,10,0.8)' : 'rgba(255,255,255,0.05)',
-                                border: isFullScreen ? '1px solid rgba(249,115,22,0.4)' : '1px solid rgba(249,115,22,0.3)',
-                                borderRadius: isFullScreen ? '16px' : '12px',
-                                color: '#fff',
-                                fontSize: isFullScreen ? '18px' : '14px',
-                                outline: 'none',
-                                transition: 'all 0.3s ease',
-                                backdropFilter: 'blur(12px)',
-                            }}
-                            onFocus={(e) => {
-                                if (isFullScreen) {
-                                    e.target.style.borderColor = 'rgba(249,115,22,0.8)';
-                                    e.target.style.background = 'rgba(10,10,10,0.95)';
-                                } else {
-                                    e.target.style.borderColor = 'rgba(249,115,22,0.8)';
-                                    e.target.style.background = 'rgba(255,255,255,0.1)';
-                                }
-                            }}
-                            onBlur={(e) => {
-                                if (isFullScreen) {
-                                    e.target.style.borderColor = 'rgba(249,115,22,0.4)';
-                                    e.target.style.background = 'rgba(10,10,10,0.8)';
-                                } else {
-                                    e.target.style.borderColor = 'rgba(249,115,22,0.3)';
-                                    e.target.style.background = 'rgba(255,255,255,0.05)';
-                                }
-                            }}
-                        />
-                        <button 
-                            type="submit"
-                            disabled={searchLoading}
-                            style={{
-                                position: 'absolute',
-                                right: isFullScreen ? '12px' : '4px',
-                                top: isFullScreen ? '12px' : '4px',
-                                bottom: isFullScreen ? '12px' : '4px',
-                                width: '40px',
-                                background: 'transparent',
-                                border: 'none',
-                                color: isFullScreen ? '#22d3ee' : '#fdba74',
-                                cursor: 'pointer',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            {!searchLoading && (
-                                <motion.span 
-                                    whileHover={{ scale: 1.1 }} 
-                                    whileTap={{ scale: 0.9 }}
-                                    style={{ fontSize: isFullScreen ? '20px' : '16px' }}
+                                <form 
+                                    onSubmit={handleSearchSubmit}
+                                    style={{ position: 'relative' }}
                                 >
-                                    🔍
-                                </motion.span>
-                            )}
-                        </button>
-                    </form>
+                                    {engineStage === 'search' && (
+                                        <motion.div
+                                            animate={{
+                                                boxShadow: [
+                                                    '0 0 15px rgba(249,115,22,0.2)',
+                                                    '0 0 35px rgba(249,115,22,0.5)',
+                                                    '0 0 15px rgba(249,115,22,0.2)'
+                                                ]
+                                            }}
+                                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                            style={{
+                                                position: 'absolute',
+                                                inset: -2,
+                                                borderRadius: '18px',
+                                                zIndex: -1,
+                                                background: 'linear-gradient(90deg, rgba(249,115,22,0.5), rgba(251,191,36,0.5))',
+                                                opacity: 0.5,
+                                                filter: 'blur(8px)',
+                                            }}
+                                        />
+                                    )}
 
-                    {/* Hint text for State 1 */}
-                    <AnimatePresence>
-                        {engineStage === 'search' && (
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1, transition: { delay: 0.5 } }}
-                                exit={{ opacity: 0, transition: { duration: 0.2 } }}
-                                style={{ textAlign: 'center', marginTop: '16px' }}
-                            >
-                                <span style={{ fontSize: '13px', color: '#64748b' }}>
-                                    Press Enter to generate a semantic galaxy map
-                                </span>
+                                    <motion.input
+                                        type="text"
+                                        value={engineQuery}
+                                        onChange={(e) => setEngineQuery(e.target.value)}
+                                        placeholder="e.g. intense car chase, psychological thriller, 90s sci-fi"
+                                        style={{
+                                            width: '100%',
+                                            paddingTop: '20px',
+                                            paddingBottom: '20px',
+                                            paddingLeft: '24px',
+                                            paddingRight: '48px',
+                                            background: 'rgba(10,10,10,0.8)',
+                                            border: '1px solid rgba(249,115,22,0.4)',
+                                            borderRadius: '16px',
+                                            color: '#fff',
+                                            fontSize: '18px',
+                                            outline: 'none',
+                                            transition: 'all 0.3s ease',
+                                            backdropFilter: 'blur(12px)',
+                                        }}
+                                        onFocus={(e) => {
+                                            e.target.style.borderColor = 'rgba(249,115,22,0.8)';
+                                            e.target.style.background = 'rgba(10,10,10,0.95)';
+                                        }}
+                                        onBlur={(e) => {
+                                            e.target.style.borderColor = 'rgba(249,115,22,0.4)';
+                                            e.target.style.background = 'rgba(10,10,10,0.8)';
+                                        }}
+                                    />
+                                    <button 
+                                        type="submit"
+                                        disabled={searchLoading}
+                                        style={{
+                                            position: 'absolute',
+                                            right: '12px',
+                                            top: '12px',
+                                            bottom: '12px',
+                                            width: '40px',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            color: '#22d3ee',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                        }}
+                                    >
+                                        {!searchLoading && (
+                                            <motion.span 
+                                                whileHover={{ scale: 1.1 }} 
+                                                whileTap={{ scale: 0.9 }}
+                                                style={{ fontSize: '20px' }}
+                                            >
+                                                🔍
+                                            </motion.span>
+                                        )}
+                                    </button>
+                                </form>
+
+                                {engineStage === 'search' && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1, transition: { delay: 0.5 } }}
+                                        exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                                        style={{ textAlign: 'center', marginTop: '16px' }}
+                                    >
+                                        <span style={{ fontSize: '13px', color: '#64748b' }}>
+                                            Press Enter to generate a semantic galaxy map
+                                        </span>
+                                    </motion.div>
+                                )}
+                            </motion.div>
+                        ) : (
+                            <motion.div key="state3-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                <motion.h2 
+                                    style={{
+                                        fontSize: '1.25rem',
+                                        fontWeight: 800,
+                                        margin: '0',
+                                        background: 'linear-gradient(135deg, #fdba74, #f97316)',
+                                        WebkitBackgroundClip: 'text',
+                                        WebkitTextFillColor: 'transparent',
+                                    }}
+                                >
+                                    Nebula Engine
+                                </motion.h2>
+
+                                <button
+                                    onClick={handleBack}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: 'transparent',
+                                        border: '1px solid rgba(249,115,22,0.4)',
+                                        color: '#fdba74',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        textAlign: 'left',
+                                        transition: 'all 0.2s',
+                                        alignSelf: 'flex-start'
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                    {engineEntrySource === 'direct' ? '← Back to Main Page' : '← Back to Browse Movies'}
+                                </button>
+
+                                <div>
+                                    <span style={{ fontSize: '13px', color: '#64748b' }}>Results for: </span>
+                                    <span style={{ fontSize: '14px', color: '#f97316', fontWeight: 500 }}>"{engineQuery}"</span>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        useAppStore.getState().setEngineStage('search');
+                                        document.dispatchEvent(new CustomEvent('engine-clear-selection'));
+                                    }}
+                                    style={{
+                                        padding: '8px 16px',
+                                        background: 'transparent',
+                                        border: '1px solid rgba(249,115,22,0.4)',
+                                        color: '#fdba74',
+                                        borderRadius: '8px',
+                                        fontSize: '13px',
+                                        fontWeight: 600,
+                                        cursor: 'pointer',
+                                        textAlign: 'center',
+                                        transition: 'all 0.2s',
+                                    }}
+                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
+                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                >
+                                    New Search
+                                </button>
+                                
+                                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', marginTop: '8px', marginBottom: '8px' }} />
                             </motion.div>
                         )}
                     </AnimatePresence>
-
                 </motion.div>
             </motion.div>
 

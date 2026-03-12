@@ -57,6 +57,8 @@ export default function Home() {
   const setSearchLoading = useAppStore((state) => state.setSearchLoading);
 
   // New Engine State Slices
+  const engineEntrySource = useAppStore((state) => state.engineEntrySource);
+  const setEngineEntrySource = useAppStore((state) => state.setEngineEntrySource);
   const engineQuery = useAppStore((state) => state.engineQuery);
   const engineResults = useAppStore((state) => state.engineResults);
   const setEngineResults = useAppStore((state) => state.setEngineResults);
@@ -67,8 +69,9 @@ export default function Home() {
   const [centralNodeId, setCentralNodeId] = useState(null);
 
   // ─── Engine Specific Handlers ───
-  const launchGraph = () => {
+  const launchGraph = (source = 'direct') => {
     setView('GRAPH');
+    setEngineEntrySource(source);
     // Clear state on fresh launch
     setGraphData({ nodes: [], links: [] });
     setEngineResults([]);
@@ -141,8 +144,16 @@ export default function Home() {
       }
     };
 
+    const handleClearSelection = () => {
+        setSelectedEngineMovie(null);
+    };
+
     document.addEventListener('engine-search', handleEngineSearch);
-    return () => document.removeEventListener('engine-search', handleEngineSearch);
+    document.addEventListener('engine-clear-selection', handleClearSelection);
+    return () => {
+        document.removeEventListener('engine-search', handleEngineSearch);
+        document.removeEventListener('engine-clear-selection', handleClearSelection);
+    };
   }, [setSearchLoading, setEngineResults, setGraphData, setError, setSelectedEngineMovie, setEngineStage]);
 
   // Load Graph Cluster when a movie is selected from sidebar (or from graph nodes)
@@ -174,7 +185,7 @@ export default function Home() {
   if (view === 'GRAPH') {
     return (
       <>
-        <div className="relative w-full h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900" style={{ overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1, overflow: 'hidden' }} className="bg-gradient-to-br from-slate-950 via-black to-slate-900">
           
           {/* Main Graph Component */}
           <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -238,63 +249,6 @@ export default function Home() {
                 <button onClick={() => setError(null)} className="ml-4 text-red-400 hover:text-red-200">✕</button>
             </div>
           )}
-
-          {/* Navigation Back Buttons - Top Left for Graph Canvas (since drawer covers left) */}
-          {/* Note: In State 3, drawer is 360px wide, so offset by that amount. */}
-          <AnimatePresence>
-          {useAppStore.getState().engineStage === 'graph' && (
-            <motion.div 
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
-                style={{ position: 'absolute', top: '24px', left: '384px', zIndex: 20, display: 'flex', gap: '12px' }}
-            >
-                <motion.button
-                onClick={() => setEngineStage('search')}
-                style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    background: 'transparent',
-                    border: '1px solid rgba(249,115,22,0.4)',
-                    color: '#fdba74',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                ← New Search
-                </motion.button>
-                <motion.button
-                onClick={exitEngineToBrowse}
-                style={{
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    background: 'transparent',
-                    border: '1px solid rgba(249,115,22,0.4)',
-                    color: '#fdba74',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
-                >
-                ← Back to Browse
-                </motion.button>
-            </motion.div>
-          )}
-          </AnimatePresence>
         </div>
       </>
     );
@@ -318,7 +272,7 @@ export default function Home() {
             onSelectMovie={(movie) => setSelectedMovie(movie)}
             onLaunchEngine={() => {
                 // If the "Launch Engine" button is clicked inside the Browser's movie detail panel
-                launchGraph();
+                launchGraph('browse');
                 
                 // Immediately auto-select and build the graph for this movie
                 setSelectedEngineMovie(selectedMovie);

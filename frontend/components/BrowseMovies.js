@@ -10,6 +10,8 @@ import MovieRow from './MovieRow';
 import { SkeletonSection } from './ui/skeleton';
 import { fetchMovies } from '@/lib/api';
 import { useAppStore } from '@/store/useAppStore'; // Store for local filters
+import { Bookmark, Search } from 'lucide-react';
+import WatchlistPanel from './WatchlistPanel';
 
 // ─── Constants ───
 const CARD_WIDTH = 192;
@@ -95,6 +97,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
 
     // Scroll container ref for virtualizer
     const scrollRef = useRef(null);
+    const [isWatchlistOpen, setIsWatchlistOpen] = useState(false);
 
     // ─── Intersection Observer sentinel for infinite scroll ───
     const { ref: sentinelRef, inView } = useInView({
@@ -348,7 +351,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                             type="text"
                             value={browseSearchQuery}
                             onChange={(e) => setBrowseSearchQuery(e.target.value)}
-                            placeholder="Search displayed movies..."
+                            placeholder="Search for movies"
                             style={{
                                 width: '100%',
                                 padding: '8px 12px 8px 36px',
@@ -376,6 +379,30 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <button
+                        onClick={() => setIsWatchlistOpen(true)}
+                        style={{
+                            padding: '10px 22px',
+                            borderRadius: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#e5e7eb',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                    >
+                        <Bookmark size={18} />
+                        Watchlist
+                    </button>
+
                     <button
                         onClick={onLaunchEngine}
                         style={{
@@ -638,6 +665,13 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                     </div>
                 )}
             </div>
+
+            {/* Watchlist Sidebar */}
+            <WatchlistPanel 
+                isOpen={isWatchlistOpen} 
+                onClose={() => setIsWatchlistOpen(false)} 
+                onMovieClick={(movie) => onMovieClick(movie)}
+            />
         </div>
     );
 };
