@@ -10,8 +10,9 @@ import MovieRow from './MovieRow';
 import { SkeletonSection } from './ui/skeleton';
 import { fetchMovies } from '@/lib/api';
 import { useAppStore } from '@/store/useAppStore'; // Store for local filters
-import { Bookmark, Search } from 'lucide-react';
+import { Bookmark, Search, Calendar, Filter, Sparkles, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import WatchlistPanel from './WatchlistPanel';
+import DiaryPanel from './DiaryPanel';
 
 // ─── Constants ───
 const CARD_WIDTH = 192;
@@ -98,6 +99,10 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     // Scroll container ref for virtualizer
     const scrollRef = useRef(null);
     const [isWatchlistOpen, setIsWatchlistOpen] = useState(false);
+    const [isDiaryOpen, setIsDiaryOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'diary'
+    const [sortBy, setSortBy] = useState('popularity'); // 'popularity' | 'rating' | 'release_date'
+    const [showSortMenu, setShowSortMenu] = useState(false);
 
     // ─── Intersection Observer sentinel for infinite scroll ───
     const { ref: sentinelRef, inView } = useInView({
@@ -378,7 +383,31 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    {/* Tabs */}
+                    <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', padding: '4px', marginRight: '16px' }}>
+                        {['browse', 'diary'].map(tab => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                style={{
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    border: 'none',
+                                    background: activeTab === tab ? '#f97316' : 'transparent',
+                                    color: activeTab === tab ? '#000' : '#94a3b8',
+                                    fontSize: '13px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    textTransform: 'capitalize',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+
                     <button
                         onClick={() => setIsWatchlistOpen(true)}
                         style={{
@@ -401,6 +430,30 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                     >
                         <Bookmark size={18} />
                         Watchlist
+                    </button>
+
+                    <button
+                        onClick={() => setIsDiaryOpen(true)}
+                        style={{
+                            padding: '10px 22px',
+                            borderRadius: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            backdropFilter: 'blur(12px)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#e5e7eb',
+                            fontSize: '14px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                    >
+                        <Calendar size={18} />
+                        Diary
                     </button>
 
                     <button
@@ -666,10 +719,15 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                 )}
             </div>
 
-            {/* Watchlist Sidebar */}
+            {/* Watchlist & Diary Panels */}
             <WatchlistPanel 
                 isOpen={isWatchlistOpen} 
                 onClose={() => setIsWatchlistOpen(false)} 
+                onMovieClick={(movie) => onMovieClick(movie)}
+            />
+            <DiaryPanel 
+                isOpen={isDiaryOpen} 
+                onClose={() => setIsDiaryOpen(false)} 
                 onMovieClick={(movie) => onMovieClick(movie)}
             />
         </div>

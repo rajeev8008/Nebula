@@ -1,12 +1,25 @@
-'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
-import { Bookmark } from 'lucide-react';
+import { Bookmark, Star, ClipboardList, History, Calendar, MessageSquare, Repeat } from 'lucide-react';
+import StarRating from './StarRating';
+import { useState } from 'react';
 
 export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie, onLaunchEngine }) {
     const watchlist = useAppStore((state) => state.watchlist);
     const toggleWatchlist = useAppStore((state) => state.toggleWatchlist);
+    const userRatings = useAppStore((state) => state.userRatings);
+    const setUserRating = useAppStore((state) => state.setUserRating);
+    const addLog = useAppStore((state) => state.addLog);
+
     const isBookmarked = selectedMovie ? watchlist.some(m => m.id === selectedMovie.id) : false;
+    const personalRating = selectedMovie ? userRatings[selectedMovie.id] || 0 : 0;
+
+    const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+    const [logForm, setLogForm] = useState({
+        date: new Date().toISOString().split('T')[0],
+        review: '',
+        rewatch: false
+    });
     return (
         <AnimatePresence>
             {selectedMovie && (
@@ -201,6 +214,51 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                 ))}
                             </div>
                         )}
+
+                        {/* User Activity Row (Ratings & Logs) */}
+                        <div style={{
+                            background: 'rgba(249,115,22,0.05)',
+                            borderRadius: '16px',
+                            padding: '20px',
+                            border: '1px solid rgba(249,115,22,0.15)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px'
+                        }}>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div style={{ fontSize: '11px', color: '#fb923c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Your Rating</div>
+                                <StarRating 
+                                    rating={personalRating} 
+                                    onRate={(r) => setUserRating(selectedMovie.id, r)} 
+                                    size={24}
+                                />
+                             </div>
+                             
+                             <button
+                                onClick={() => setIsLogModalOpen(true)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    color: '#fff',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    transition: 'all 0.2s'
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
+                                onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                             >
+                                <ClipboardList size={18} />
+                                Log or Review
+                             </button>
+                        </div>
 
                         {/* Stats Row */}
                         <div style={{
@@ -451,6 +509,95 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                             </div>
                         )}
                     </div>
+
+                    {/* ── Log Modal ────────────────────────────────── */}
+                    <AnimatePresence>
+                        {isLogModalOpen && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: 'rgba(0,0,0,0.85)',
+                                    backdropFilter: 'blur(10px)',
+                                    zIndex: 1000,
+                                    padding: '40px 24px',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f97316' }}>Log Movie</h3>
+                                    <button onClick={() => setIsLogModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>✕</button>
+                                </div>
+
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                    {/* Date */}
+                                    <div>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                            <Calendar size={14} /> Date Watched
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            value={logForm.date}
+                                            onChange={(e) => setLogForm({...logForm, date: e.target.value})}
+                                            style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none' }}
+                                        />
+                                    </div>
+
+                                    {/* Review */}
+                                    <div>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                            <MessageSquare size={14} /> Review
+                                        </label>
+                                        <textarea 
+                                            placeholder="Write your thoughts..."
+                                            value={logForm.review}
+                                            onChange={(e) => setLogForm({...logForm, review: e.target.value})}
+                                            style={{ width: '100%', height: '120px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none', resize: 'none' }}
+                                        />
+                                    </div>
+
+                                    {/* Rewatch Toggle */}
+                                    <div 
+                                        onClick={() => setLogForm({...logForm, rewatch: !logForm.rewatch})}
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '10px', cursor: 'pointer' }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <Repeat size={16} color={logForm.rewatch ? '#f97316' : '#64748b'} />
+                                            <span style={{ fontSize: '14px', color: logForm.rewatch ? '#fff' : '#94a3b8' }}>Rewatch</span>
+                                        </div>
+                                        <div style={{ width: '40px', height: '20px', borderRadius: '10px', background: logForm.rewatch ? '#f97316' : '#334155', position: 'relative', transition: '0.3s' }}>
+                                            <div style={{ position: 'absolute', top: '2px', left: logForm.rewatch ? '22px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: '#fff', transition: '0.3s' }} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        addLog({
+                                            ...selectedMovie,
+                                            ...logForm,
+                                            personalRating,
+                                            loggedAt: Date.now()
+                                        });
+                                        setIsLogModalOpen(false);
+                                        setLogForm({ date: new Date().toISOString().split('T')[0], review: '', rewatch: false });
+                                    }}
+                                    style={{
+                                        width: '100%', padding: '16px', borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #f97316, #f59e0b)', border: 'none',
+                                        color: '#000', fontSize: '15px', fontWeight: 800, cursor: 'pointer',
+                                        boxShadow: '0 4px 20px rgba(249,115,22,0.3)', marginTop: '20px'
+                                    }}
+                                >
+                                    Save Entry
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.div>
             )}
         </AnimatePresence>

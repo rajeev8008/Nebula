@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-
 import { useAppStore } from '@/store/useAppStore';
+import StarRating from './StarRating';
 
 // --- Bookmark SVG Icons ---
 const BookmarkOutline = () => (
@@ -21,8 +21,10 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
     const [isHovered, setIsHovered] = useState(false);
     const watchlist = useAppStore((state) => state.watchlist);
     const toggleWatchlist = useAppStore((state) => state.toggleWatchlist);
+    const userRatings = useAppStore((state) => state.userRatings);
     
     const isBookmarked = watchlist.some(m => m.id === movie.id);
+    const personalRating = userRatings[movie.id] || 0;
     const [bookmarkAnimating, setBookmarkAnimating] = useState(false);
     const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
     const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
@@ -219,11 +221,18 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
                 </h3>
 
                 {/* Rating */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
-                    <span style={{ color: '#fbbf24', fontSize: '14px' }}>★</span>
-                    <span style={{ color: '#fb923c', fontSize: '13px', fontWeight: 600 }}>
-                        {movie.rating ? movie.rating.toFixed(1) : 'N/A'}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ color: '#fbbf24', fontSize: '14px' }}>★</span>
+                        <span style={{ color: '#fb923c', fontSize: '13px', fontWeight: 600 }}>
+                            {movie.rating ? movie.rating.toFixed(1) : 'N/A'}
+                        </span>
+                    </div>
+                    {personalRating > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(0.8)', transformOrigin: 'right' }}>
+                            <StarRating rating={personalRating} size={12} interactive={false} />
+                        </div>
+                    )}
                 </div>
 
                 {/* Genres */}
