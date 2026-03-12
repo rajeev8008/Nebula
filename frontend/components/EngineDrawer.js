@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
 // Options for loading dots
 const dotVariants = {
@@ -199,7 +200,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                                             paddingTop: '20px',
                                             paddingBottom: '20px',
                                             paddingLeft: '24px',
-                                            paddingRight: '48px',
+                                            paddingRight: '80px',
                                             background: 'rgba(10,10,10,0.8)',
                                             border: '1px solid rgba(249,115,22,0.4)',
                                             borderRadius: '16px',
@@ -218,6 +219,31 @@ export default function EngineDrawer({ onSelectMovie }) {
                                             e.target.style.background = 'rgba(10,10,10,0.8)';
                                         }}
                                     />
+                                    {engineQuery && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setEngineQuery('')}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '52px',
+                                                top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                background: 'transparent',
+                                                border: 'none',
+                                                color: '#64748b',
+                                                cursor: 'pointer',
+                                                padding: '4px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                zIndex: 10,
+                                            }}
+                                            onMouseEnter={(e) => e.currentTarget.style.color = '#fdba74'}
+                                            onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    )}
                                     <button 
                                         type="submit"
                                         disabled={searchLoading}
@@ -304,6 +330,7 @@ export default function EngineDrawer({ onSelectMovie }) {
 
                                 <button
                                     onClick={() => {
+                                        setEngineQuery('');
                                         useAppStore.getState().setEngineStage('search');
                                         document.dispatchEvent(new CustomEvent('engine-clear-selection'));
                                     }}
