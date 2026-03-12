@@ -23,7 +23,7 @@ const hudBtnStyle = {
 
 const imageCache = new Map();
 
-export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }) {
+export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, centralNodeId }) {
   const graphRef = useRef();
   const [hoveredNode, setHoveredNode] = useState(null);
 
@@ -253,7 +253,10 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
           graphRef.current.zoom(2.5, 1000);
           onNodeClick(node);
         }}
-        onNodeHover={(node) => setHoveredNode(node || null)}
+        onNodeHover={(node) => {
+          setHoveredNode(node || null);
+          if (onNodeHover) onNodeHover(node);
+        }}
         enableNodeDrag={true}
         enableZoomInteraction={true}
         enablePanInteraction={true}

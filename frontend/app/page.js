@@ -197,6 +197,12 @@ export default function Home() {
                     // When a node in the graph is clicked, open detail panel AND load its neighborhood
                     handleSelectEngineMovie(node);
                 }}
+                onNodeHover={(node) => {
+                    // When a node is hovered, just update the detail panel (don't rebuild graph)
+                    if (node) {
+                        setSelectedEngineMovie(node);
+                    }
+                }}
                 centralNodeId={centralNodeId}
                 />
             </ErrorBoundary>
