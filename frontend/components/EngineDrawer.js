@@ -381,13 +381,18 @@ export default function EngineDrawer({ onSelectMovie }) {
                             />
                             {/* Central glowing core */}
                             <motion.div
-                                animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+                                initial={{ x: '-50%', y: '-50%' }}
+                                animate={{ 
+                                    scale: [1, 1.2, 1], 
+                                    opacity: [0.7, 1, 0.7],
+                                    x: '-50%',
+                                    y: '-50%' 
+                                }}
                                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                                 style={{
                                     position: 'absolute',
                                     top: '50%',
                                     left: '50%',
-                                    transform: 'translate(-50%, -50%)',
                                     width: '30px',
                                     height: '30px',
                                     borderRadius: '50%',

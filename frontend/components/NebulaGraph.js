@@ -58,12 +58,14 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
         const centralNode = nodes.find(n => n.id === centralNodeId);
         if (centralNode) {
             setTimeout(() => {
-                graphRef.current.centerAt(
-                (centralNode.x || 0) + 30, 
-                (centralNode.y || 0), 
-                1000
-                );
-                graphRef.current.zoom(2, 1000);
+                if (graphRef.current) {
+                    graphRef.current.centerAt(
+                        (centralNode.x || 0) + 30, 
+                        (centralNode.y || 0), 
+                        1000
+                    );
+                    graphRef.current.zoom(2, 1000);
+                }
             }, 500);
         }
     }
