@@ -288,38 +288,6 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
                         ))}
                     </div>
                 )}
-
-                {/* "See in Graph" Button */}
-                {onSeeInGraph && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onSeeInGraph(movie);
-                        }}
-                        style={{
-                            width: '100%',
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                            background: 'linear-gradient(135deg, #f97316, #f59e0b)',
-                            border: 'none',
-                            color: '#000',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            pointerEvents: 'auto',
-                            boxShadow: '0 2px 8px rgba(249,115,22,0.4)',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(249,115,22,0.6)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(249,115,22,0.4)';
-                        }}
-                    >
-                        See in Graph →
-                    </button>
-                )}
             </div>
         </div>
     );

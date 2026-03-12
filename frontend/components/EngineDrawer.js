@@ -23,6 +23,7 @@ export default function EngineDrawer({ onSelectMovie }) {
     const engineResults = useAppStore((state) => state.engineResults);
     const searchLoading = useAppStore((state) => state.searchLoading);
     const engineStage = useAppStore((state) => state.engineStage);
+    const hasSeenLoadingAnimation = useAppStore((state) => state.hasSeenLoadingAnimation);
 
     const isFullScreen = engineStage === 'search' || engineStage === 'building';
 
@@ -38,7 +39,7 @@ export default function EngineDrawer({ onSelectMovie }) {
             initial={false}
             animate={{
                 width: isFullScreen ? '100vw' : '360px',
-                background: isFullScreen ? 'rgba(0, 0, 0, 0.95)' : 'rgba(15, 23, 42, 0.85)',
+                background: isFullScreen ? '#0a0a0a' : 'rgba(10, 10, 10, 0.95)',
                 borderRight: isFullScreen ? '1px solid transparent' : '1px solid rgba(249,115,22,0.2)',
                 backdropFilter: isFullScreen ? 'blur(0px)' : 'blur(20px)',
             }}
@@ -60,17 +61,58 @@ export default function EngineDrawer({ onSelectMovie }) {
                 {isFullScreen && (
                     <motion.div
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: engineStage === 'search' ? 0.4 : 0.1 }}
+                        animate={{ opacity: engineStage === 'search' ? 0.3 : 0.05 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 1 }}
                         style={{
                             position: 'absolute',
                             inset: 0,
-                            backgroundImage: 'radial-gradient(circle at center, rgba(6,182,212,0.15) 0%, transparent 50%)',
+                            backgroundImage: 'radial-gradient(circle at center, rgba(249,115,22,0.1) 0%, transparent 60%)',
                             pointerEvents: 'none',
                             zIndex: 0
                         }}
                     />
+                )}
+            </AnimatePresence>
+
+            {/* Back Button for State 1 */}
+            <AnimatePresence>
+                {engineStage === 'search' && (
+                    <motion.button
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        onClick={() => {
+                            const setView = useAppStore.getState().setView;
+                            if (setView) {
+                                setView('BROWSE');
+                                useAppStore.setState({ hasSeenLoadingAnimation: false });
+                            }
+                        }}
+                        style={{
+                            position: 'absolute',
+                            top: '24px',
+                            left: '24px',
+                            zIndex: 50,
+                            padding: '8px 16px',
+                            background: 'transparent',
+                            border: '1px solid rgba(249,115,22,0.4)',
+                            color: '#fdba74',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s',
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                        ← Back to Browse
+                    </motion.button>
                 )}
             </AnimatePresence>
 
@@ -153,9 +195,9 @@ export default function EngineDrawer({ onSelectMovie }) {
                             <motion.div
                                 animate={{
                                     boxShadow: [
-                                        '0 0 15px rgba(6,182,212,0.2)',
-                                        '0 0 35px rgba(6,182,212,0.5)',
-                                        '0 0 15px rgba(6,182,212,0.2)'
+                                        '0 0 15px rgba(249,115,22,0.2)',
+                                        '0 0 35px rgba(249,115,22,0.5)',
+                                        '0 0 15px rgba(249,115,22,0.2)'
                                     ]
                                 }}
                                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
@@ -164,7 +206,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                                     inset: -2,
                                     borderRadius: isFullScreen ? '18px' : '14px',
                                     zIndex: -1,
-                                    background: 'linear-gradient(90deg, rgba(6,182,212,0.5), rgba(59,130,246,0.5))',
+                                    background: 'linear-gradient(90deg, rgba(249,115,22,0.5), rgba(251,191,36,0.5))',
                                     opacity: 0.5,
                                     filter: 'blur(8px)',
                                 }}
@@ -183,8 +225,8 @@ export default function EngineDrawer({ onSelectMovie }) {
                                 paddingBottom: isFullScreen ? '20px' : '12px',
                                 paddingLeft: isFullScreen ? '24px' : '16px',
                                 paddingRight: '48px',
-                                background: isFullScreen ? 'rgba(15,23,42,0.6)' : 'rgba(255,255,255,0.05)',
-                                border: isFullScreen ? '1px solid rgba(6,182,212,0.4)' : '1px solid rgba(249,115,22,0.3)',
+                                background: isFullScreen ? 'rgba(10,10,10,0.8)' : 'rgba(255,255,255,0.05)',
+                                border: isFullScreen ? '1px solid rgba(249,115,22,0.4)' : '1px solid rgba(249,115,22,0.3)',
                                 borderRadius: isFullScreen ? '16px' : '12px',
                                 color: '#fff',
                                 fontSize: isFullScreen ? '18px' : '14px',
@@ -194,8 +236,8 @@ export default function EngineDrawer({ onSelectMovie }) {
                             }}
                             onFocus={(e) => {
                                 if (isFullScreen) {
-                                    e.target.style.borderColor = 'rgba(6,182,212,0.8)';
-                                    e.target.style.background = 'rgba(15,23,42,0.8)';
+                                    e.target.style.borderColor = 'rgba(249,115,22,0.8)';
+                                    e.target.style.background = 'rgba(10,10,10,0.95)';
                                 } else {
                                     e.target.style.borderColor = 'rgba(249,115,22,0.8)';
                                     e.target.style.background = 'rgba(255,255,255,0.1)';
@@ -203,8 +245,8 @@ export default function EngineDrawer({ onSelectMovie }) {
                             }}
                             onBlur={(e) => {
                                 if (isFullScreen) {
-                                    e.target.style.borderColor = 'rgba(6,182,212,0.4)';
-                                    e.target.style.background = 'rgba(15,23,42,0.6)';
+                                    e.target.style.borderColor = 'rgba(249,115,22,0.4)';
+                                    e.target.style.background = 'rgba(10,10,10,0.8)';
                                 } else {
                                     e.target.style.borderColor = 'rgba(249,115,22,0.3)';
                                     e.target.style.background = 'rgba(255,255,255,0.05)';
@@ -262,7 +304,7 @@ export default function EngineDrawer({ onSelectMovie }) {
 
             {/* STATE 2: Building Loading Animation Centered */}
             <AnimatePresence>
-                {engineStage === 'building' && (
+                {engineStage === 'building' && !hasSeenLoadingAnimation && (
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
@@ -274,7 +316,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                             left: 0,
                             width: '100vw',
                             height: '100vh',
-                            background: '#0f172a', // Fully opaque slate-900 matching site dark theme
+                            background: '#0a0a0a', // Fully opaque near-black matching site dark theme
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',

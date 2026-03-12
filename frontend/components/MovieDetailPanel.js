@@ -1,7 +1,7 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie }) {
+export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie, onLaunchEngine }) {
     return (
         <AnimatePresence>
             {selectedMovie && (
@@ -284,6 +284,42 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                         }}
                                     />
                                 </div>
+                            </div>
+                        )}
+
+                        {/* "Launch Engine" Button (Browse View Only) */}
+                        {onLaunchEngine && (
+                            <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
+                                <button
+                                    onClick={onLaunchEngine}
+                                    style={{
+                                        width: '100%',
+                                        padding: '16px',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #f97316, #f59e0b)',
+                                        border: 'none',
+                                        color: '#000',
+                                        fontSize: '15px',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        boxShadow: '0 4px 20px rgba(249,115,22,0.3)',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 6px 25px rgba(249,115,22,0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 20px rgba(249,115,22,0.3)';
+                                    }}
+                                >
+                                    <span style={{ fontSize: '20px' }}>💥</span> Launch Engine for this Movie
+                                </button>
                             </div>
                         )}
 

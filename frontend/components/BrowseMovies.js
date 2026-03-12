@@ -9,6 +9,7 @@ import MovieCard from './MovieCard';
 import MovieRow from './MovieRow';
 import { SkeletonSection } from './ui/skeleton';
 import { fetchMovies } from '@/lib/api';
+import { useAppStore } from '@/store/useAppStore'; // Store for local filters
 
 // ─── Constants ───
 const CARD_WIDTH = 192;
@@ -17,9 +18,23 @@ const CARD_GAP = 16;
 const PAGE_LIMIT = 40;
 
 // ─── Available filter options ───
-const DECADES = ['2020s', '2010s', '2000s', '1990s', 'Earlier'];
+const DECADES = ['2020s', '2010s', '2000s', '1990s', '1980s', 'Earlier'];
 const RATINGS = ['7+', '8+', '9+'];
 const MAIN_GENRES = ['Action', 'Comedy', 'Drama', 'Horror', 'Science Fiction', 'Thriller', 'Animation', 'Romance'];
+
+const SORTS = [
+    { label: 'Popularity', value: 'popularity' },
+    { label: 'Newest', value: 'release_date_desc' },
+    { label: 'Oldest', value: 'release_date_asc' },
+    { label: 'Rating (High)', value: 'rating_desc' },
+];
+
+const RUNTIMES = [
+    { label: 'Normal Runtime', value: '' },
+    { label: 'Short (<90m)', value: 'short' },
+    { label: 'Standard (90-150m)', value: 'standard' },
+    { label: 'Long (150m+)', value: 'long' }
+];
 
 // ─── Filter Chip ───
 function FilterChip({ label, active, onClick }) {
@@ -65,7 +80,18 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     const activeDecade = searchParams.get('decade') || '';
     const activeRating = searchParams.get('rating') || '';
     const activeMinYear = searchParams.get('min_year') || '';
-    const hasActiveFilters = activeGenre || activeDecade || activeRating || activeMinYear;
+    const hasActiveUrlFilters = activeGenre || activeDecade || activeRating || activeMinYear;
+
+    // Read local filters from Zustand
+    const browseSearchQuery = useAppStore(state => state.browseSearchQuery);
+    const setBrowseSearchQuery = useAppStore(state => state.setBrowseSearchQuery);
+    const browseSortBy = useAppStore(state => state.browseSortBy);
+    const setBrowseSortBy = useAppStore(state => state.setBrowseSortBy);
+    const browseRuntime = useAppStore(state => state.browseRuntime);
+    const setBrowseRuntime = useAppStore(state => state.setBrowseRuntime);
+    
+    const hasLocalFilters = browseSearchQuery || browseRuntime || (browseSortBy && browseSortBy !== 'popularity');
+    const hasActiveFilters = hasActiveUrlFilters || hasLocalFilters;
 
     // Scroll container ref for virtualizer
     const scrollRef = useRef(null);
@@ -141,10 +167,48 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     });
 
     // Flatten pages into a single movie array
-    const movies = useMemo(
+    const rawMovies = useMemo(
         () => filteredData?.pages?.flatMap(p => p.movies) ?? [],
         [filteredData]
     );
+
+    // Apply Client-Side Filtering & Sorting
+    const movies = useMemo(() => {
+        let result = rawMovies;
+        
+        // 1. Title Search
+        if (browseSearchQuery) {
+            const query = browseSearchQuery.toLowerCase();
+            result = result.filter(m => m.title.toLowerCase().includes(query));
+        }
+
+        // 2. Runtime Filter
+        if (browseRuntime) {
+            result = result.filter(m => {
+                const rt = m.runtime || 0;
+                if (!rt) return true; // Keep if we don't know the runtime (TMDB discover often omits it unless requested)
+                if (browseRuntime === 'short') return rt < 90;
+                if (browseRuntime === 'standard') return rt >= 90 && rt <= 150;
+                if (browseRuntime === 'long') return rt > 150;
+                return true;
+            });
+        }
+
+        // 3. Sort
+        if (browseSortBy) {
+            result = [...result].sort((a, b) => {
+                if (browseSortBy === 'popularity') return (b.popularity || 0) - (a.popularity || 0);
+                if (browseSortBy === 'release_date_desc') return new Date(b.release_date || 0) - new Date(a.release_date || 0);
+                if (browseSortBy === 'release_date_asc') return new Date(a.release_date || 0) - new Date(b.release_date || 0);
+                if (browseSortBy === 'rating_desc') return (b.rating || 0) - (a.rating || 0);
+                if (browseSortBy === 'rating_asc') return (a.rating || 0) - (b.rating || 0);
+                return 0;
+            });
+        }
+
+        return result;
+    }, [rawMovies, browseSearchQuery, browseRuntime, browseSortBy]);
+
     const totalCount = filteredData?.pages?.[0]?.total ?? 0;
 
     // ─── Auto-fetch next page when sentinel is in view ───
@@ -276,6 +340,41 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                     Browse Movies
                 </h1>
 
+                {/* Browse Search Bar */}
+                <div style={{ flex: 1, maxWidth: '400px', margin: '0 24px' }}>
+                    <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '12px', top: '9px', fontSize: '14px', color: '#94a3b8' }}>🔍</span>
+                        <input
+                            type="text"
+                            value={browseSearchQuery}
+                            onChange={(e) => setBrowseSearchQuery(e.target.value)}
+                            placeholder="Search displayed movies..."
+                            style={{
+                                width: '100%',
+                                padding: '8px 12px 8px 36px',
+                                borderRadius: '12px',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(249,115,22,0.3)',
+                                color: '#fff',
+                                fontSize: '14px',
+                                outline: 'none',
+                                transition: 'all 0.3s ease',
+                                backdropFilter: 'blur(12px)',
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.background = 'rgba(0,0,0,0.6)';
+                                e.target.style.borderColor = 'rgba(249,115,22,0.8)';
+                                e.target.style.boxShadow = '0 0 10px rgba(249,115,22,0.2)';
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.background = 'rgba(255,255,255,0.05)';
+                                e.target.style.borderColor = 'rgba(249,115,22,0.3)';
+                                e.target.style.boxShadow = 'none';
+                            }}
+                        />
+                    </div>
+                </div>
+
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <button
                         onClick={onLaunchEngine}
@@ -301,7 +400,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
             <div
                 style={{
                     position: 'fixed',
-                    top: '76px',
+                    top: '76px', // Original was 76px when Nav Bar was simple. Nav Bar is still ~76px
                     left: 0,
                     right: 0,
                     zIndex: 49,
@@ -311,9 +410,57 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                     padding: '12px 24px',
                     overflowX: 'auto',
                 }}
+                className="hide-scrollbar"
             >
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap', minWidth: 'max-content' }}>
-                    <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginRight: '8px', flexShrink: 0 }}>
+                    
+                    {/* Local Filters: Sort By & Runtime */}
+                    <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginRight: '4px', flexShrink: 0 }}>
+                        Sort
+                    </span>
+                    <select
+                        value={browseSortBy}
+                        onChange={(e) => setBrowseSortBy(e.target.value)}
+                        style={{
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#e5e7eb',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            outline: 'none',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        {SORTS.map(s => <option key={s.value} value={s.value} style={{ background: '#0f172a' }}>{s.label}</option>)}
+                    </select>
+
+                    <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.08)', flexShrink: 0, margin: '0 4px' }} />
+
+                    <select
+                        value={browseRuntime}
+                        onChange={(e) => setBrowseRuntime(e.target.value)}
+                        style={{
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: browseRuntime ? '#000' : '#e5e7eb',
+                            backgroundColor: browseRuntime ? '#f97316' : 'rgba(255,255,255,0.04)',
+                            borderColor: browseRuntime ? '#ea580c' : 'rgba(255,255,255,0.1)',
+                            fontSize: '12px',
+                            fontWeight: 600,
+                            outline: 'none',
+                            cursor: 'pointer',
+                        }}
+                    >
+                        {RUNTIMES.map(r => <option key={r.value} value={r.value} style={{ background: '#0f172a', color: '#fff' }}>{r.label}</option>)}
+                    </select>
+
+                    <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.08)', flexShrink: 0, margin: '0 4px' }} />
+
+                    <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginRight: '4px', flexShrink: 0 }}>
                         Filters
                     </span>
 
@@ -364,7 +511,12 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                         <>
                             <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.08)', flexShrink: 0, margin: '0 4px' }} />
                             <button
-                                onClick={() => router.push(pathname, { scroll: false })}
+                                onClick={() => {
+                                    router.push(pathname, { scroll: false });
+                                    setBrowseSearchQuery('');
+                                    setBrowseRuntime('');
+                                    setBrowseSortBy('popularity');
+                                }}
                                 style={{
                                     padding: '6px 16px',
                                     borderRadius: '20px',

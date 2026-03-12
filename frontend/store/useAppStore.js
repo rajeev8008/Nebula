@@ -36,4 +36,16 @@ export const useAppStore = create((set) => ({
 
     engineStage: 'search', // 'search' | 'building' | 'graph'
     setEngineStage: (engineStage) => set({ engineStage }),
+
+    hasSeenLoadingAnimation: false,
+    setHasSeenLoadingAnimation: (val) => set({ hasSeenLoadingAnimation: val }),
+
+    browseSearchQuery: '',
+    setBrowseSearchQuery: (browseSearchQuery) => set({ browseSearchQuery }),
+
+    browseSortBy: 'popularity', 
+    setBrowseSortBy: (browseSortBy) => set({ browseSortBy }),
+
+    browseRuntime: '', 
+    setBrowseRuntime: (browseRuntime) => set({ browseRuntime }),
 }));

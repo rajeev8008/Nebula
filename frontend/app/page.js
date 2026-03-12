@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useAppStore } from '@/store/useAppStore';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Hero = dynamic(() => import('@/components/ui/animated-shader-hero'), { ssr: false });
 import NebulaGraph from '@/components/NebulaGraph';
@@ -73,6 +74,13 @@ export default function Home() {
     setEngineResults([]);
     setSelectedEngineMovie(null);
     setCentralNodeId(null);
+    setEngineStage('search');
+    useAppStore.setState({ hasSeenLoadingAnimation: false });
+  };
+
+  const exitEngineToBrowse = () => {
+    setView('BROWSE');
+    useAppStore.setState({ hasSeenLoadingAnimation: false });
     setEngineStage('search');
   };
 
@@ -169,17 +177,46 @@ export default function Home() {
         <div className="relative w-full h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900" style={{ overflow: 'hidden' }}>
           
           {/* Main Graph Component */}
-          <ErrorBoundary>
-            <NebulaGraph
-              nodes={graphData.nodes}
-              links={graphData.links}
-              onNodeClick={(node) => {
-                 // When a node in the graph is clicked, open detail panel AND load its neighborhood
-                 handleSelectEngineMovie(node);
-              }}
-              centralNodeId={centralNodeId}
-            />
-          </ErrorBoundary>
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <ErrorBoundary>
+                <NebulaGraph
+                nodes={graphData.nodes}
+                links={graphData.links}
+                onNodeClick={(node) => {
+                    // When a node in the graph is clicked, open detail panel AND load its neighborhood
+                    handleSelectEngineMovie(node);
+                }}
+                centralNodeId={centralNodeId}
+                />
+            </ErrorBoundary>
+            
+            {/* Minimal inline spinner for subsequent node clicks */}
+            {searchLoading && useAppStore.getState().hasSeenLoadingAnimation && (
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: 'calc(50% + 180px)', // Offset for left panel
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 40,
+                    background: 'rgba(15,23,42,0.6)',
+                    padding: '16px 24px',
+                    borderRadius: '30px',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(249,115,22,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    color: '#fdba74',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid rgba(249,115,22,0.3)', borderTopColor: '#f97316', animation: 'spin 1s linear infinite' }} />
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    Updating Graph...
+                </div>
+            )}
+          </div>
 
           {/* Engine Sidebar (Search & Results) */}
           <EngineDrawer onSelectMovie={handleSelectEngineMovie} />
@@ -202,40 +239,62 @@ export default function Home() {
             </div>
           )}
 
-          {/* Navigation Back Button - top right so it doesn't conflict with left sidebar */}
-          <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 20 }}>
-            <button
-              onClick={() => setView('LANDING')}
-              style={{
-                padding: '10px 22px',
-                borderRadius: '12px',
-                background: 'rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(249,115,22,0.3)',
-                color: '#fdba74',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                letterSpacing: '0.3px',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(249,115,22,0.2)';
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.6)';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
-                e.currentTarget.style.color = '#fdba74';
-              }}
+          {/* Navigation Back Buttons - Top Left for Graph Canvas (since drawer covers left) */}
+          {/* Note: In State 3, drawer is 360px wide, so offset by that amount. */}
+          <AnimatePresence>
+          {useAppStore.getState().engineStage === 'graph' && (
+            <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.4 }}
+                style={{ position: 'absolute', top: '24px', left: '384px', zIndex: 20, display: 'flex', gap: '12px' }}
             >
-              <span style={{ fontSize: '16px' }}>←</span> Exit Engine
-            </button>
-          </div>
+                <motion.button
+                onClick={() => setEngineStage('search')}
+                style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    background: 'transparent',
+                    border: '1px solid rgba(249,115,22,0.4)',
+                    color: '#fdba74',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                ← New Search
+                </motion.button>
+                <motion.button
+                onClick={exitEngineToBrowse}
+                style={{
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    background: 'transparent',
+                    border: '1px solid rgba(249,115,22,0.4)',
+                    color: '#fdba74',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                ← Back to Browse
+                </motion.button>
+            </motion.div>
+          )}
+          </AnimatePresence>
         </div>
       </>
     );
@@ -248,13 +307,47 @@ export default function Home() {
           onBack={() => setView('LANDING')}
           onLaunchEngine={() => launchGraph()}
           onMovieClick={(movie) => {
-             // In Browse, we just use the selectedMovie state, which might open the detail panel if Browse uses it.
-             // Actually BrowseMovies uses onMovieClick to show it somehow or route.
-             // Here, if they click "Launch Engine" from browse, we can route them to the engine.
-             // It seems the old code did: launchGraph(movie.id); Let's adapt it to new engine.
-             launchGraph();
-             handleSelectEngineMovie(movie); 
+             // For Browse view, just set the selected movie so the panel opens
+             setSelectedMovie(movie);
           }}
+        />
+        <MovieDetailPanel
+            selectedMovie={selectedMovie}
+            onClose={() => setSelectedMovie(null)}
+            similarMovies={[]}
+            onSelectMovie={(movie) => setSelectedMovie(movie)}
+            onLaunchEngine={() => {
+                // If the "Launch Engine" button is clicked inside the Browser's movie detail panel
+                launchGraph();
+                
+                // Immediately auto-select and build the graph for this movie
+                setSelectedEngineMovie(selectedMovie);
+                
+                // Mock an event search or directly call the fetch block
+                setSearchLoading(true);
+                setEngineStage('building');
+                setError(null);
+                
+                axios.get(`http://127.0.0.1:8000/engine/similar/${selectedMovie.id}`)
+                    .then(similarRes => {
+                        setGraphData({
+                            nodes: similarRes.data.nodes,
+                            links: similarRes.data.links
+                        });
+                        setCentralNodeId(similarRes.data.centralNodeId);
+                        setEngineStage('graph');
+                        useAppStore.setState({ hasSeenLoadingAnimation: true });
+                    })
+                    .catch(err => {
+                        console.error("Failed to load auto-similar graph:", err);
+                        setError("Failed to build galaxy for: " + selectedMovie.title);
+                        setEngineStage('search');
+                    })
+                    .finally(() => {
+                        setSearchLoading(false);
+                        setSelectedMovie(null); // Close the BROWSE view's detail panel
+                    });
+            }}
         />
         <CommandPalette
           onSelectMovie={(movie) => {
