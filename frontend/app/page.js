@@ -318,14 +318,14 @@ export default function Home() {
     <>
       <Hero
         trustBadge={{
-          text: "Powered by AI & Vector Embeddings",
+          text: "Powered by Vector Embeddings & Semantic AI",
           icons: []
         }}
         headline={{
-          line1: "Project",
+          line1: "",
           line2: "Nebula"
         }}
-        subtitle="The Semantic Search Engine for Cinema. Search by vibe, emotion, and plot using our 2D Constellation Engine."
+        subtitle="The Semantic Cinema Engine. Describe the vibe. Discover the film."
         buttons={{
           primary: {
             text: "Launch Engine",
