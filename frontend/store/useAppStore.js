@@ -24,4 +24,16 @@ export const useAppStore = create((set) => ({
 
     searchLoading: false,
     setSearchLoading: (searchLoading) => set({ searchLoading }),
+
+    engineQuery: '',
+    setEngineQuery: (engineQuery) => set({ engineQuery }),
+
+    engineResults: [],
+    setEngineResults: (engineResults) => set({ engineResults }),
+
+    selectedEngineMovie: null,
+    setSelectedEngineMovie: (selectedEngineMovie) => set({ selectedEngineMovie }),
+
+    engineStage: 'search', // 'search' | 'building' | 'graph'
+    setEngineStage: (engineStage) => set({ engineStage }),
 }));
