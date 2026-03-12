@@ -426,12 +426,13 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                     marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px',
                                 }}>Similar Movies</h3>
                                 <div
-                                    className="hide-scrollbar"
+                                    className="horizontal-scroll"
                                     style={{
                                         display: 'flex',
                                         gap: '12px',
                                         overflowX: 'auto',
-                                        paddingBottom: '4px',
+                                        paddingBottom: '8px',
+                                        paddingRight: '24px',
                                     }}
                                 >
                                     {similarMovies.map((movie) => (

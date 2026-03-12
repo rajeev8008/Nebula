@@ -272,6 +272,7 @@ export default function Home() {
             onSelectMovie={(movie) => setSelectedMovie(movie)}
             onLaunchEngine={() => {
                 // If the "Launch Engine" button is clicked inside the Browser's movie detail panel
+                useAppStore.getState().setEngineQuery(selectedMovie.title);
                 launchGraph('browse');
                 
                 // Immediately auto-select and build the graph for this movie
