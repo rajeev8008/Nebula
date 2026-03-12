@@ -69,17 +69,18 @@ export default function Home() {
   const [centralNodeId, setCentralNodeId] = useState(null);
 
   // ─── Engine Specific Handlers ───
-  const launchGraph = (source = 'direct') => {
-    setView('GRAPH');
-    setEngineEntrySource(source);
-    // Clear state on fresh launch
-    setGraphData({ nodes: [], links: [] });
-    setEngineResults([]);
-    setSelectedEngineMovie(null);
-    setCentralNodeId(null);
-    setEngineStage('search');
-    useAppStore.setState({ hasSeenLoadingAnimation: false });
-  };
+    const launchGraph = (source = 'direct') => {
+      setView('GRAPH');
+      setEngineEntrySource(source);
+      // Clear state on fresh launch
+      setGraphData({ nodes: [], links: [] });
+      setEngineResults([]);
+      setSelectedEngineMovie(null);
+      setCentralNodeId(null);
+      setEngineStage('search');
+      useAppStore.getState().setEngineQuery('');
+      useAppStore.setState({ hasSeenLoadingAnimation: false });
+    };
 
   const exitEngineToBrowse = () => {
     setView('BROWSE');
@@ -278,8 +279,8 @@ export default function Home() {
             onSelectMovie={(movie) => setSelectedMovie(movie)}
             onLaunchEngine={() => {
                 // If the "Launch Engine" button is clicked inside the Browser's movie detail panel
-                useAppStore.getState().setEngineQuery(selectedMovie.title);
                 launchGraph('browse');
+                useAppStore.getState().setEngineQuery(selectedMovie.title);
                 
                 // Immediately auto-select and build the graph for this movie
                 setSelectedEngineMovie(selectedMovie);
