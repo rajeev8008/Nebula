@@ -17,23 +17,35 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 // ─── Similar Movies Helper ───
 function getSimilarMovies(targetMovie, links, allNodes, limit = 6) {
   if (!targetMovie || !links || !allNodes) return [];
-  const connectedLinks = links.filter(l => 
-    (l.source?.id || l.source) === targetMovie.id || 
-    (l.target?.id || l.target) === targetMovie.id
-  );
+  const targetId = String(targetMovie.id);
+  
+  const connectedLinks = links.filter(l => {
+    const sId = String(l.source?.id || l.source);
+    const tId = String(l.target?.id || l.target);
+    return sId === targetId || tId === targetId;
+  });
+
   connectedLinks.sort((a, b) => (b.similarity || b.value || 0) - (a.similarity || a.value || 0));
+  
   const similarNodes = [];
-  for (const link of connectedLinks.slice(0, limit)) {
-    const neighborId = (link.source?.id || link.source) === targetMovie.id 
-      ? (link.target?.id || link.target) 
-      : (link.source?.id || link.source);
-      
-    const neighborNode = allNodes.find(n => n.id === neighborId);
+  const seenIds = new Set([targetId]);
+
+  for (const link of connectedLinks) {
+    if (similarNodes.length >= limit) break;
+    
+    const sId = String(link.source?.id || link.source);
+    const tId = String(link.target?.id || link.target);
+    const neighborId = sId === targetId ? tId : sId;
+    
+    if (seenIds.has(neighborId)) continue;
+    
+    const neighborNode = allNodes.find(n => String(n.id) === neighborId);
     if (neighborNode) {
       similarNodes.push({
         ...neighborNode,
         _similarity: link.similarity || link.value || 0.1
       });
+      seenIds.add(neighborId);
     }
   }
   return similarNodes;
@@ -292,11 +304,20 @@ export default function Home() {
                 
                 axios.get(`http://127.0.0.1:8000/engine/similar/${selectedMovie.id}`)
                     .then(similarRes => {
+                        const nodes = similarRes.data.nodes || [];
                         setGraphData({
-                            nodes: similarRes.data.nodes,
+                            nodes: nodes,
                             links: similarRes.data.links
                         });
                         setCentralNodeId(similarRes.data.centralNodeId);
+                        
+                        // Populate results sidebar with the nodes found for this movie
+                        // Make sure the seed movie is first, then the neighbors
+                        const sortedResults = [...nodes].sort((a, b) => 
+                            (a.id === selectedMovie.id ? -1 : (b.id === selectedMovie.id ? 1 : 0))
+                        );
+                        setEngineResults(sortedResults);
+                        
                         setEngineStage('graph');
                         useAppStore.setState({ hasSeenLoadingAnimation: true });
                     })

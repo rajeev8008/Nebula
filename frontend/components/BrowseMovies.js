@@ -40,7 +40,16 @@ const RUNTIMES = [
 ];
 
 // ─── Filter Chip ───
-function FilterChip({ label, active, onClick }) {
+function FilterChip({ label, active, onClick, color = 'orange' }) {
+    const colorMap = {
+        orange: { grad: 'linear-gradient(135deg, #f97316, #f59e0b)', border: 'rgba(249,115,22,0.8)', glow: 'rgba(249,115,22,0.3)' },
+        cyan: { grad: 'linear-gradient(135deg, #06b6d4, #0891b2)', border: 'rgba(6,182,212,0.8)', glow: 'rgba(6,182,212,0.3)' },
+        blue: { grad: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'rgba(59,130,246,0.8)', glow: 'rgba(59,130,246,0.3)' },
+        violet: { grad: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', border: 'rgba(139,92,246,0.8)', glow: 'rgba(139,92,246,0.3)' }
+    };
+    
+    const theme = colorMap[color] || colorMap.orange;
+
     return (
         <button
             className="filter-chip"
@@ -54,14 +63,14 @@ function FilterChip({ label, active, onClick }) {
                 cursor: 'pointer',
                 border: '1px solid',
                 background: active
-                    ? 'linear-gradient(135deg, #f97316, #f59e0b)'
+                    ? theme.grad
                     : 'rgba(255,255,255,0.04)',
                 borderColor: active
-                    ? 'rgba(249,115,22,0.8)'
+                    ? theme.border
                     : 'rgba(255,255,255,0.1)',
                 color: active ? '#000' : '#9ca3af',
                 boxShadow: active
-                    ? '0 2px 12px rgba(249,115,22,0.3)'
+                    ? `0 2px 12px ${theme.glow}`
                     : 'none',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.2s ease',
@@ -384,15 +393,15 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
 
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     {/* Tabs */}
-                    <button
+                     <button
                         onClick={() => setIsDiaryOpen(true)}
                         style={{
                             padding: '10px 22px',
                             borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.05)',
+                            background: 'rgba(6, 182, 212, 0.1)',
                             backdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: '#e5e7eb',
+                            border: '1px solid rgba(6, 182, 212, 0.25)',
+                            color: '#22d3ee',
                             fontSize: '14px',
                             fontWeight: 600,
                             cursor: 'pointer',
@@ -400,23 +409,32 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                             alignItems: 'center',
                             gap: '8px',
                             transition: 'all 0.3s ease',
-                            marginRight: '8px'
+                            marginRight: '8px',
+                            boxShadow: '0 0 20px rgba(6, 182, 212, 0.05)',
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                        onMouseEnter={(e) => { 
+                            e.currentTarget.style.background = 'rgba(6, 182, 212, 0.2)';
+                            e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.5)';
+                            e.currentTarget.style.boxShadow = '0 0 25px rgba(6, 182, 212, 0.15)';
+                        }}
+                        onMouseLeave={(e) => { 
+                            e.currentTarget.style.background = 'rgba(6, 182, 212, 0.1)';
+                            e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.25)';
+                            e.currentTarget.style.boxShadow = '0 0 20px rgba(6, 182, 212, 0.05)';
+                        }}
                     >
                         <Calendar size={18} /> Diary
                     </button>
 
-                    <button
+                     <button
                         onClick={() => setIsWatchlistOpen(true)}
                         style={{
                             padding: '10px 22px',
                             borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.05)',
+                            background: 'rgba(59, 130, 246, 0.1)',
                             backdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            color: '#e5e7eb',
+                            border: '1px solid rgba(59, 130, 246, 0.25)',
+                            color: '#93c5fd',
                             fontSize: '14px',
                             fontWeight: 600,
                             cursor: 'pointer',
@@ -424,9 +442,18 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                             alignItems: 'center',
                             gap: '8px',
                             transition: 'all 0.3s ease',
+                            boxShadow: '0 0 20px rgba(59, 130, 246, 0.05)',
                         }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
+                        onMouseEnter={(e) => { 
+                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
+                            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                            e.currentTarget.style.boxShadow = '0 0 25px rgba(59, 130, 246, 0.15)';
+                        }}
+                        onMouseLeave={(e) => { 
+                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
+                            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.25)';
+                            e.currentTarget.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.05)';
+                        }}
                     >
                         <Bookmark size={18} />
                         Watchlist
@@ -549,6 +576,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                         <FilterChip
                             key={r}
                             label={`★ ${r}`}
+                            color="cyan"
                             active={activeRating === String(parseFloat(r))}
                             onClick={() => updateFilter('rating', String(parseFloat(r)))}
                         />
@@ -556,10 +584,11 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
 
                     <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.08)', flexShrink: 0, margin: '0 4px' }} />
 
-                    {MAIN_GENRES.map((genre) => (
+                    {MAIN_GENRES.map((genre, index) => (
                         <FilterChip
                             key={genre}
                             label={genre}
+                            color={['cyan', 'blue', 'violet', 'orange'][index % 4]}
                             active={activeGenre === genre}
                             onClick={() => updateFilter('genre', genre)}
                         />

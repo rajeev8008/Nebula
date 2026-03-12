@@ -202,21 +202,24 @@ export default function EngineDrawer({ onSelectMovie }) {
                                             paddingLeft: '24px',
                                             paddingRight: '80px',
                                             background: 'rgba(10,10,10,0.8)',
-                                            border: '1px solid rgba(249,115,22,0.4)',
+                                            border: '1px solid rgba(6, 182, 212, 0.4)',
                                             borderRadius: '16px',
                                             color: '#fff',
                                             fontSize: '18px',
                                             outline: 'none',
                                             transition: 'all 0.3s ease',
                                             backdropFilter: 'blur(12px)',
+                                            boxShadow: '0 0 15px rgba(6, 182, 212, 0.05)',
                                         }}
                                         onFocus={(e) => {
-                                            e.target.style.borderColor = 'rgba(249,115,22,0.8)';
+                                            e.target.style.borderColor = 'rgba(6,182,212,0.8)';
                                             e.target.style.background = 'rgba(10,10,10,0.95)';
+                                            e.target.style.boxShadow = '0 0 30px rgba(6, 182, 212, 0.15)';
                                         }}
                                         onBlur={(e) => {
-                                            e.target.style.borderColor = 'rgba(249,115,22,0.4)';
+                                            e.target.style.borderColor = 'rgba(6,182,212,0.4)';
                                             e.target.style.background = 'rgba(10,10,10,0.8)';
+                                            e.target.style.boxShadow = '0 0 15px rgba(6, 182, 212, 0.05)';
                                         }}
                                     />
                                     {engineQuery && (
@@ -323,9 +326,9 @@ export default function EngineDrawer({ onSelectMovie }) {
                                     {engineEntrySource === 'direct' ? '← Back to Main Page' : '← Back to Browse Movies'}
                                 </button>
 
-                                <div>
+                                 <div>
                                     <span style={{ fontSize: '13px', color: '#64748b' }}>Results for: </span>
-                                    <span style={{ fontSize: '14px', color: '#f97316', fontWeight: 500 }}>"{engineQuery}"</span>
+                                    <span style={{ fontSize: '14px', color: '#22d3ee', fontWeight: 600 }} className="text-glow-cyan">"{engineQuery}"</span>
                                 </div>
 
                                 <button
@@ -336,18 +339,27 @@ export default function EngineDrawer({ onSelectMovie }) {
                                     }}
                                     style={{
                                         padding: '8px 16px',
-                                        background: 'transparent',
-                                        border: '1px solid rgba(249,115,22,0.4)',
-                                        color: '#fdba74',
+                                        background: 'rgba(6, 182, 212, 0.05)',
+                                        border: '1px solid rgba(6, 182, 212, 0.3)',
+                                        color: '#67e8f9',
                                         borderRadius: '8px',
                                         fontSize: '13px',
                                         fontWeight: 600,
                                         cursor: 'pointer',
                                         textAlign: 'center',
                                         transition: 'all 0.2s',
+                                        boxShadow: '0 0 15px rgba(6, 182, 212, 0.05)',
                                     }}
-                                    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(249,115,22,0.1)'; }}
-                                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                                    onMouseEnter={(e) => { 
+                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.15)'; 
+                                        e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.6)';
+                                        e.currentTarget.style.boxShadow = '0 0 25px rgba(6, 182, 212, 0.15)';
+                                    }}
+                                    onMouseLeave={(e) => { 
+                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.05)'; 
+                                        e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.3)';
+                                        e.currentTarget.style.boxShadow = '0 0 15px rgba(6, 182, 212, 0.05)';
+                                    }}
                                 >
                                     New Search
                                 </button>
@@ -428,13 +440,17 @@ export default function EngineDrawer({ onSelectMovie }) {
                                 }}
                             />
                         </div>
-                        <h3 style={{ 
-                            fontSize: '20px', 
-                            fontWeight: 600, 
-                            color: '#e2e8f0',
-                            letterSpacing: '1px'
-                        }}>
-                            Building your graph...
+                        <h3 
+                            className="text-glow-cyan"
+                            style={{ 
+                                fontSize: '20px', 
+                                fontWeight: 700, 
+                                color: '#22d3ee',
+                                letterSpacing: '1px',
+                                textTransform: 'uppercase'
+                            }}
+                        >
+                            Building your Galaxy...
                         </h3>
                         <p style={{ color: '#64748b', fontSize: '14px', marginTop: '8px' }}>
                             Locating semantic neighbors in the latent space

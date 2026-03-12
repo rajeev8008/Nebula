@@ -54,8 +54,17 @@ float clouds(vec2 p) {
 void main(void) {
   vec2 uv=(FC-.5*R)/MN,st=uv*vec2(2,1);
   vec3 col=vec3(0);
-  float bg=clouds(vec2(st.x+T*.5,-st.y));
-  uv*=1.-.3*(sin(T*.2)*.5+.5);
+  
+  // Calculate horizontal parallax factor (-1.0 to 1.0)
+  float parallax = (touch.x / R.x) * 2.0 - 1.0;
+  
+  // Apply parallax to background clouds (deeper layer, slower)
+  float bg=clouds(vec2(st.x + T*.5 + parallax * 0.05, -st.y));
+  
+  uv *= 1.-.3*(sin(T*.2)*.5+.5);
+  
+  // Apply parallax to fractal layers (closer layer, faster)
+  uv.x += parallax * 0.15;
   
   // Add cursor interaction effect
   vec2 mousePos = touch / R;
@@ -63,18 +72,22 @@ void main(void) {
   float cursorEffect = exp(-cursorDist * 0.005) * 0.8;
   
   for (float i=1.; i<12.; i++) {
-    uv+=.1*cos(i*vec2(.1+.01*i, .8)+i*i+T*.5+.1*uv.x + move * 0.02);
+    // Incorporate parallax into individual fractal iterations
+    uv+=.1*cos(i*vec2(.1+.01*i, .8)+i*i+T*.5+.1*uv.x + move * 0.02 + parallax * (i * 0.01));
     vec2 p=uv;
     float d=length(p);
-    col+=.00125/d*(cos(sin(i)*vec3(1,2,3))+1.);
+    
+    // VIVID BLUE STARS: Electric blue glow as requested
+    vec3 starCol = (cos(sin(i)*vec3(1,2,3))+1.) * vec3(0.1, 0.4, 1.0);
+    col+=.00125/d*starCol;
+    
     float b=noise(i+p+bg*1.731);
     col+=.002*b/length(max(p,vec2(b*p.x*.02,p.y)));
-    col=mix(col,vec3(bg*.25,bg*.137,bg*.05),d);
+    col=mix(col,vec3(bg*.25,bg*.137,bg*.05),d); // BACK TO ORIGINAL ORANGE CLOUDS
   }
   
-  // Add orange glow at cursor position
+  // BACK TO ORIGINAL ORANGE CURSOR GLOW
   col += vec3(0.98, 0.58, 0.20) * cursorEffect * 0.5;
-  // Add subtle distortion around cursor
   col += vec3(0.98, 0.46, 0.08) * cursorEffect * 0.3;
   
   O=vec4(col,1);

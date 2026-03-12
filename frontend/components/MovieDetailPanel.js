@@ -116,10 +116,10 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                     width: '44px',
                                     height: '44px',
                                     borderRadius: '50%',
-                                    background: isBookmarked ? 'rgba(249,115,22,0.9)' : 'rgba(0,0,0,0.55)',
+                                    background: isBookmarked ? 'rgba(6, 182, 212, 0.9)' : 'rgba(0,0,0,0.55)',
                                     backdropFilter: 'blur(8px)',
                                     border: '1px solid',
-                                    borderColor: isBookmarked ? 'rgba(249,115,22,1)' : 'rgba(255,255,255,0.12)',
+                                    borderColor: isBookmarked ? 'rgba(6,182,212,1)' : 'rgba(255,255,255,0.12)',
                                     color: isBookmarked ? '#000' : '#e5e7eb',
                                     cursor: 'pointer',
                                     display: 'flex',
@@ -129,10 +129,16 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                     zIndex: 20
                                 }}
                                 onMouseEnter={(e) => {
-                                    if (!isBookmarked) e.currentTarget.style.background = 'rgba(255,255,255,0.15)';
+                                    if (!isBookmarked) {
+                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.15)';
+                                        e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.4)';
+                                    }
                                 }}
                                 onMouseLeave={(e) => {
-                                    if (!isBookmarked) e.currentTarget.style.background = 'rgba(0,0,0,0.55)';
+                                    if (!isBookmarked) {
+                                        e.currentTarget.style.background = 'rgba(0,0,0,0.55)';
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                                    }
                                 }}
                             >
                                 <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
@@ -199,16 +205,20 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                         {selectedMovie.genres && selectedMovie.genres !== 'Unknown' && (
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                 {selectedMovie.genres.split(', ').map((genre, i) => (
-                                    <span key={i} style={{
-                                        padding: '4px 14px',
-                                        fontSize: '11px',
-                                        fontWeight: 600,
-                                        letterSpacing: '0.5px',
-                                        background: 'rgba(249,115,22,0.12)',
-                                        color: '#fdba74',
-                                        borderRadius: '20px',
-                                        border: '1px solid rgba(249,115,22,0.25)',
-                                    }}>
+                                    <span key={i} 
+                                        className="filter-chip"
+                                        style={{
+                                            padding: '4px 14px',
+                                            fontSize: '11px',
+                                            fontWeight: 600,
+                                            letterSpacing: '0.5px',
+                                            background: 'rgba(6,182,212,0.08)',
+                                            color: '#67e8f9',
+                                            borderRadius: '20px',
+                                            border: '1px solid rgba(6,182,212,0.2)',
+                                            transition: 'all 0.2s ease',
+                                        }}
+                                    >
                                         {genre}
                                     </span>
                                 ))}
@@ -217,16 +227,22 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
 
                         {/* User Activity Row (Ratings & Logs) */}
                         <div style={{
-                            background: 'rgba(249,115,22,0.05)',
+                            background: 'rgba(6, 182, 212, 0.03)',
                             borderRadius: '16px',
                             padding: '20px',
-                            border: '1px solid rgba(249,115,22,0.15)',
+                            border: '1px solid rgba(6, 182, 212, 0.15)',
                             display: 'flex',
                             flexDirection: 'column',
-                            gap: '16px'
+                            gap: '16px',
+                            backdropFilter: 'blur(8px)',
                         }}>
                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ fontSize: '11px', color: '#fb923c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Your Rating</div>
+                                <div 
+                                    className="text-glow-cyan"
+                                    style={{ fontSize: '11px', color: '#22d3ee', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px' }}
+                                >
+                                    Your Rating
+                                </div>
                                 <StarRating 
                                     rating={personalRating} 
                                     onRate={(r) => setUserRating(selectedMovie.id, r)} 
@@ -234,15 +250,15 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                 />
                              </div>
                              
-                             <button
+                              <button
                                 onClick={() => setIsLogModalOpen(true)}
                                 style={{
                                     width: '100%',
                                     padding: '12px',
                                     borderRadius: '10px',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    color: '#fff',
+                                    background: 'rgba(59, 130, 246, 0.08)',
+                                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                                    color: '#93c5fd',
                                     fontSize: '14px',
                                     fontWeight: 600,
                                     cursor: 'pointer',
@@ -250,10 +266,21 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     gap: '10px',
-                                    transition: 'all 0.2s'
+                                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    boxShadow: '0 0 15px rgba(59, 130, 246, 0.05)',
                                 }}
-                                onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
-                                onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)';
+                                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                                    e.currentTarget.style.boxShadow = '0 0 25px rgba(59, 130, 246, 0.1)';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
+                                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+                                    e.currentTarget.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.05)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
                              >
                                 <ClipboardList size={18} />
                                 Log or Review
@@ -268,31 +295,33 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                         }}>
                             {/* Rating */}
                             <div style={{
-                                background: 'rgba(255,255,255,0.04)',
+                                background: 'rgba(10,10,10,0.4)',
                                 borderRadius: '12px',
                                 padding: '14px 16px',
-                                border: '1px solid rgba(249,115,22,0.12)',
+                                border: '1px solid rgba(6, 182, 212, 0.15)',
+                                backdropFilter: 'blur(10px)',
                             }}>
-                                <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Rating</div>
+                                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Rating</div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <span style={{ color: '#fbbf24', fontSize: '20px' }}>★</span>
-                                    <span style={{ color: '#fb923c', fontSize: '1.25rem', fontWeight: 700 }}>
+                                    <span style={{ color: '#06b6d4', fontSize: '1.25rem', fontWeight: 800 }}>
                                         {selectedMovie.rating ? selectedMovie.rating.toFixed(1) : 'N/A'}
                                     </span>
-                                    <span style={{ color: '#6b7280', fontSize: '13px' }}>/10</span>
+                                    <span style={{ color: '#475569', fontSize: '13px' }}>/10</span>
                                 </div>
                             </div>
 
                             {/* Match Score */}
                             {selectedMovie.score && (
                                 <div style={{
-                                    background: 'rgba(255,255,255,0.04)',
+                                    background: 'rgba(10,10,10,0.4)',
                                     borderRadius: '12px',
                                     padding: '14px 16px',
-                                    border: '1px solid rgba(249,115,22,0.12)',
+                                    border: '1px solid rgba(6, 182, 212, 0.15)',
+                                    backdropFilter: 'blur(10px)',
                                 }}>
-                                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Match</div>
-                                    <div style={{ color: '#4ade80', fontSize: '1.25rem', fontWeight: 700 }}>
+                                    <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Match</div>
+                                    <div style={{ color: '#22d3ee', fontSize: '1.25rem', fontWeight: 800 }} className="text-glow-cyan">
                                         {(selectedMovie.score * 100).toFixed(0)}%
                                     </div>
                                 </div>
@@ -421,10 +450,13 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                         {/* ── Similar Movies ───────────────────────────── */}
                         {similarMovies.length > 0 && (
                             <div style={{ marginTop: '4px' }}>
-                                <h3 style={{
-                                    fontSize: '11px', fontWeight: 700, color: '#fb923c',
-                                    marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px',
-                                }}>Similar Movies</h3>
+                                <h3 
+                                    className="text-glow-cyan"
+                                    style={{
+                                        fontSize: '11px', fontWeight: 800, color: '#22d3ee',
+                                        marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px',
+                                    }}
+                                >Similar Movies</h3>
                                 <div
                                     className="horizontal-scroll"
                                     style={{
@@ -445,8 +477,8 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                                 cursor: 'pointer',
                                                 borderRadius: '10px',
                                                 overflow: 'hidden',
-                                                background: 'rgba(255,255,255,0.04)',
-                                                border: '1px solid rgba(249,115,22,0.12)',
+                                                background: 'rgba(6, 182, 212, 0.04)',
+                                                border: '1px solid rgba(6, 182, 212, 0.15)',
                                                 transition: 'all 0.3s ease',
                                             }}
                                             onMouseEnter={(e) => {
