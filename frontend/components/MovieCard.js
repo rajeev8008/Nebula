@@ -1,43 +1,8 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-
-// ─── localStorage Watchlist Store ───
-const WATCHLIST_KEY = 'nebula-watchlist';
-
-function getWatchlist() {
-    if (typeof window === 'undefined') return new Set();
-    try {
-        const stored = localStorage.getItem(WATCHLIST_KEY);
-        return stored ? new Set(JSON.parse(stored)) : new Set();
-    } catch {
-        return new Set();
-    }
-}
-
-function saveWatchlist(watchlistSet) {
-    try {
-        localStorage.setItem(WATCHLIST_KEY, JSON.stringify([...watchlistSet]));
-    } catch (e) {
-        console.error('Failed to save watchlist:', e);
-    }
-}
-
-function toggleWatchlistItem(movieId) {
-    const watchlist = getWatchlist();
-    const id = String(movieId);
-    if (watchlist.has(id)) {
-        watchlist.delete(id);
-    } else {
-        watchlist.add(id);
-    }
-    saveWatchlist(watchlist);
-    return watchlist.has(id);
-}
-
-function isInWatchlist(movieId) {
-    return getWatchlist().has(String(movieId));
-}
+import { useAppStore } from '@/store/useAppStore';
+import StarRating from './StarRating';
 
 // --- Bookmark SVG Icons ---
 const BookmarkOutline = () => (
@@ -54,16 +19,18 @@ const BookmarkFilled = () => (
 
 const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
     const [isHovered, setIsHovered] = useState(false);
-    const [isBookmarked, setIsBookmarked] = useState(false);
+    const watchlist = useAppStore((state) => state.watchlist);
+    const toggleWatchlist = useAppStore((state) => state.toggleWatchlist);
+    const userRatings = useAppStore((state) => state.userRatings);
+    
+    const isBookmarked = watchlist.some(m => m.id === movie.id);
+    const personalRating = userRatings[movie.id] || 0;
     const [bookmarkAnimating, setBookmarkAnimating] = useState(false);
     const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 });
     const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
     const cardRef = useRef(null);
 
-    // Initialize bookmark state from localStorage
-    useEffect(() => {
-        setIsBookmarked(isInWatchlist(movie.id));
-    }, [movie.id]);
+
 
     // --- 3D Tilt & Glare ---
     const handleMouseMove = useCallback((e) => {
@@ -90,19 +57,13 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
         setGlare({ x: 50, y: 50, opacity: 0 });
     }, []);
 
-    // --- Optimistic Bookmark with localStorage ---
+    // --- Bookmark Toggle ---
     const handleBookmark = useCallback((e) => {
         e.stopPropagation();
-
-        // Optimistic update — toggle immediately
-        const newState = !isBookmarked;
-        setIsBookmarked(newState);
         setBookmarkAnimating(true);
         setTimeout(() => setBookmarkAnimating(false), 350);
-
-        // Persist to localStorage (synchronous, no rollback needed)
-        toggleWatchlistItem(movie.id);
-    }, [isBookmarked, movie.id]);
+        toggleWatchlist(movie);
+    }, [movie, toggleWatchlist]);
 
     return (
         <div
@@ -260,11 +221,18 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
                 </h3>
 
                 {/* Rating */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
-                    <span style={{ color: '#fbbf24', fontSize: '14px' }}>★</span>
-                    <span style={{ color: '#fb923c', fontSize: '13px', fontWeight: 600 }}>
-                        {movie.rating ? movie.rating.toFixed(1) : 'N/A'}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ color: '#fbbf24', fontSize: '14px' }}>★</span>
+                        <span style={{ color: '#fb923c', fontSize: '13px', fontWeight: 600 }}>
+                            {movie.rating ? movie.rating.toFixed(1) : 'N/A'}
+                        </span>
+                    </div>
+                    {personalRating > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', transform: 'scale(0.8)', transformOrigin: 'right' }}>
+                            <StarRating rating={personalRating} size={12} interactive={false} />
+                        </div>
+                    )}
                 </div>
 
                 {/* Genres */}
@@ -287,38 +255,6 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
                             </span>
                         ))}
                     </div>
-                )}
-
-                {/* "See in Graph" Button */}
-                {onSeeInGraph && (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onSeeInGraph(movie);
-                        }}
-                        style={{
-                            width: '100%',
-                            padding: '6px 12px',
-                            borderRadius: '8px',
-                            background: 'linear-gradient(135deg, #f97316, #f59e0b)',
-                            border: 'none',
-                            color: '#000',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            pointerEvents: 'auto',
-                            boxShadow: '0 2px 8px rgba(249,115,22,0.4)',
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(249,115,22,0.6)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(249,115,22,0.4)';
-                        }}
-                    >
-                        See in Graph →
-                    </button>
                 )}
             </div>
         </div>

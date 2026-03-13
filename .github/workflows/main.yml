@@ -40,7 +40,7 @@ jobs:
         run: ls -R
 
       - name: Build Frontend Docker Image
-        run: docker build -t nebula-frontend:test -f docker/frontend.Dockerfile .
+        run: docker build -t nebula-frontend:test ./frontend
 
       - name: Build Backend Docker Image
-        run: docker build -t nebula-backend:test -f docker/backend.Dockerfile .
+        run: docker build -t nebula-backend:test ./backend

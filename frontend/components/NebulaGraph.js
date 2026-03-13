@@ -1,17 +1,10 @@
 'use client';
-import { useRef, useCallback, useEffect, useMemo } from 'react';
+import { useRef, useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import * as THREE from 'three';
 import { ZoomIn, ZoomOut, Locate } from 'lucide-react';
 
-const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
+const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
-/* ── Module-level caches for WebGL performance ───────── */
-const textureLoader = new THREE.TextureLoader().setCrossOrigin('anonymous');
-const textureCache = new Map();
-const spriteMaterialCache = new Map();
-
-/* ── HUD button style helper ───────────────────────────── */
 const hudBtnStyle = {
   width: '42px',
   height: '42px',
@@ -28,334 +21,253 @@ const hudBtnStyle = {
   transition: 'all 0.25s ease',
 };
 
-export default function NebulaGraph({ nodes, links, onNodeClick, selectedNode }) {
+const imageCache = new Map();
+
+export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, centralNodeId }) {
   const graphRef = useRef();
-  const hoveredNodeRef = useRef(null);
-  const labelsRef = useRef([]);
+  const [hoveredNode, setHoveredNode] = useState(null);
 
-  /* ── Helper: Create a floating text sprite ─────────── */
-  const createTextSprite = useCallback((text) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 192;
-    canvas.height = 80;
-
-    // Pill background
-    ctx.fillStyle = 'rgba(0,0,0,0.85)';
-    ctx.beginPath();
-    ctx.roundRect(8, 8, 176, 64, 20);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(74,222,128,0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(8, 8, 176, 64, 20);
-    ctx.stroke();
-
-    // Text
-    ctx.fillStyle = '#4ade80';
-    ctx.font = 'bold 36px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, 96, 44);
-
-    const texture = new THREE.CanvasTexture(canvas);
-    const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false });
-    return material;
-  }, []);
-
-  /* ── Pre-compute neighbor map whenever links change ──── */
-  const neighborMap = useMemo(() => {
-    const map = new Map();
-    (links || []).forEach(link => {
-      const srcId = link.source?.id ?? link.source;
-      const tgtId = link.target?.id ?? link.target;
-      if (!map.has(srcId)) map.set(srcId, new Set());
-      if (!map.has(tgtId)) map.set(tgtId, new Set());
-      map.get(srcId).add(tgtId);
-      map.get(tgtId).add(srcId);
-    });
-    return map;
-  }, [links]);
-
-  /* ── Tighten force layout to reduce empty space ────── */
   useEffect(() => {
     const fg = graphRef.current;
     if (!fg || !nodes?.length) return;
-    // Small timeout ensures the simulation is initialised before we touch it
     const t = setTimeout(() => {
-      // Weaker charge → less repulsion between clusters
-      fg.d3Force('charge')?.strength(-15);
-      // Shorter link distance, inversely proportional to similarity
+      // Connected Papers style spread
+      fg.d3Force('charge')?.strength(-300);
       fg.d3Force('link')?.distance((link) => {
         const sim = link.similarity || link.value || 0.5;
-        return 20 / sim;
+        // High similarity = short distance, low = long
+        return 50 / Math.max(sim, 0.1); 
       });
+      if (typeof window !== 'undefined') {
+        import('d3-force').then(d3 => {
+           // Base collision radius on poster size
+           fg.d3Force('collide', d3.forceCollide().radius(n => {
+               const voteCount = n.vote_count || 100;
+               const size = Math.min(Math.max(Math.sqrt(voteCount) / 10, 4), 16);
+               return (size * 2) + 20; // Enough room for the poster and spacing
+           }));
+        });
+      }
       fg.d3ReheatSimulation();
     }, 300);
     return () => clearTimeout(t);
   }, [nodes, links]);
 
-  /* ── Camera fly-to on node select ──────────────────── */
   useEffect(() => {
-    if (selectedNode && graphRef.current) {
-      setTimeout(() => {
-        const distance = 60;
-        const distRatio =
-          1 + distance / Math.hypot(selectedNode.x || 0, selectedNode.y || 0, selectedNode.z || 0);
-        graphRef.current.cameraPosition(
-          {
-            x: (selectedNode.x || 0) * distRatio - 40,
-            y: (selectedNode.y || 0) * distRatio,
-            z: (selectedNode.z || 0) * distRatio,
-          },
-          selectedNode,
-          1500
-        );
-      }, 200);
-    }
-  }, [selectedNode]);
-
-  /* ── Hover handler (ref-based, no React re-render) ── */
-  const handleNodeHover = useCallback(
-    (node) => {
-      hoveredNodeRef.current = node || null;
-      document.body.style.cursor = node ? 'pointer' : 'default';
-
-      // Clean up previous labels (materials are cached, only remove sprites from scene)
-      const scene = graphRef.current?.scene();
-      labelsRef.current.forEach((lbl) => {
-        scene?.remove(lbl);
-        lbl.material.dispose(); // dispose the clone, not the cached original
-      });
-      labelsRef.current = [];
-
-      // Update sprite opacities for focus+context dimming
-      const allNodes = nodes || [];
-      const neighbors = node ? neighborMap.get(node.id) : null;
-
-      allNodes.forEach((n) => {
-        if (!n.__threeObj) return;
-        const mat = n.__threeObj.material;
-        if (!mat) return;
-
-        if (!node) {
-          mat.opacity = 1;
-        } else if (n.id === node.id || (neighbors && neighbors.has(n.id))) {
-          mat.opacity = 1;
-        } else {
-          mat.opacity = 0.1;
+    if (centralNodeId && graphRef.current) {
+        const centralNode = nodes.find(n => n.id === centralNodeId);
+        if (centralNode) {
+            setTimeout(() => {
+                if (graphRef.current) {
+                    graphRef.current.centerAt(
+                        (centralNode.x || 0) + 30, 
+                        (centralNode.y || 0), 
+                        1000
+                    );
+                    graphRef.current.zoom(2, 1000);
+                }
+            }, 500);
         }
-      });
-
-      // Dim / restore links + collect similarity for neighbors
-      const allLinks = links || [];
-      const neighborSimilarity = new Map(); // neighborId -> similarity
-
-      allLinks.forEach((link) => {
-        const lineObj = link.__lineObj;
-        if (!lineObj || !lineObj.material) return;
-        const srcId = link.source?.id ?? link.source;
-        const tgtId = link.target?.id ?? link.target;
-
-        if (!node) {
-          lineObj.material.opacity = 0.6;
-        } else if (srcId === node.id || tgtId === node.id) {
-          lineObj.material.opacity = 0.6;
-          // Track similarity for this neighbor
-          const neighborId = srcId === node.id ? tgtId : srcId;
-          neighborSimilarity.set(neighborId, link.similarity || link.value || 0);
-        } else {
-          lineObj.material.opacity = 0.03;
-        }
-      });
-
-      // Create floating similarity labels above neighbor nodes
-      if (node && scene) {
-        neighborSimilarity.forEach((sim, neighborId) => {
-          const neighborNode = allNodes.find((n) => n.id === neighborId);
-          if (!neighborNode || neighborNode.x == null) return;
-
-          const pct = `${(sim * 100).toFixed(0)}%`;
-          let cachedMaterial = spriteMaterialCache.get(pct);
-          if (!cachedMaterial) {
-            cachedMaterial = createTextSprite(pct);
-            spriteMaterialCache.set(pct, cachedMaterial);
-          }
-          const label = new THREE.Sprite(cachedMaterial.clone());
-          label.scale.set(10, 5, 1);
-          label.renderOrder = 999;
-          const nodeScale = neighborNode.val ? neighborNode.val : 10;
-          label.position.set(
-            neighborNode.x,
-            neighborNode.y + nodeScale * 1.5 + 6,
-            neighborNode.z
-          );
-          scene.add(label);
-          labelsRef.current.push(label);
-        });
-      }
-    },
-    [nodes, links, neighborMap, createTextSprite]
-  );
-
-  /* ── Node Three Object (Poster Sprites) ────────────── */
-  const nodeThreeObject = useCallback((node) => {
-    if (!node.poster) {
-      const geometry = new THREE.SphereGeometry(node.val || 5);
-      const material = new THREE.MeshLambertMaterial({
-        color: node.isSearchResult ? 0xfbbf24 : 0xf97316,
-        emissive: node.isSearchResult ? 0xfbbf24 : 0xf97316,
-        emissiveIntensity: node.isSearchResult ? 0.8 : 0.2,
-        transparent: true,
-        opacity: 1,
-      });
-      return new THREE.Mesh(geometry, material);
     }
+  }, [centralNodeId, nodes]);
 
-    let imgTexture = textureCache.get(node.poster);
-    if (!imgTexture) {
-      imgTexture = textureLoader.load(`https://image.tmdb.org/t/p/w200${node.poster}`);
-      imgTexture.colorSpace = THREE.SRGBColorSpace;
-      textureCache.set(node.poster, imgTexture);
-    }
-
-    const material = new THREE.SpriteMaterial({
-      map: imgTexture,
-      transparent: true,
-      opacity: 1,
-    });
-    const sprite = new THREE.Sprite(material);
-
-    const baseScale = node.val ? node.val : 10;
-    const scale = node.isSearchResult ? baseScale * 1.2 : baseScale;
-    sprite.scale.set(scale, scale * 1.5, 1);
-    sprite.renderOrder = node.isSearchResult ? 2 : 1;
-
-    return sprite;
-  }, []);
-
-  /* ── HUD controls ──────────────────────────────────── */
   const handleZoomIn = () => {
     if (!graphRef.current) return;
-    const cam = graphRef.current.camera();
-    const pos = cam.position;
-    graphRef.current.cameraPosition(
-      { x: pos.x * 0.75, y: pos.y * 0.75, z: pos.z * 0.75 },
-      null,
-      600
-    );
+    const currentZoom = graphRef.current.zoom();
+    graphRef.current.zoom(currentZoom * 1.5, 600);
   };
 
   const handleZoomOut = () => {
     if (!graphRef.current) return;
-    const cam = graphRef.current.camera();
-    const pos = cam.position;
-    graphRef.current.cameraPosition(
-      { x: pos.x * 1.35, y: pos.y * 1.35, z: pos.z * 1.35 },
-      null,
-      600
-    );
+    const currentZoom = graphRef.current.zoom();
+    graphRef.current.zoom(currentZoom / 1.5, 600);
   };
 
   const handleRecenter = () => {
     if (!graphRef.current) return;
-    if (selectedNode && selectedNode.x != null) {
-      const distance = 60;
-      const distRatio =
-        1 + distance / Math.hypot(selectedNode.x || 0, selectedNode.y || 0, selectedNode.z || 0);
-      graphRef.current.cameraPosition(
-        {
-          x: (selectedNode.x || 0) * distRatio - 40,
-          y: (selectedNode.y || 0) * distRatio,
-          z: (selectedNode.z || 0) * distRatio,
-        },
-        selectedNode,
-        1000
-      );
+    const centralNode = nodes.find(n => n.id === centralNodeId);
+    if (centralNode && centralNode.x != null) {
+        graphRef.current.centerAt(
+          (centralNode.x || 0) + 30, 
+          (centralNode.y || 0), 
+          1000
+        );
+        graphRef.current.zoom(2, 1000);
     } else {
-      graphRef.current.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, 1000);
+      graphRef.current.zoomToFit(1000, 50);
     }
   };
 
-  /* ── Link color (static, no hover dependency) ──────── */
-  const linkColorFn = useCallback(
-    (link) => {
-      const srcId = link.source?.id ?? link.source;
-      const tgtId = link.target?.id ?? link.target;
-      const sourceNode = (nodes || []).find((n) => n.id === srcId);
-      const targetNode = (nodes || []).find((n) => n.id === tgtId);
-      if (sourceNode?.isSearchResult || targetNode?.isSearchResult) {
-        return 'rgba(251,191,36,0.6)';
-      }
-      return 'rgba(249,115,22,0.25)';
-    },
-    [nodes]
-  );
+  const drawNode = useCallback((node, ctx, globalScale) => {
+    const isCentral = node.id === centralNodeId;
+    const isHovered = hoveredNode?.id === node.id;
+    const isDimmed = hoveredNode && !isHovered;
+    
+    // Size scales with vote count
+    const voteCount = node.vote_count || 100;
+    // Base size bounded between 4 and 16
+    const baseSize = Math.min(Math.max(Math.sqrt(voteCount) / 10, 4), 16);
+    
+    // Poster dimensions
+    const imgWidth = (isCentral ? baseSize * 1.5 : baseSize) * 4;
+    const imgHeight = imgWidth * 1.5;
+    const x = node.x - imgWidth / 2;
+    const y = node.y - imgHeight / 2;
+    const r = 6; // slightly rounded corners for poster
 
-  const linkWidthFn = useCallback(
-    (link) => {
-      const srcId = link.source?.id ?? link.source;
-      const tgtId = link.target?.id ?? link.target;
-      const sourceNode = (nodes || []).find((n) => n.id === srcId);
-      const targetNode = (nodes || []).find((n) => n.id === tgtId);
-      if (sourceNode?.isSearchResult || targetNode?.isSearchResult) return 2;
-      return 0.5;
-    },
-    [nodes]
-  );
+    ctx.globalAlpha = isDimmed ? 0.2 : 1;
+
+    // Draw Poster Rectangle (Background fallback)
+    ctx.save();
+    ctx.beginPath();
+    if (ctx.roundRect) {
+        ctx.roundRect(x, y, imgWidth, imgHeight, r);
+    } else {
+        ctx.rect(x, y, imgWidth, imgHeight);
+    }
+    ctx.fillStyle = '#1e293b'; // slate-800
+    ctx.fill();
+    ctx.clip(); // Clip for image
+
+    if (node.poster) {
+      let img = imageCache.get(node.poster);
+      if (!img) {
+        img = new Image();
+        img.src = `https://image.tmdb.org/t/p/w200${node.poster}`;
+        imageCache.set(node.poster, img);
+      }
+      if (img.complete && img.naturalHeight !== 0) {
+        ctx.drawImage(img, x, y, imgWidth, imgHeight);
+      }
+    }
+    // Dark overlay so text is readable
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(x, y, imgWidth, imgHeight);
+    ctx.restore();
+
+    // Central Node Glowing Ring
+    if (isCentral || isHovered) {
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(x - 2, y - 2, imgWidth + 4, imgHeight + 4, r + 2);
+        } else {
+            ctx.rect(x - 2, y - 2, imgWidth + 4, imgHeight + 4);
+        }
+        ctx.lineWidth = isCentral ? 3 : 2;
+        ctx.strokeStyle = isCentral ? '#fbbf24' : '#f97316';
+        if (isCentral) {
+            ctx.shadowColor = 'rgba(251, 191, 36, 0.6)';
+            ctx.shadowBlur = 15;
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0; // reset
+    } else {
+        // Normal border
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(x, y, imgWidth, imgHeight, r);
+        } else {
+            ctx.rect(x, y, imgWidth, imgHeight);
+        }
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#334155';
+        ctx.stroke();
+    }
+
+    // Centered Text Overlay matching site typography
+    const fontSize = Math.max(10 / globalScale, 3);
+    if (imgWidth > fontSize * 2) {
+        ctx.font = `800 ${Math.min(fontSize, imgWidth / 5)}px Inter, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Multi-line wrap or truncate? We will truncate to fit poster width
+        const title = node.title;
+        ctx.fillStyle = isCentral ? '#fbbf24' : '#ffffff';
+        
+        let displayTitle = title;
+        if (ctx.measureText(displayTitle).width > imgWidth - 4) {
+             while(displayTitle.length > 0 && ctx.measureText(displayTitle + '...').width > imgWidth - 6) {
+                 displayTitle = displayTitle.slice(0, -1);
+             }
+             displayTitle += '...';
+        }
+        
+        ctx.fillText(displayTitle, node.x, node.y);
+    }
+    
+    ctx.globalAlpha = 1;
+
+  }, [centralNodeId, hoveredNode]);
+
+  const drawLink = useCallback((link, ctx, globalScale) => {
+    const start = link.source;
+    const end = link.target;
+    if (!start.x || !start.y || !end.x || !end.y) return;
+
+    const isHovered = hoveredNode !== null;
+    const involvesHovered = isHovered && (start.id === hoveredNode.id || end.id === hoveredNode.id);
+    const isCentralLink = link.isCentralLink;
+    
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    
+    const sim = link.similarity || link.value || 0.5;
+    
+    if (isHovered && !involvesHovered) {
+      ctx.strokeStyle = 'rgba(15, 23, 42, 0.2)'; // Faded out
+      ctx.lineWidth = 0.5 / globalScale;
+    } else if (involvesHovered) {
+      ctx.strokeStyle = `rgba(249, 115, 22, ${Math.max(sim, 0.5)})`; // Orange accent
+      ctx.lineWidth = (sim * 5) / globalScale;
+    } else {
+      // Scale edge thickness and opacity with similarity
+      ctx.strokeStyle = isCentralLink 
+            ? `rgba(249, 115, 22, ${Math.max(sim * 0.7, 0.2)})`  // Central link orange
+            : `rgba(251, 191, 36, ${Math.max(sim * 0.5, 0.1)})`; // Cross link yellow
+            
+      ctx.lineWidth = (sim * 3) / globalScale;
+    }
+    
+    ctx.stroke();
+  }, [hoveredNode]);
 
   return (
-    <div className="w-full h-screen bg-black relative z-0">
-      <ForceGraph3D
+    <div className="w-full h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900 relative z-0" style={{ cursor: hoveredNode ? 'pointer' : 'grab' }}>
+      <ForceGraph2D
         ref={graphRef}
         graphData={{ nodes: nodes || [], links: links || [] }}
-        nodeThreeObject={nodeThreeObject}
-        nodeLabel={(node) =>
-          `<div style="color: white; background: rgba(0,0,0,0.92); padding: 12px; border-radius: 10px; border: 1px solid rgba(249,115,22,0.45); max-width: 260px; backdrop-filter: blur(8px);">
-            <strong style="color: #fb923c; font-size: 14px;">${node.title}</strong><br/>
-            ${node.genres && node.genres !== 'Unknown' ? `<span style="color: #fdba74; font-size: 11px;">${node.genres}</span><br/>` : ''}
-            ${node.rating ? `<span style="color: #fbbf24;">⭐ ${node.rating.toFixed(1)}</span>` : ''}
-            ${node.score ? `<br/><span style="color: #86efac;">🎯 Match: ${(node.score * 100).toFixed(0)}%</span>` : ''}
-          </div>`
-        }
+        nodeCanvasObject={drawNode}
+        linkCanvasObject={drawLink}
         d3VelocityDecay={0.3}
         d3AlphaDecay={0.02}
-        cooldownTicks={100}
+        cooldownTicks={150}
         warmupTicks={50}
-        linkColor={linkColorFn}
-        linkWidth={linkWidthFn}
-        linkOpacity={0.6}
-        linkDirectionalParticles={0}
-        backgroundColor="#000000"
-        cameraPosition={{ z: 400 }}
         onNodeClick={(node) => {
-          // Camera fly-to with left-offset so node isn't hidden behind drawer
-          const distance = 60;
-          const distRatio =
-            1 + distance / Math.hypot(node.x || 0, node.y || 0, node.z || 0);
-          graphRef.current.cameraPosition(
-            {
-              x: (node.x || 0) * distRatio - 40,
-              y: (node.y || 0) * distRatio,
-              z: (node.z || 0) * distRatio,
-            },
-            node,
-            1500
+          graphRef.current.centerAt(
+            (node.x || 0) + 30, 
+            (node.y || 0), 
+            1000
           );
+          graphRef.current.zoom(2.5, 1000);
           onNodeClick(node);
         }}
-        onNodeHover={handleNodeHover}
+        onNodeHover={(node) => {
+          setHoveredNode(node || null);
+          if (onNodeHover) onNodeHover(node);
+        }}
         enableNodeDrag={true}
-        enableNavigationControls={true}
-        showNavInfo={false}
+        enableZoomInteraction={true}
+        enablePanInteraction={true}
       />
 
-      {/* ── Floating Navigation HUD ────────────────────── */}
+      {/* Floating Navigation HUD */}
       <div
         style={{
           position: 'absolute',
           bottom: '32px',
-          left: '50%',
+          left: 'calc(50% + 180px)', // Offset to account for the 360px left panel
           transform: 'translateX(-50%)',
           zIndex: 30,
           display: 'flex',

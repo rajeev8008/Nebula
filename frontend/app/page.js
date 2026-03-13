@@ -1,487 +1,341 @@
 'use client';
 
-import { Suspense } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { Suspense, useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useAppStore } from '@/store/useAppStore';
-import Hero from '@/components/ui/animated-shader-hero';
+import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const Hero = dynamic(() => import('@/components/ui/animated-shader-hero'), { ssr: false });
 import NebulaGraph from '@/components/NebulaGraph';
 import EngineDrawer from '@/components/EngineDrawer';
+import MovieDetailPanel from '@/components/MovieDetailPanel';
 import BrowseMovies from '@/components/BrowseMovies';
 import CommandPalette from '@/components/CommandPalette';
 import ErrorBoundary from '@/components/ErrorBoundary';
-import axios from 'axios';
 
-// ─── Cosine Similarity Helper (semantic link calculation) ───
-function cosineSimilarity(vecA, vecB) {
-  if (!vecA || !vecB || vecA.length !== vecB.length) return 0;
-  let dot = 0;
-  let magA = 0;
-  let magB = 0;
-  for (let i = 0, len = vecA.length; i < len; i++) {
-    const a = vecA[i];
-    const b = vecB[i];
-    dot += a * b;
-    magA += a * a;
-    magB += b * b;
+// ─── Similar Movies Helper ───
+function getSimilarMovies(targetMovie, links, allNodes, limit = 6) {
+  if (!targetMovie || !links || !allNodes) return [];
+  const targetId = String(targetMovie.id);
+  
+  const connectedLinks = links.filter(l => {
+    const sId = String(l.source?.id || l.source);
+    const tId = String(l.target?.id || l.target);
+    return sId === targetId || tId === targetId;
+  });
+
+  connectedLinks.sort((a, b) => (b.similarity || b.value || 0) - (a.similarity || a.value || 0));
+  
+  const similarNodes = [];
+  const seenIds = new Set([targetId]);
+
+  for (const link of connectedLinks) {
+    if (similarNodes.length >= limit) break;
+    
+    const sId = String(link.source?.id || link.source);
+    const tId = String(link.target?.id || link.target);
+    const neighborId = sId === targetId ? tId : sId;
+    
+    if (seenIds.has(neighborId)) continue;
+    
+    const neighborNode = allNodes.find(n => String(n.id) === neighborId);
+    if (neighborNode) {
+      similarNodes.push({
+        ...neighborNode,
+        _similarity: link.similarity || link.value || 0.1
+      });
+      seenIds.add(neighborId);
+    }
   }
-  const denom = Math.sqrt(magA) * Math.sqrt(magB);
-  return denom === 0 ? 0 : dot / denom;
-}
-
-// ─── Similar Movies Helper (on-the-fly recommendations) ───
-function getSimilarMovies(targetMovie, allMovies, limit = 6) {
-  if (!targetMovie || !allMovies || allMovies.length === 0) return [];
-  return allMovies
-    .filter((m) => m.id !== targetMovie.id && m.vector && targetMovie.vector)
-    .map((m) => ({ ...m, _similarity: cosineSimilarity(targetMovie.vector, m.vector) }))
-    .sort((a, b) => b._similarity - a._similarity)
-    .slice(0, limit);
+  return similarNodes;
 }
 
 export default function Home() {
   const view = useAppStore((state) => state.view);
   const setView = useAppStore((state) => state.setView);
+  
+  // Graph & Filtered Data (Preserved for compatibility if needed, but we'll use graphData for the Engine)
   const graphData = useAppStore((state) => state.graphData);
   const setGraphData = useAppStore((state) => state.setGraphData);
-  const filteredData = useAppStore((state) => state.filteredData);
-  const setFilteredData = useAppStore((state) => state.setFilteredData);
+  
   const selectedMovie = useAppStore((state) => state.selectedMovie);
   const setSelectedMovie = useAppStore((state) => state.setSelectedMovie);
-  const searchQuery = useAppStore((state) => state.searchQuery);
-  const setSearchQuery = useAppStore((state) => state.setSearchQuery);
-  const isSearchView = useAppStore((state) => state.isSearchView);
-  const setIsSearchView = useAppStore((state) => state.setIsSearchView);
+  
   const error = useAppStore((state) => state.error);
   const setError = useAppStore((state) => state.setError);
+  
   const searchLoading = useAppStore((state) => state.searchLoading);
   const setSearchLoading = useAppStore((state) => state.setSearchLoading);
 
-  // ─── TanStack Query: fetch all movies for graph ───
-  const {
-    data: moviesData,
-    isLoading: moviesLoading,
-    error: moviesError,
-  } = useQuery({
-    queryKey: ['movies'],
-    queryFn: async () => {
-      const res = await axios.get('http://127.0.0.1:8000/movies');
-      return res.data.movies || [];
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes — heavy payload
-  });
+  // New Engine State Slices
+  const engineEntrySource = useAppStore((state) => state.engineEntrySource);
+  const setEngineEntrySource = useAppStore((state) => state.setEngineEntrySource);
+  const engineQuery = useAppStore((state) => state.engineQuery);
+  const engineResults = useAppStore((state) => state.engineResults);
+  const setEngineResults = useAppStore((state) => state.setEngineResults);
+  const selectedEngineMovie = useAppStore((state) => state.selectedEngineMovie);
+  const setSelectedEngineMovie = useAppStore((state) => state.setSelectedEngineMovie);
+  const setEngineStage = useAppStore((state) => state.setEngineStage);
+  
+  const [centralNodeId, setCentralNodeId] = useState(null);
 
-  // Helper to build graph from flat movie list
-  const buildGraphFromMovies = (movies) => {
-    if (!movies || movies.length === 0) return { nodes: [], links: [] };
+  // ─── Engine Specific Handlers ───
+    const launchGraph = (source = 'direct') => {
+      setView('GRAPH');
+      setEngineEntrySource(source);
+      // Clear state on fresh launch
+      setGraphData({ nodes: [], links: [] });
+      setEngineResults([]);
+      setSelectedEngineMovie(null);
+      setCentralNodeId(null);
+      setEngineStage('search');
+      useAppStore.getState().setEngineQuery('');
+      useAppStore.setState({ hasSeenLoadingAnimation: false });
+    };
 
-    const nodes = movies.slice(0, 100).map((movie) => ({
-      id: movie.id,
-      title: movie.title,
-      poster: movie.poster,
-      overview: movie.overview,
-      val: movie.rating * 2, // Node size based on rating
-      rating: movie.rating,
-      genres: movie.genres,
-      release_date: movie.release_date,
-      language: movie.language,
-      popularity: movie.popularity,
-      vector: movie.vector,
-      group: 1,
-    }));
-
-    // Calculate links based on semantic cosine similarity
-    const links = [];
-    const threshold = 0.65;
-
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const similarity = cosineSimilarity(nodes[i].vector, nodes[j].vector);
-
-        if (similarity > threshold) {
-          links.push({
-            source: nodes[i].id,
-            target: nodes[j].id,
-            value: similarity,
-            similarity: similarity,
-          });
-        }
-      }
-    }
-
-    // Rescue orphan nodes — connect any node with 0 links to its nearest semantic neighbor
-    const connectedIds = new Set(links.flatMap((l) => [l.source, l.target]));
-    nodes.forEach((node, i) => {
-      if (connectedIds.has(node.id)) return;
-      let bestJ = -1;
-      let bestSim = -1;
-      for (let j = 0; j < nodes.length; j++) {
-        if (j === i) continue;
-        const sim = cosineSimilarity(nodes[i].vector, nodes[j].vector);
-        if (sim > bestSim) { bestSim = sim; bestJ = j; }
-      }
-      if (bestJ >= 0) {
-        links.push({
-          source: node.id,
-          target: nodes[bestJ].id,
-          value: Math.max(bestSim, 0.1),
-          similarity: Math.max(bestSim, 0.1),
-        });
-      }
-    });
-
-    return { nodes, links };
+  const exitEngineToBrowse = () => {
+    setView('BROWSE');
+    useAppStore.setState({ hasSeenLoadingAnimation: false });
+    setEngineStage('search');
   };
 
   const launchBrowse = () => {
-    // BrowseMovies is now self-contained — fetches its own data
     setView('BROWSE');
   };
 
-  const launchGraph = (preSelectedMovieId = null) => {
-    const movies = moviesData;
-    if (!movies || movies.length === 0) return;
-
-    const graph = buildGraphFromMovies(movies);
-    setGraphData(graph);
-
-    // Shallow copy fix to prevent ForceGraph3D from mutating global graph nodes
-    setFilteredData({
-      nodes: graph.nodes.map(n => ({ ...n })),
-      links: graph.links.map(l => ({ ...l }))
-    });
-    setView('GRAPH');
-    setIsSearchView(false);
-
-    // Pre-select movie if provided (deep link from browse)
-    if (preSelectedMovieId) {
-      const movie = graph.nodes.find(n => n.id === preSelectedMovieId);
-      if (movie) {
-        setTimeout(() => setSelectedMovie(movie), 100);
+  // Listen for the custom search event dispatched from EngineDrawer
+  useEffect(() => {
+    const handleEngineSearch = async (e) => {
+      const query = e.detail;
+      if (!query.trim()) return;
+      
+      setSearchLoading(true);
+      setEngineStage('building');
+      setError(null);
+      
+      try {
+        const res = await axios.post('http://127.0.0.1:8000/engine/search', {
+          query: query
+        });
+        
+        const results = res.data.results || [];
+        setEngineResults(results);
+        
+        if (results.length > 0) {
+            // Auto-select the top result
+            const topResult = results[0];
+            setSelectedEngineMovie(topResult);
+            
+            // Immediately start building the graph for the top result
+            try {
+                const similarRes = await axios.get(`http://127.0.0.1:8000/engine/similar/${topResult.id}`);
+                setGraphData({
+                    nodes: similarRes.data.nodes,
+                    links: similarRes.data.links
+                });
+                setCentralNodeId(similarRes.data.centralNodeId);
+                setEngineStage('graph');
+            } catch (err) {
+                console.error("Failed to load auto-similar graph:", err);
+                setError("Failed to build galaxy for: " + topResult.title);
+                setEngineStage('search'); // fallback
+            }
+        } else {
+            // Clear graph if no results found
+            setGraphData({ nodes: [], links: [] });
+            setCentralNodeId(null);
+            setSelectedEngineMovie(null);
+        }
+        
+      } catch (err) {
+        setError("Search failed: " + (err.response?.data?.detail || err.message));
+        console.error(err);
+        setEngineStage('search'); // fallback on failure
+      } finally {
+        setSearchLoading(false);
       }
+    };
+
+    const handleClearSelection = () => {
+        setSelectedEngineMovie(null);
+    };
+
+    document.addEventListener('engine-search', handleEngineSearch);
+    document.addEventListener('engine-clear-selection', handleClearSelection);
+    return () => {
+        document.removeEventListener('engine-search', handleEngineSearch);
+        document.removeEventListener('engine-clear-selection', handleClearSelection);
+    };
+  }, [setSearchLoading, setEngineResults, setGraphData, setError, setSelectedEngineMovie, setEngineStage]);
+
+  // Load Graph Cluster when a movie is selected from sidebar (or from graph nodes)
+  const handleSelectEngineMovie = async (movie) => {
+    setSelectedEngineMovie(movie); // Opens detail panel immediately
+    
+    // Only fetch new graph cluster if clicking a completely new central node
+    if (centralNodeId !== movie.id) {
+        setSearchLoading(true);
+        try {
+            const res = await axios.get(`http://127.0.0.1:8000/engine/similar/${movie.id}`);
+            
+            setGraphData({
+                nodes: res.data.nodes,
+                links: res.data.links
+            });
+            setCentralNodeId(res.data.centralNodeId);
+        } catch (err) {
+            console.error("Failed to load similar graph:", err);
+            setError("Failed to build galaxy for: " + movie.title);
+        } finally {
+            setSearchLoading(false);
+        }
     }
   };
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-
-    // Ensure graph is loaded first
-    if (!graphData.nodes || graphData.nodes.length === 0) {
-      setError("Please launch the engine first!");
-      return;
-    }
-
-    setSearchLoading(true);
-    setError(null);
-    try {
-      const res = await axios.post('http://127.0.0.1:8000/search', {
-        query: searchQuery,
-        top_k: 25  // Rich semantic cluster
-      });
-      console.log('Search results:', res.data);
-
-      const searchData = res.data;
-      const searchNodes = searchData.nodes || searchData;
-
-      // Get IDs of search result nodes
-      const searchNodeIds = new Set(searchNodes.map(n => n.id));
-
-      // Find all nodes connected to search results from the FULL graph
-      const connectedNodeIds = new Set(searchNodeIds);
-
-      // Add all nodes connected to search results from full graph links
-      graphData.links.forEach(link => {
-        const sourceId = link.source.id || link.source;
-        const targetId = link.target.id || link.target;
-
-        if (searchNodeIds.has(sourceId)) {
-          connectedNodeIds.add(targetId);
-        }
-        if (searchNodeIds.has(targetId)) {
-          connectedNodeIds.add(sourceId);
-        }
-      });
-
-      console.log('Search node IDs:', Array.from(searchNodeIds));
-      console.log('Connected node IDs:', Array.from(connectedNodeIds));
-
-      // Filter full graph data to include only connected nodes
-      const filteredNodes = graphData.nodes
-        .filter(n => connectedNodeIds.has(n.id))
-        .map(n => ({ ...n }));
-      const filteredLinks = graphData.links.filter(l => {
-        const sourceId = l.source.id || l.source;
-        const targetId = l.target.id || l.target;
-        return connectedNodeIds.has(sourceId) && connectedNodeIds.has(targetId);
-      });
-
-      console.log('Filtered nodes before adding search results:', filteredNodes.length);
-
-      // Add search results that aren't already in the filtered nodes
-      // This ensures all semantic search matches are displayed, even if not in the initial graph
-      searchNodes.forEach(searchNode => {
-        if (!filteredNodes.find(n => n.id === searchNode.id)) {
-          filteredNodes.push(searchNode);
-        }
-      });
-
-      console.log('Filtered nodes after adding search results:', filteredNodes.length, 'Filtered links:', filteredLinks.length);
-
-      // Mark search result nodes and preserve search data
-      filteredNodes.forEach(node => {
-        node.isSearchResult = searchNodeIds.has(node.id);
-        // Copy score and ranking from search results
-        const searchNode = searchNodes.find(sn => sn.id === node.id);
-        if (searchNode) {
-          node.score = searchNode.score;
-          node.relevanceRank = searchNode.relevanceRank;
-          if (searchNode.vector) {
-            node.vector = searchNode.vector;
-          }
-        }
-      });
-
-      // Filter links to only include those between nodes that exist in filteredNodes
-      const filteredNodeIds = new Set(filteredNodes.map(n => n.id));
-      const finalLinks = filteredLinks.filter(l => {
-        const sourceId = l.source.id || l.source;
-        const targetId = l.target.id || l.target;
-        return filteredNodeIds.has(sourceId) && filteredNodeIds.has(targetId);
-      });
-
-      setFilteredData({ nodes: filteredNodes, links: finalLinks });
-      setIsSearchView(true);
-
-      // Auto-select THE TOP SEARCH RESULT (from backend search results, not filtered nodes)
-      if (searchNodes.length > 0) {
-        // Find the #1 ranked search result in filteredNodes
-        const topResult = filteredNodes.find(n => n.id === searchNodes[0].id);
-        if (topResult) {
-          console.log('Auto-selecting top result:', topResult.title);
-          setTimeout(() => setSelectedMovie(topResult), 100);
-        }
-      }
-    } catch (e) {
-      if (e.message === 'Network Error') {
-        setError("Search failed: Backend unreachable.");
-      } else {
-        setError("Search failed: " + (e.response?.data?.detail || e.message));
-      }
-      console.error(e);
-    }
-    setSearchLoading(false);
-  };
-
-  const handleViewAll = () => {
-    // Shallow copy fix to prevent ForceGraph3D from mutating global graph nodes
-    setFilteredData({
-      nodes: graphData.nodes.map(n => ({ ...n })),
-      links: graphData.links.map(l => ({ ...l }))
-    });
-    setIsSearchView(false);
-    setSelectedMovie(null);
-    setSearchQuery("");
-  };
-
-  // Derive loading state: either TanStack Query is fetching movies or a search is running
-  const loading = moviesLoading || searchLoading;
-
-  // GRAPH VIEW
+  // ─── View Renders ───
+  
   if (view === 'GRAPH') {
     return (
       <>
-        <div className="relative w-full h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900" style={{ overflow: 'hidden' }}>
-          {/* Navigation */}
-          <div style={{ position: 'absolute', top: '24px', left: '24px', zIndex: 20 }}>
-            <button
-              onClick={() => setView('LANDING')}
-              style={{
-                padding: '10px 22px',
-                borderRadius: '12px',
-                background: 'rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(249,115,22,0.3)',
-                color: '#fdba74',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                letterSpacing: '0.3px',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(249,115,22,0.2)';
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.6)';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
-                e.currentTarget.style.color = '#fdba74';
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>←</span> Back
-            </button>
-          </div>
-
-          {/* Search Bar */}
-          <div style={{
-            position: 'absolute',
-            top: '24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 20,
-            width: '100%',
-            maxWidth: '700px',
-            padding: '0 24px',
-          }}>
-            <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by vibe (e.g., 'action thriller', 'romantic comedy')..."
-                style={{
-                  flex: 1,
-                  padding: '12px 24px',
-                  borderRadius: '14px',
-                  background: 'rgba(0,0,0,0.5)',
-                  backdropFilter: 'blur(12px)',
-                  color: '#fff',
-                  border: '1px solid rgba(249,115,22,0.25)',
-                  fontSize: '14px',
-                  outline: 'none',
-                  transition: 'all 0.3s ease',
-                  letterSpacing: '0.2px',
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1, overflow: 'hidden' }} className="bg-gradient-to-br from-slate-950 via-black to-slate-900">
+          
+          {/* Main Graph Component */}
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <ErrorBoundary>
+                <NebulaGraph
+                nodes={graphData.nodes}
+                links={graphData.links}
+                onNodeClick={(node) => {
+                    // When a node in the graph is clicked, open detail panel AND load its neighborhood
+                    handleSelectEngineMovie(node);
                 }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = 'rgba(249,115,22,0.6)';
-                  e.target.style.boxShadow = '0 0 20px rgba(249,115,22,0.15)';
+                onNodeHover={(node) => {
+                    // When a node is hovered, just update the detail panel (don't rebuild graph)
+                    if (node) {
+                        setSelectedEngineMovie(node);
+                    }
                 }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = 'rgba(249,115,22,0.25)';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-              <button
-                type="submit"
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: '14px',
-                  background: 'linear-gradient(135deg, #f97316, #f59e0b)',
-                  border: 'none',
-                  color: '#000',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  whiteSpace: 'nowrap',
-                  boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 25px rgba(249,115,22,0.5)';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(249,115,22,0.3)';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                }}
-              >
-                Search
-              </button>
-              {isSearchView && (
-                <button
-                  type="button"
-                  onClick={handleViewAll}
-                  style={{
-                    padding: '12px 20px',
-                    borderRadius: '14px',
-                    background: 'rgba(0,0,0,0.5)',
-                    backdropFilter: 'blur(12px)',
+                centralNodeId={centralNodeId}
+                />
+            </ErrorBoundary>
+            
+            {/* Minimal inline spinner for subsequent node clicks */}
+            {searchLoading && useAppStore.getState().hasSeenLoadingAnimation && (
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: 'calc(50% + 180px)', // Offset for left panel
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 40,
+                    background: 'rgba(15,23,42,0.6)',
+                    padding: '16px 24px',
+                    borderRadius: '30px',
+                    backdropFilter: 'blur(10px)',
                     border: '1px solid rgba(249,115,22,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
                     color: '#fdba74',
                     fontSize: '14px',
                     fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    whiteSpace: 'nowrap',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(249,115,22,0.2)';
-                    e.currentTarget.style.borderColor = 'rgba(249,115,22,0.6)';
-                    e.currentTarget.style.color = '#fff';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
-                    e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
-                    e.currentTarget.style.color = '#fdba74';
-                  }}
-                >
-                  View All
-                </button>
-              )}
-            </form>
-            {(error || moviesError) && <p style={{ color: '#f87171', fontSize: '12px', marginTop: '8px', textAlign: 'center' }}>{error || moviesError?.message}</p>}
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid rgba(249,115,22,0.3)', borderTopColor: '#f97316', animation: 'spin 1s linear infinite' }} />
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    Updating Graph...
+                </div>
+            )}
           </div>
 
-          {/* Graph */}
-          <ErrorBoundary>
-            <NebulaGraph
-              nodes={filteredData.nodes}
-              links={filteredData.links}
-              onNodeClick={setSelectedMovie}
-              selectedNode={selectedMovie}
-            />
-            {/* A11y Hidden DOM Layer for Screen Readers */}
-            <ul className="sr-only">
-              {filteredData.nodes?.map((node) => (
-                <li key={node.id}>
-                  <button onClick={() => setSelectedMovie(node)}>
-                    {node.title}{node.score ? ` - Similarity Score: ${Math.round(node.score * 100)}%` : ''}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </ErrorBoundary>
+          {/* Engine Sidebar (Search & Results) */}
+          <EngineDrawer onSelectMovie={handleSelectEngineMovie} />
 
-          {/* Loading State */}
-          {loading && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-              <div className="text-center">
-                <div className="w-16 h-16 border-4 border-orange-500/30 border-t-orange-400 rounded-full animate-spin mb-4"></div>
-                <p className="text-orange-300 font-semibold">Building your galaxy...</p>
-              </div>
+          {/* Movie Detail Panel (Right Side) */}
+          <MovieDetailPanel
+            selectedMovie={selectedEngineMovie}
+            onClose={() => setSelectedEngineMovie(null)}
+            similarMovies={selectedEngineMovie ? getSimilarMovies(selectedEngineMovie, graphData.links, graphData.nodes) : []}
+            onSelectMovie={handleSelectEngineMovie}
+          />
+
+
+
+          {/* Error Toast */}
+          {error && (
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 bg-red-900/80 border border-red-500/50 text-red-200 rounded-xl z-50 shadow-xl backdrop-blur-md">
+                {error}
+                <button onClick={() => setError(null)} className="ml-4 text-red-400 hover:text-red-200">✕</button>
             </div>
           )}
         </div>
-
-        {/* Movie Detail Drawer */}
-        <EngineDrawer
-          selectedMovie={selectedMovie}
-          onClose={() => setSelectedMovie(null)}
-          similarMovies={selectedMovie ? getSimilarMovies(selectedMovie, graphData.nodes) : []}
-          onSelectMovie={setSelectedMovie}
-        />
       </>
     );
   }
 
-  // BROWSE VIEW
   if (view === 'BROWSE') {
     return (
       <Suspense>
         <BrowseMovies
           onBack={() => setView('LANDING')}
-          onLaunchEngine={() => launchGraph()}
+          onLaunchEngine={() => launchGraph('browse')}
           onMovieClick={(movie) => {
-            launchGraph(movie.id);
+             // For Browse view, just set the selected movie so the panel opens
+             setSelectedMovie(movie);
           }}
+        />
+        <MovieDetailPanel
+            selectedMovie={selectedMovie}
+            onClose={() => setSelectedMovie(null)}
+            similarMovies={[]}
+            onSelectMovie={(movie) => setSelectedMovie(movie)}
+            onLaunchEngine={() => {
+                // If the "Launch Engine" button is clicked inside the Browser's movie detail panel
+                launchGraph('browse');
+                useAppStore.getState().setEngineQuery(selectedMovie.title);
+                
+                // Immediately auto-select and build the graph for this movie
+                setSelectedEngineMovie(selectedMovie);
+                
+                // Mock an event search or directly call the fetch block
+                setSearchLoading(true);
+                setEngineStage('building');
+                setError(null);
+                
+                axios.get(`http://127.0.0.1:8000/engine/similar/${selectedMovie.id}`)
+                    .then(similarRes => {
+                        const nodes = similarRes.data.nodes || [];
+                        setGraphData({
+                            nodes: nodes,
+                            links: similarRes.data.links
+                        });
+                        setCentralNodeId(similarRes.data.centralNodeId);
+                        
+                        // Populate results sidebar with the nodes found for this movie
+                        // Make sure the seed movie is first, then the neighbors
+                        const sortedResults = [...nodes].sort((a, b) => 
+                            (a.id === selectedMovie.id ? -1 : (b.id === selectedMovie.id ? 1 : 0))
+                        );
+                        setEngineResults(sortedResults);
+                        
+                        setEngineStage('graph');
+                        useAppStore.setState({ hasSeenLoadingAnimation: true });
+                    })
+                    .catch(err => {
+                        console.error("Failed to load auto-similar graph:", err);
+                        setError("Failed to build galaxy for: " + selectedMovie.title);
+                        setEngineStage('search');
+                    })
+                    .finally(() => {
+                        setSearchLoading(false);
+                        setSelectedMovie(null); // Close the BROWSE view's detail panel
+                    });
+            }}
         />
         <CommandPalette
           onSelectMovie={(movie) => {
-            launchGraph(movie.id);
+             launchGraph('direct');
+             handleSelectEngineMovie(movie);
           }}
         />
       </Suspense>
@@ -493,18 +347,18 @@ export default function Home() {
     <>
       <Hero
         trustBadge={{
-          text: "Powered by AI & Vector Embeddings",
+          text: "Powered by Vector Embeddings & Semantic AI",
           icons: []
         }}
         headline={{
-          line1: "Project",
+          line1: "",
           line2: "Nebula"
         }}
-        subtitle="The Semantic Search Engine for Cinema. Search by vibe, emotion, and plot using our 3D Constellation Engine."
+        subtitle="The Semantic Cinema Engine. Describe the vibe. Discover the film."
         buttons={{
           primary: {
-            text: loading ? "Launching..." : "Launch Engine",
-            onClick: launchGraph
+            text: "Launch Engine",
+            onClick: () => launchGraph('direct')
           },
           secondary: {
             text: "Browse Movies",
@@ -514,7 +368,8 @@ export default function Home() {
       />
       <CommandPalette
         onSelectMovie={(movie) => {
-          launchGraph(movie.id);
+           launchGraph('direct');
+           handleSelectEngineMovie(movie);
         }}
       />
     </>
