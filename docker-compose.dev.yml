@@ -5,6 +5,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
     ports:
       - "8000:8000"
     environment:
@@ -15,7 +17,7 @@ services:
       - TMDB_API_KEY=${TMDB_API_KEY}
       - DATABASE_URL=${DATABASE_URL:-}
       - REDIS_URL=${REDIS_URL:-}
-    restart: unless-stopped
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000')"]
       interval: 10s
@@ -23,14 +25,10 @@ services:
       retries: 3
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_BACKEND_URL=${NEXT_PUBLIC_BACKEND_URL:-http://localhost:8000}
-        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-        - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-Nebula}
-        - NEXT_PUBLIC_APP_TAGLINE=${NEXT_PUBLIC_APP_TAGLINE:-Describe the vibe. Discover the film.}
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
     ports:
       - "3000:3000"
     environment:
@@ -38,12 +36,7 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
       - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-Nebula}
       - NEXT_PUBLIC_APP_TAGLINE=${NEXT_PUBLIC_APP_TAGLINE:-Describe the vibe. Discover the film.}
+    command: npm run dev
     depends_on:
       backend:
         condition: service_healthy
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
