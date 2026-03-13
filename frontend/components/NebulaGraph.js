@@ -23,7 +23,7 @@ const hudBtnStyle = {
 
 const imageCache = new Map();
 
-export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }) {
+export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, centralNodeId }) {
   const graphRef = useRef();
   const [hoveredNode, setHoveredNode] = useState(null);
 
@@ -58,12 +58,14 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
         const centralNode = nodes.find(n => n.id === centralNodeId);
         if (centralNode) {
             setTimeout(() => {
-                graphRef.current.centerAt(
-                (centralNode.x || 0) - 100, 
-                (centralNode.y || 0), 
-                1000
-                );
-                graphRef.current.zoom(2, 1000);
+                if (graphRef.current) {
+                    graphRef.current.centerAt(
+                        (centralNode.x || 0) + 30, 
+                        (centralNode.y || 0), 
+                        1000
+                    );
+                    graphRef.current.zoom(2, 1000);
+                }
             }, 500);
         }
     }
@@ -86,7 +88,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
     const centralNode = nodes.find(n => n.id === centralNodeId);
     if (centralNode && centralNode.x != null) {
         graphRef.current.centerAt(
-          (centralNode.x || 0) - 100, 
+          (centralNode.x || 0) + 30, 
           (centralNode.y || 0), 
           1000
         );
@@ -244,14 +246,17 @@ export default function NebulaGraph({ nodes, links, onNodeClick, centralNodeId }
         warmupTicks={50}
         onNodeClick={(node) => {
           graphRef.current.centerAt(
-            (node.x || 0) - 100, 
+            (node.x || 0) + 30, 
             (node.y || 0), 
             1000
           );
           graphRef.current.zoom(2.5, 1000);
           onNodeClick(node);
         }}
-        onNodeHover={(node) => setHoveredNode(node || null)}
+        onNodeHover={(node) => {
+          setHoveredNode(node || null);
+          if (onNodeHover) onNodeHover(node);
+        }}
         enableNodeDrag={true}
         enableZoomInteraction={true}
         enablePanInteraction={true}

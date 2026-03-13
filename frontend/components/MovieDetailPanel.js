@@ -1,7 +1,25 @@
-'use client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '@/store/useAppStore';
+import { Bookmark, Star, ClipboardList, History, Calendar, MessageSquare, Repeat } from 'lucide-react';
+import StarRating from './StarRating';
+import { useState } from 'react';
 
-export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie }) {
+export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie, onLaunchEngine }) {
+    const watchlist = useAppStore((state) => state.watchlist);
+    const toggleWatchlist = useAppStore((state) => state.toggleWatchlist);
+    const userRatings = useAppStore((state) => state.userRatings);
+    const setUserRating = useAppStore((state) => state.setUserRating);
+    const addLog = useAppStore((state) => state.addLog);
+
+    const isBookmarked = selectedMovie ? watchlist.some(m => m.id === selectedMovie.id) : false;
+    const personalRating = selectedMovie ? userRatings[selectedMovie.id] || 0 : 0;
+
+    const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+    const [logForm, setLogForm] = useState({
+        date: new Date().toISOString().split('T')[0],
+        review: '',
+        rewatch: false
+    });
     return (
         <AnimatePresence>
             {selectedMovie && (
@@ -88,6 +106,44 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                 ✕
                             </button>
 
+                            {/* Bookmark Button */}
+                            <button
+                                onClick={(e) => { e.stopPropagation(); toggleWatchlist(selectedMovie); }}
+                                style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    left: '24px', // Opposite to close button
+                                    width: '44px',
+                                    height: '44px',
+                                    borderRadius: '50%',
+                                    background: isBookmarked ? 'rgba(6, 182, 212, 0.9)' : 'rgba(0,0,0,0.55)',
+                                    backdropFilter: 'blur(8px)',
+                                    border: '1px solid',
+                                    borderColor: isBookmarked ? 'rgba(6,182,212,1)' : 'rgba(255,255,255,0.12)',
+                                    color: isBookmarked ? '#000' : '#e5e7eb',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    transition: 'all 0.3s ease',
+                                    zIndex: 20
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!isBookmarked) {
+                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.15)';
+                                        e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.4)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!isBookmarked) {
+                                        e.currentTarget.style.background = 'rgba(0,0,0,0.55)';
+                                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                                    }
+                                }}
+                            >
+                                <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
+                            </button>
+
                             {/* Title on poster */}
                             <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '60px' }}>
                                 <h2 style={{
@@ -149,21 +205,87 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                         {selectedMovie.genres && selectedMovie.genres !== 'Unknown' && (
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                                 {selectedMovie.genres.split(', ').map((genre, i) => (
-                                    <span key={i} style={{
-                                        padding: '4px 14px',
-                                        fontSize: '11px',
-                                        fontWeight: 600,
-                                        letterSpacing: '0.5px',
-                                        background: 'rgba(249,115,22,0.12)',
-                                        color: '#fdba74',
-                                        borderRadius: '20px',
-                                        border: '1px solid rgba(249,115,22,0.25)',
-                                    }}>
+                                    <span key={i} 
+                                        className="filter-chip"
+                                        style={{
+                                            padding: '4px 14px',
+                                            fontSize: '11px',
+                                            fontWeight: 600,
+                                            letterSpacing: '0.5px',
+                                            background: 'rgba(6,182,212,0.08)',
+                                            color: '#67e8f9',
+                                            borderRadius: '20px',
+                                            border: '1px solid rgba(6,182,212,0.2)',
+                                            transition: 'all 0.2s ease',
+                                        }}
+                                    >
                                         {genre}
                                     </span>
                                 ))}
                             </div>
                         )}
+
+                        {/* User Activity Row (Ratings & Logs) */}
+                        <div style={{
+                            background: 'rgba(6, 182, 212, 0.03)',
+                            borderRadius: '16px',
+                            padding: '20px',
+                            border: '1px solid rgba(6, 182, 212, 0.15)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '16px',
+                            backdropFilter: 'blur(8px)',
+                        }}>
+                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div 
+                                    className="text-glow-cyan"
+                                    style={{ fontSize: '11px', color: '#22d3ee', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px' }}
+                                >
+                                    Your Rating
+                                </div>
+                                <StarRating 
+                                    rating={personalRating} 
+                                    onRate={(r) => setUserRating(selectedMovie.id, r)} 
+                                    size={24}
+                                />
+                             </div>
+                             
+                              <button
+                                onClick={() => setIsLogModalOpen(true)}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    background: 'rgba(59, 130, 246, 0.08)',
+                                    border: '1px solid rgba(59, 130, 246, 0.2)',
+                                    color: '#93c5fd',
+                                    fontSize: '14px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                    boxShadow: '0 0 15px rgba(59, 130, 246, 0.05)',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)';
+                                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                                    e.currentTarget.style.boxShadow = '0 0 25px rgba(59, 130, 246, 0.1)';
+                                    e.currentTarget.style.transform = 'translateY(-1px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = 'rgba(59, 130, 246, 0.08)';
+                                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
+                                    e.currentTarget.style.boxShadow = '0 0 15px rgba(59, 130, 246, 0.05)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                }}
+                             >
+                                <ClipboardList size={18} />
+                                Log or Review
+                             </button>
+                        </div>
 
                         {/* Stats Row */}
                         <div style={{
@@ -173,31 +295,33 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                         }}>
                             {/* Rating */}
                             <div style={{
-                                background: 'rgba(255,255,255,0.04)',
+                                background: 'rgba(10,10,10,0.4)',
                                 borderRadius: '12px',
                                 padding: '14px 16px',
-                                border: '1px solid rgba(249,115,22,0.12)',
+                                border: '1px solid rgba(6, 182, 212, 0.15)',
+                                backdropFilter: 'blur(10px)',
                             }}>
-                                <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Rating</div>
+                                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Rating</div>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                     <span style={{ color: '#fbbf24', fontSize: '20px' }}>★</span>
-                                    <span style={{ color: '#fb923c', fontSize: '1.25rem', fontWeight: 700 }}>
+                                    <span style={{ color: '#06b6d4', fontSize: '1.25rem', fontWeight: 800 }}>
                                         {selectedMovie.rating ? selectedMovie.rating.toFixed(1) : 'N/A'}
                                     </span>
-                                    <span style={{ color: '#6b7280', fontSize: '13px' }}>/10</span>
+                                    <span style={{ color: '#475569', fontSize: '13px' }}>/10</span>
                                 </div>
                             </div>
 
                             {/* Match Score */}
                             {selectedMovie.score && (
                                 <div style={{
-                                    background: 'rgba(255,255,255,0.04)',
+                                    background: 'rgba(10,10,10,0.4)',
                                     borderRadius: '12px',
                                     padding: '14px 16px',
-                                    border: '1px solid rgba(249,115,22,0.12)',
+                                    border: '1px solid rgba(6, 182, 212, 0.15)',
+                                    backdropFilter: 'blur(10px)',
                                 }}>
-                                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Match</div>
-                                    <div style={{ color: '#4ade80', fontSize: '1.25rem', fontWeight: 700 }}>
+                                    <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '1px' }}>Match</div>
+                                    <div style={{ color: '#22d3ee', fontSize: '1.25rem', fontWeight: 800 }} className="text-glow-cyan">
                                         {(selectedMovie.score * 100).toFixed(0)}%
                                     </div>
                                 </div>
@@ -287,20 +411,60 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                             </div>
                         )}
 
+                        {/* "Launch Engine" Button (Browse View Only) */}
+                        {onLaunchEngine && (
+                            <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
+                                <button
+                                    onClick={onLaunchEngine}
+                                    style={{
+                                        width: '100%',
+                                        padding: '16px',
+                                        borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #f97316, #f59e0b)',
+                                        border: 'none',
+                                        color: '#000',
+                                        fontSize: '15px',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: '8px',
+                                        boxShadow: '0 4px 20px rgba(249,115,22,0.3)',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 6px 25px rgba(249,115,22,0.4)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 20px rgba(249,115,22,0.3)';
+                                    }}
+                                >
+                                    <span style={{ fontSize: '20px' }}>💥</span> Launch Engine for this Movie
+                                </button>
+                            </div>
+                        )}
+
                         {/* ── Similar Movies ───────────────────────────── */}
                         {similarMovies.length > 0 && (
                             <div style={{ marginTop: '4px' }}>
-                                <h3 style={{
-                                    fontSize: '11px', fontWeight: 700, color: '#fb923c',
-                                    marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px',
-                                }}>Similar Movies</h3>
+                                <h3 
+                                    className="text-glow-cyan"
+                                    style={{
+                                        fontSize: '11px', fontWeight: 800, color: '#22d3ee',
+                                        marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '1.5px',
+                                    }}
+                                >Similar Movies</h3>
                                 <div
-                                    className="hide-scrollbar"
+                                    className="horizontal-scroll"
                                     style={{
                                         display: 'flex',
                                         gap: '12px',
                                         overflowX: 'auto',
-                                        paddingBottom: '4px',
+                                        paddingBottom: '8px',
+                                        paddingRight: '24px',
                                     }}
                                 >
                                     {similarMovies.map((movie) => (
@@ -313,8 +477,8 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                                 cursor: 'pointer',
                                                 borderRadius: '10px',
                                                 overflow: 'hidden',
-                                                background: 'rgba(255,255,255,0.04)',
-                                                border: '1px solid rgba(249,115,22,0.12)',
+                                                background: 'rgba(6, 182, 212, 0.04)',
+                                                border: '1px solid rgba(6, 182, 212, 0.15)',
                                                 transition: 'all 0.3s ease',
                                             }}
                                             onMouseEnter={(e) => {
@@ -378,6 +542,95 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                             </div>
                         )}
                     </div>
+
+                    {/* ── Log Modal ────────────────────────────────── */}
+                    <AnimatePresence>
+                        {isLogModalOpen && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: 'rgba(0,0,0,0.85)',
+                                    backdropFilter: 'blur(10px)',
+                                    zIndex: 1000,
+                                    padding: '40px 24px',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f97316' }}>Log Movie</h3>
+                                    <button onClick={() => setIsLogModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>✕</button>
+                                </div>
+
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                                    {/* Date */}
+                                    <div>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                            <Calendar size={14} /> Date Watched
+                                        </label>
+                                        <input 
+                                            type="date" 
+                                            value={logForm.date}
+                                            onChange={(e) => setLogForm({...logForm, date: e.target.value})}
+                                            style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none' }}
+                                        />
+                                    </div>
+
+                                    {/* Review */}
+                                    <div>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 600, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                            <MessageSquare size={14} /> Review
+                                        </label>
+                                        <textarea 
+                                            placeholder="Write your thoughts..."
+                                            value={logForm.review}
+                                            onChange={(e) => setLogForm({...logForm, review: e.target.value})}
+                                            style={{ width: '100%', height: '120px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none', resize: 'none' }}
+                                        />
+                                    </div>
+
+                                    {/* Rewatch Toggle */}
+                                    <div 
+                                        onClick={() => setLogForm({...logForm, rewatch: !logForm.rewatch})}
+                                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '10px', cursor: 'pointer' }}
+                                    >
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                            <Repeat size={16} color={logForm.rewatch ? '#f97316' : '#64748b'} />
+                                            <span style={{ fontSize: '14px', color: logForm.rewatch ? '#fff' : '#94a3b8' }}>Rewatch</span>
+                                        </div>
+                                        <div style={{ width: '40px', height: '20px', borderRadius: '10px', background: logForm.rewatch ? '#f97316' : '#334155', position: 'relative', transition: '0.3s' }}>
+                                            <div style={{ position: 'absolute', top: '2px', left: logForm.rewatch ? '22px' : '2px', width: '16px', height: '16px', borderRadius: '50%', background: '#fff', transition: '0.3s' }} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => {
+                                        addLog({
+                                            ...selectedMovie,
+                                            ...logForm,
+                                            personalRating,
+                                            loggedAt: Date.now()
+                                        });
+                                        setIsLogModalOpen(false);
+                                        setLogForm({ date: new Date().toISOString().split('T')[0], review: '', rewatch: false });
+                                    }}
+                                    style={{
+                                        width: '100%', padding: '16px', borderRadius: '12px',
+                                        background: 'linear-gradient(135deg, #f97316, #f59e0b)', border: 'none',
+                                        color: '#000', fontSize: '15px', fontWeight: 800, cursor: 'pointer',
+                                        boxShadow: '0 4px 20px rgba(249,115,22,0.3)', marginTop: '20px'
+                                    }}
+                                >
+                                    Save Entry
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </motion.div>
             )}
         </AnimatePresence>

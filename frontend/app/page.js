@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useAppStore } from '@/store/useAppStore';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Hero = dynamic(() => import('@/components/ui/animated-shader-hero'), { ssr: false });
 import NebulaGraph from '@/components/NebulaGraph';
@@ -16,23 +17,35 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 // ─── Similar Movies Helper ───
 function getSimilarMovies(targetMovie, links, allNodes, limit = 6) {
   if (!targetMovie || !links || !allNodes) return [];
-  const connectedLinks = links.filter(l => 
-    (l.source?.id || l.source) === targetMovie.id || 
-    (l.target?.id || l.target) === targetMovie.id
-  );
+  const targetId = String(targetMovie.id);
+  
+  const connectedLinks = links.filter(l => {
+    const sId = String(l.source?.id || l.source);
+    const tId = String(l.target?.id || l.target);
+    return sId === targetId || tId === targetId;
+  });
+
   connectedLinks.sort((a, b) => (b.similarity || b.value || 0) - (a.similarity || a.value || 0));
+  
   const similarNodes = [];
-  for (const link of connectedLinks.slice(0, limit)) {
-    const neighborId = (link.source?.id || link.source) === targetMovie.id 
-      ? (link.target?.id || link.target) 
-      : (link.source?.id || link.source);
-      
-    const neighborNode = allNodes.find(n => n.id === neighborId);
+  const seenIds = new Set([targetId]);
+
+  for (const link of connectedLinks) {
+    if (similarNodes.length >= limit) break;
+    
+    const sId = String(link.source?.id || link.source);
+    const tId = String(link.target?.id || link.target);
+    const neighborId = sId === targetId ? tId : sId;
+    
+    if (seenIds.has(neighborId)) continue;
+    
+    const neighborNode = allNodes.find(n => String(n.id) === neighborId);
     if (neighborNode) {
       similarNodes.push({
         ...neighborNode,
         _similarity: link.similarity || link.value || 0.1
       });
+      seenIds.add(neighborId);
     }
   }
   return similarNodes;
@@ -56,6 +69,8 @@ export default function Home() {
   const setSearchLoading = useAppStore((state) => state.setSearchLoading);
 
   // New Engine State Slices
+  const engineEntrySource = useAppStore((state) => state.engineEntrySource);
+  const setEngineEntrySource = useAppStore((state) => state.setEngineEntrySource);
   const engineQuery = useAppStore((state) => state.engineQuery);
   const engineResults = useAppStore((state) => state.engineResults);
   const setEngineResults = useAppStore((state) => state.setEngineResults);
@@ -66,13 +81,22 @@ export default function Home() {
   const [centralNodeId, setCentralNodeId] = useState(null);
 
   // ─── Engine Specific Handlers ───
-  const launchGraph = () => {
-    setView('GRAPH');
-    // Clear state on fresh launch
-    setGraphData({ nodes: [], links: [] });
-    setEngineResults([]);
-    setSelectedEngineMovie(null);
-    setCentralNodeId(null);
+    const launchGraph = (source = 'direct') => {
+      setView('GRAPH');
+      setEngineEntrySource(source);
+      // Clear state on fresh launch
+      setGraphData({ nodes: [], links: [] });
+      setEngineResults([]);
+      setSelectedEngineMovie(null);
+      setCentralNodeId(null);
+      setEngineStage('search');
+      useAppStore.getState().setEngineQuery('');
+      useAppStore.setState({ hasSeenLoadingAnimation: false });
+    };
+
+  const exitEngineToBrowse = () => {
+    setView('BROWSE');
+    useAppStore.setState({ hasSeenLoadingAnimation: false });
     setEngineStage('search');
   };
 
@@ -133,8 +157,16 @@ export default function Home() {
       }
     };
 
+    const handleClearSelection = () => {
+        setSelectedEngineMovie(null);
+    };
+
     document.addEventListener('engine-search', handleEngineSearch);
-    return () => document.removeEventListener('engine-search', handleEngineSearch);
+    document.addEventListener('engine-clear-selection', handleClearSelection);
+    return () => {
+        document.removeEventListener('engine-search', handleEngineSearch);
+        document.removeEventListener('engine-clear-selection', handleClearSelection);
+    };
   }, [setSearchLoading, setEngineResults, setGraphData, setError, setSelectedEngineMovie, setEngineStage]);
 
   // Load Graph Cluster when a movie is selected from sidebar (or from graph nodes)
@@ -166,20 +198,55 @@ export default function Home() {
   if (view === 'GRAPH') {
     return (
       <>
-        <div className="relative w-full h-screen bg-gradient-to-br from-slate-950 via-black to-slate-900" style={{ overflow: 'hidden' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 1, overflow: 'hidden' }} className="bg-gradient-to-br from-slate-950 via-black to-slate-900">
           
           {/* Main Graph Component */}
-          <ErrorBoundary>
-            <NebulaGraph
-              nodes={graphData.nodes}
-              links={graphData.links}
-              onNodeClick={(node) => {
-                 // When a node in the graph is clicked, open detail panel AND load its neighborhood
-                 handleSelectEngineMovie(node);
-              }}
-              centralNodeId={centralNodeId}
-            />
-          </ErrorBoundary>
+          <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <ErrorBoundary>
+                <NebulaGraph
+                nodes={graphData.nodes}
+                links={graphData.links}
+                onNodeClick={(node) => {
+                    // When a node in the graph is clicked, open detail panel AND load its neighborhood
+                    handleSelectEngineMovie(node);
+                }}
+                onNodeHover={(node) => {
+                    // When a node is hovered, just update the detail panel (don't rebuild graph)
+                    if (node) {
+                        setSelectedEngineMovie(node);
+                    }
+                }}
+                centralNodeId={centralNodeId}
+                />
+            </ErrorBoundary>
+            
+            {/* Minimal inline spinner for subsequent node clicks */}
+            {searchLoading && useAppStore.getState().hasSeenLoadingAnimation && (
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: 'calc(50% + 180px)', // Offset for left panel
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 40,
+                    background: 'rgba(15,23,42,0.6)',
+                    padding: '16px 24px',
+                    borderRadius: '30px',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(249,115,22,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    color: '#fdba74',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                }}>
+                    <div style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid rgba(249,115,22,0.3)', borderTopColor: '#f97316', animation: 'spin 1s linear infinite' }} />
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                    Updating Graph...
+                </div>
+            )}
+          </div>
 
           {/* Engine Sidebar (Search & Results) */}
           <EngineDrawer onSelectMovie={handleSelectEngineMovie} />
@@ -201,41 +268,6 @@ export default function Home() {
                 <button onClick={() => setError(null)} className="ml-4 text-red-400 hover:text-red-200">✕</button>
             </div>
           )}
-
-          {/* Navigation Back Button - top right so it doesn't conflict with left sidebar */}
-          <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 20 }}>
-            <button
-              onClick={() => setView('LANDING')}
-              style={{
-                padding: '10px 22px',
-                borderRadius: '12px',
-                background: 'rgba(0,0,0,0.5)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(249,115,22,0.3)',
-                color: '#fdba74',
-                fontSize: '14px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                letterSpacing: '0.3px',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(249,115,22,0.2)';
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.6)';
-                e.currentTarget.style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(0,0,0,0.5)';
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
-                e.currentTarget.style.color = '#fdba74';
-              }}
-            >
-              <span style={{ fontSize: '16px' }}>←</span> Exit Engine
-            </button>
-          </div>
         </div>
       </>
     );
@@ -246,19 +278,63 @@ export default function Home() {
       <Suspense>
         <BrowseMovies
           onBack={() => setView('LANDING')}
-          onLaunchEngine={() => launchGraph()}
+          onLaunchEngine={() => launchGraph('browse')}
           onMovieClick={(movie) => {
-             // In Browse, we just use the selectedMovie state, which might open the detail panel if Browse uses it.
-             // Actually BrowseMovies uses onMovieClick to show it somehow or route.
-             // Here, if they click "Launch Engine" from browse, we can route them to the engine.
-             // It seems the old code did: launchGraph(movie.id); Let's adapt it to new engine.
-             launchGraph();
-             handleSelectEngineMovie(movie); 
+             // For Browse view, just set the selected movie so the panel opens
+             setSelectedMovie(movie);
           }}
+        />
+        <MovieDetailPanel
+            selectedMovie={selectedMovie}
+            onClose={() => setSelectedMovie(null)}
+            similarMovies={[]}
+            onSelectMovie={(movie) => setSelectedMovie(movie)}
+            onLaunchEngine={() => {
+                // If the "Launch Engine" button is clicked inside the Browser's movie detail panel
+                launchGraph('browse');
+                useAppStore.getState().setEngineQuery(selectedMovie.title);
+                
+                // Immediately auto-select and build the graph for this movie
+                setSelectedEngineMovie(selectedMovie);
+                
+                // Mock an event search or directly call the fetch block
+                setSearchLoading(true);
+                setEngineStage('building');
+                setError(null);
+                
+                axios.get(`http://127.0.0.1:8000/engine/similar/${selectedMovie.id}`)
+                    .then(similarRes => {
+                        const nodes = similarRes.data.nodes || [];
+                        setGraphData({
+                            nodes: nodes,
+                            links: similarRes.data.links
+                        });
+                        setCentralNodeId(similarRes.data.centralNodeId);
+                        
+                        // Populate results sidebar with the nodes found for this movie
+                        // Make sure the seed movie is first, then the neighbors
+                        const sortedResults = [...nodes].sort((a, b) => 
+                            (a.id === selectedMovie.id ? -1 : (b.id === selectedMovie.id ? 1 : 0))
+                        );
+                        setEngineResults(sortedResults);
+                        
+                        setEngineStage('graph');
+                        useAppStore.setState({ hasSeenLoadingAnimation: true });
+                    })
+                    .catch(err => {
+                        console.error("Failed to load auto-similar graph:", err);
+                        setError("Failed to build galaxy for: " + selectedMovie.title);
+                        setEngineStage('search');
+                    })
+                    .finally(() => {
+                        setSearchLoading(false);
+                        setSelectedMovie(null); // Close the BROWSE view's detail panel
+                    });
+            }}
         />
         <CommandPalette
           onSelectMovie={(movie) => {
-             launchGraph();
+             launchGraph('direct');
              handleSelectEngineMovie(movie);
           }}
         />
@@ -271,18 +347,18 @@ export default function Home() {
     <>
       <Hero
         trustBadge={{
-          text: "Powered by AI & Vector Embeddings",
+          text: "Powered by Vector Embeddings & Semantic AI",
           icons: []
         }}
         headline={{
-          line1: "Project",
+          line1: "",
           line2: "Nebula"
         }}
-        subtitle="The Semantic Search Engine for Cinema. Search by vibe, emotion, and plot using our 2D Constellation Engine."
+        subtitle="The Semantic Cinema Engine. Describe the vibe. Discover the film."
         buttons={{
           primary: {
             text: "Launch Engine",
-            onClick: launchGraph
+            onClick: () => launchGraph('direct')
           },
           secondary: {
             text: "Browse Movies",
@@ -292,7 +368,7 @@ export default function Home() {
       />
       <CommandPalette
         onSelectMovie={(movie) => {
-           launchGraph();
+           launchGraph('direct');
            handleSelectEngineMovie(movie);
         }}
       />
