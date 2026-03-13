@@ -385,20 +385,20 @@ async def get_movies():
 
 # Keep legacy endpoints for backwards compatibility during transition
 @app.get("/graph")
-def get_graph_data():
+async def get_graph_data():
     """
     Legacy endpoint - redirects to /movies.
     Graph construction now handled by frontend.
     """
-    return get_movies()
+    return await get_movies()
 
 @app.get("/browse")
-def browse_movies():
+async def browse_movies():
     """
     Legacy endpoint - redirects to /movies.
     Categorization now handled by frontend.
     """
-    return get_movies()
+    return await get_movies()
 
 
 # --- Engine Endpoints (Connected Papers Style) ---
