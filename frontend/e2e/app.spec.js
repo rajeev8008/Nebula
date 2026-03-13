@@ -3,10 +3,12 @@ import { test, expect } from '@playwright/test';
 test.describe('Nebula Core User Flows', () => {
   test('Load the root URL and assert the "Project Nebula" hero title is visible', async ({ page }) => {
     await page.goto('/');
+    // Wait for the page to be fully loaded including animations
+    await page.waitForLoadState('domcontentloaded');
 
-    // Check for "Project" and "Nebula" since they might be in separate spans/lines
-    await expect(page.locator('text=Project')).toBeVisible();
-    await expect(page.locator('text=Nebula')).toBeVisible();
+    // Check for "Project" and "Nebula" using more robust test IDs
+    await expect(page.getByTestId('hero-title-line1')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByTestId('hero-title-line2')).toBeVisible({ timeout: 15000 });
   });
 
   test('Click the "Browse Movies" button, wait for BROWSE view, and assert movie grid renders', async ({ page }) => {

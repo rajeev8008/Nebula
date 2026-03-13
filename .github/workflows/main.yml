@@ -36,8 +36,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Debug - List files
+        run: ls -R
+
       - name: Build Frontend Docker Image
-        run: docker build -f Dockerfile.frontend -t nebula-frontend:test .
+        run: docker build -t nebula-frontend:test -f docker/frontend.Dockerfile .
 
       - name: Build Backend Docker Image
-        run: docker build -f Dockerfile.backend -t nebula-backend:test .
+        run: docker build -t nebula-backend:test -f docker/backend.Dockerfile .

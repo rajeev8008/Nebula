@@ -507,6 +507,7 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
           {/* Main Heading */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <motion.h1
+              data-testid="hero-title-line1"
               initial={{ filter: 'blur(10px)', opacity: 0 }}
               animate={{ filter: 'blur(0px)', opacity: 1 }}
               transition={{ duration: 0.8 }}
@@ -522,6 +523,7 @@ const Hero = ({ trustBadge, headline, subtitle, buttons }) => {
               {headline.line1}
             </motion.h1>
             <motion.h1
+              data-testid="hero-title-line2"
               initial={{ filter: 'blur(10px)', opacity: 0 }}
               animate={{ filter: 'blur(0px)', opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
