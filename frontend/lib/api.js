@@ -28,12 +28,19 @@ export async function fetchMovies({ q = '', genre, decade, rating, minYear, page
     url.searchParams.set('page', String(page));
     url.searchParams.set('limit', String(limit));
 
-    const res = await fetch(url.toString());
+    console.log(`[API] Fetching: ${url.toString()}`);
+    const res = await fetch(url.toString()).catch(err => {
+        console.error(`[API] Network error:`, err);
+        throw err;
+    });
 
     if (!res.ok) {
         const detail = await res.text();
+        console.error(`[API] Response error (${res.status}): ${detail}`);
         throw new Error(`API error ${res.status}: ${detail}`);
     }
 
-    return res.json();
+    const data = await res.json();
+    console.log(`[API] Fetched ${data.movies?.length || 0} movies`);
+    return data;
 }

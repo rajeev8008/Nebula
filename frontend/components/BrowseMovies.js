@@ -306,191 +306,16 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                 overflowX: 'hidden',
             }}
         >
-            {/* Navigation Bar */}
-            <div
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    zIndex: 50,
-                    background: 'rgba(0,0,0,0.8)',
-                    backdropFilter: 'blur(20px)',
-                    borderBottom: '1px solid rgba(249,115,22,0.2)',
-                    padding: '20px 24px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                }}
-            >
-                <button
-                    onClick={onBack}
-                    style={{
-                        padding: '10px 22px',
-                        borderRadius: '12px',
-                        background: 'rgba(0,0,0,0.5)',
-                        backdropFilter: 'blur(12px)',
-                        border: '1px solid rgba(249,115,22,0.3)',
-                        color: '#fdba74',
-                        fontSize: '14px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                    }}
-                >
-                    <span style={{ fontSize: '16px' }}>←</span> Back
-                </button>
-
-                <h1
-                    style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 800,
-                        background: 'linear-gradient(135deg, #fdba74, #f97316, #fbbf24)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                    }}
-                >
-                    Browse Movies
-                </h1>
-
-                {/* Browse Search Bar */}
-                <div style={{ flex: 1, maxWidth: '400px', margin: '0 24px' }}>
-                    <div style={{ position: 'relative' }}>
-                        <span style={{ position: 'absolute', left: '12px', top: '9px', fontSize: '14px', color: '#94a3b8' }}>🔍</span>
-                        <input
-                            type="text"
-                            value={browseSearchQuery}
-                            onChange={(e) => setBrowseSearchQuery(e.target.value)}
-                            placeholder="Search for movies"
-                            style={{
-                                width: '100%',
-                                padding: '8px 12px 8px 36px',
-                                borderRadius: '12px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(249,115,22,0.3)',
-                                color: '#fff',
-                                fontSize: '14px',
-                                outline: 'none',
-                                transition: 'all 0.3s ease',
-                                backdropFilter: 'blur(12px)',
-                            }}
-                            onFocus={(e) => {
-                                e.target.style.background = 'rgba(0,0,0,0.6)';
-                                e.target.style.borderColor = 'rgba(249,115,22,0.8)';
-                                e.target.style.boxShadow = '0 0 10px rgba(249,115,22,0.2)';
-                            }}
-                            onBlur={(e) => {
-                                e.target.style.background = 'rgba(255,255,255,0.05)';
-                                e.target.style.borderColor = 'rgba(249,115,22,0.3)';
-                                e.target.style.boxShadow = 'none';
-                            }}
-                        />
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    {/* Tabs */}
-                     <button
-                        onClick={() => setIsDiaryOpen(true)}
-                        style={{
-                            padding: '10px 22px',
-                            borderRadius: '12px',
-                            background: 'rgba(6, 182, 212, 0.1)',
-                            backdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(6, 182, 212, 0.25)',
-                            color: '#22d3ee',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            transition: 'all 0.3s ease',
-                            marginRight: '8px',
-                            boxShadow: '0 0 20px rgba(6, 182, 212, 0.05)',
-                        }}
-                        onMouseEnter={(e) => { 
-                            e.currentTarget.style.background = 'rgba(6, 182, 212, 0.2)';
-                            e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.5)';
-                            e.currentTarget.style.boxShadow = '0 0 25px rgba(6, 182, 212, 0.15)';
-                        }}
-                        onMouseLeave={(e) => { 
-                            e.currentTarget.style.background = 'rgba(6, 182, 212, 0.1)';
-                            e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.25)';
-                            e.currentTarget.style.boxShadow = '0 0 20px rgba(6, 182, 212, 0.05)';
-                        }}
-                    >
-                        <Calendar size={18} /> Diary
-                    </button>
-
-                     <button
-                        onClick={() => setIsWatchlistOpen(true)}
-                        style={{
-                            padding: '10px 22px',
-                            borderRadius: '12px',
-                            background: 'rgba(59, 130, 246, 0.1)',
-                            backdropFilter: 'blur(12px)',
-                            border: '1px solid rgba(59, 130, 246, 0.25)',
-                            color: '#93c5fd',
-                            fontSize: '14px',
-                            fontWeight: 600,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 0 20px rgba(59, 130, 246, 0.05)',
-                        }}
-                        onMouseEnter={(e) => { 
-                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.2)';
-                            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-                            e.currentTarget.style.boxShadow = '0 0 25px rgba(59, 130, 246, 0.15)';
-                        }}
-                        onMouseLeave={(e) => { 
-                            e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
-                            e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.25)';
-                            e.currentTarget.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.05)';
-                        }}
-                    >
-                        <Bookmark size={18} />
-                        Watchlist
-                    </button>
-
-
-
-                    <button
-                        onClick={onLaunchEngine}
-                        style={{
-                            padding: '10px 22px',
-                            borderRadius: '12px',
-                            background: 'linear-gradient(135deg, #f97316, #f59e0b)',
-                            border: 'none',
-                            color: '#000',
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
-                        }}
-                    >
-                        Launch Engine
-                    </button>
-                </div>
-            </div>
-
             {/* Filter Bar */}
             <div
                 style={{
                     position: 'fixed',
-                    top: '76px', // Original was 76px when Nav Bar was simple. Nav Bar is still ~76px
+                    top: '80px', // Adjusted for GlobalHeader (scrolled: 56px, unscrolled: 80px)
                     left: 0,
                     right: 0,
                     zIndex: 49,
-                    background: 'rgba(0,0,0,0.6)',
-                    backdropFilter: 'blur(12px)',
+                    background: 'rgba(0,0,0,0.85)',
+                    backdropFilter: 'blur(20px)',
                     borderBottom: '1px solid rgba(255,255,255,0.05)',
                     padding: '12px 24px',
                     overflowX: 'auto',
@@ -624,7 +449,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
             </div>
 
             {/* Content Area */}
-            <div style={{ paddingTop: '152px', paddingBottom: '80px' }}>
+            <div style={{ paddingTop: '144px', paddingBottom: '80px' }}>
 
                 {/* 1. Grouped View (No Filters) */}
                 {!hasActiveFilters && !error && (

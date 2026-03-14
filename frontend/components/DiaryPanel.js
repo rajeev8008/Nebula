@@ -5,7 +5,7 @@ import { X, Calendar, MessageSquare, Trash2, Repeat } from 'lucide-react';
 import StarRating from './StarRating';
 
 export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
-    const logs = useAppStore((state) => state.logs);
+    const diaryEntries = useAppStore((state) => state.diaryEntries);
     const removeLog = useAppStore((state) => state.removeLog);
 
     return (
@@ -17,7 +17,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 100 }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 2000 }}
                     />
                     <motion.div
                         initial={{ x: '100%' }}
@@ -27,7 +27,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                         style={{
                             position: 'fixed', top: 0, right: 0, width: '450px', height: '100vh',
                             background: '#0a0a0a', borderLeft: '1px solid rgba(249,115,22,0.2)',
-                            boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', zIndex: 101,
+                            boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', zIndex: 2001,
                             display: 'flex', flexDirection: 'column', color: 'white'
                         }}
                     >
@@ -37,7 +37,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                                     Your Diary
                                 </h2>
                                 <p style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
-                                    {logs.length} films logged
+                                    {diaryEntries.length} films logged
                                 </p>
                             </div>
                             <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', color: '#94a3b8', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}>
@@ -46,16 +46,16 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                         </div>
 
                         <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }} className="hide-scrollbar">
-                            {logs.length === 0 ? (
+                            {diaryEntries.length === 0 ? (
                                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: 0.3, gap: '16px' }}>
                                     <Calendar size={48} />
                                     <p>No movies logged yet.</p>
                                 </div>
                             ) : (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                    {logs.map((log) => (
+                                    {diaryEntries.map((log) => (
                                         <motion.div
-                                            key={log.loggedAt}
+                                            key={log.dbId || log.loggedAt}
                                             layout
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
@@ -77,7 +77,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                                         <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#f8fafc', marginBottom: '2px' }}>{log.title}</h4>
                                                         <button 
-                                                            onClick={() => removeLog(log.loggedAt)}
+                                                            onClick={() => removeLog(log.dbId || log.loggedAt)}
                                                             style={{ background: 'transparent', border: 'none', color: '#ef4444', opacity: 0.5, cursor: 'pointer' }}
                                                             onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                                                             onMouseLeave={(e) => e.currentTarget.style.opacity = '0.5'}

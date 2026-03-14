@@ -3,8 +3,8 @@ import asyncio
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends, Request
-from backend.dependencies import rate_limiter, get_model, get_index
-from backend.cache import get_cached_search, set_cached_search
+from dependencies import rate_limiter, get_model, get_index
+from cache import get_cached_search, set_cached_search
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -35,10 +35,17 @@ app.add_middleware(
 
 # 4. Load AI Model & DB (Runs once on startup, skip in tests)
 if os.getenv('TESTING') != 'true':
-    print("Loading Model...")
-    model = SentenceTransformer('all-MiniLM-L6-v2')
-    pc = Pinecone(api_key=PINECONE_KEY)
-    index = pc.Index("nebula-index")
+    print(f"Loading Model... (PINECONE_KEY present: {bool(PINECONE_KEY)})")
+    try:
+        model = SentenceTransformer('all-MiniLM-L6-v2')
+        pc = Pinecone(api_key=PINECONE_KEY)
+        index = pc.Index("nebula-index")
+        print("Successfully loaded model and index.")
+    except Exception as e:
+        print(f"Error loading model/index: {e}")
+        model = None
+        pc = None
+        index = None
 else:
     # In test mode, use None (mocked in actual tests if needed)
     model = None
@@ -145,7 +152,9 @@ def api_search(
         if metadata_filter:
             query_kwargs["filter"] = metadata_filter
 
+        print(f"API Search: q='{q}', genre={genre}, decade={decade}")
         results = index.query(**query_kwargs)
+        print(f"Found {len(results.matches)} matches in Pinecone.")
 
         # Format all results
         all_movies = []
