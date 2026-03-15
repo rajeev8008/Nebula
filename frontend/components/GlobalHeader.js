@@ -117,10 +117,11 @@ export default function GlobalHeader() {
           backdropFilter: scrolled ? 'blur(20px)' : 'none',
           display: 'flex', alignItems: 'center',
           transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-          borderBottom: scrolled ? '1px solid rgba(249,115,22,0.1)' : '1px solid transparent'
+          borderBottom: scrolled ? '1px solid rgba(249,115,22,0.1)' : '1px solid transparent',
+          pointerEvents: 'none'
         }}
       >
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '16px', pointerEvents: 'auto' }}>
           {view === 'BROWSE' && (
             <>
               <div
@@ -165,7 +166,7 @@ export default function GlobalHeader() {
         </div>
 
         {/* Navigation */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '24px', pointerEvents: 'auto' }}>
           <button
             suppressHydrationWarning={true}
             onClick={() => setIsSearchOpen(true)}

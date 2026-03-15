@@ -515,6 +515,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                                                 height: `${CARD_HEIGHT}px`,
                                                 transform: `translateY(${virtualRow.start}px)`,
                                                 display: 'flex',
+                                                justifyContent: 'center',
                                                 gap: `${CARD_GAP}px`,
                                             }}
                                         >

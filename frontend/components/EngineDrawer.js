@@ -31,16 +31,11 @@ export default function EngineDrawer({ onSelectMovie }) {
 
     const handleBack = () => {
         const setView = useAppStore.getState().setView;
-        const setEngineStage = useAppStore.getState().setEngineStage; // Get setEngineStage from store
+        const setEngineStage = useAppStore.getState().setEngineStage;
         if (setView) {
-            if (engineEntrySource === 'direct') {
-                setView('LANDING');
-            } else {
-                setView('BROWSE');
-            }
-            // Ensure stage is reset as well
+            setView(engineEntrySource === 'direct' ? 'LANDING' : 'BROWSE');
             setEngineStage('search');
-            useAppStore.setState({ hasSeenLoadingAnimation: false }); // Keep this line
+            useAppStore.setState({ hasSeenLoadingAnimation: false });
         }
     };
 
