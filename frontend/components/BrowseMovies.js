@@ -10,7 +10,7 @@ import MovieRow from './MovieRow';
 import { SkeletonSection } from './ui/skeleton';
 import { fetchMovies } from '@/lib/api';
 import { useAppStore } from '@/store/useAppStore'; // Store for local filters
-import { Bookmark, Search, Calendar, Filter, Sparkles, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { Bookmark, Search, Calendar, Filter, Sparkles, SlidersHorizontal, ArrowUpDown, ArrowLeft } from 'lucide-react';
 import WatchlistPanel from './WatchlistPanel';
 import DiaryPanel from './DiaryPanel';
 
@@ -449,7 +449,46 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
 
             {/* Content Area */}
             <div style={{ paddingTop: '160px', paddingBottom: '80px' }}>
-                <div style={{ padding: '0 24px', marginBottom: '40px' }}>
+                <div style={{ padding: '0 24px', marginBottom: '40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    {hasActiveFilters && (
+                        <button
+                            onClick={() => {
+                                router.push(pathname, { scroll: true });
+                                setBrowseSearchQuery('');
+                                setBrowseRuntime('');
+                                setBrowseSortBy('popularity');
+                            }}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '48px',
+                                height: '48px',
+                                borderRadius: '14px',
+                                background: 'rgba(255,255,255,0.03)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                color: '#94a3b8',
+                                cursor: 'pointer',
+                                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                flexShrink: 0
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(249,115,22,0.1)';
+                                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.4)';
+                                e.currentTarget.style.color = '#fff';
+                                e.currentTarget.style.transform = 'translateX(-4px)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                                e.currentTarget.style.color = '#94a3b8';
+                                e.currentTarget.style.transform = 'translateX(0)';
+                            }}
+                            title="Back to All Movies"
+                        >
+                            <ArrowLeft size={22} />
+                        </button>
+                    )}
                     <h1 style={{ fontSize: '3rem', fontWeight: 900, background: 'linear-gradient(135deg, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-2px', margin: 0 }}>
                         Browse Movies
                     </h1>

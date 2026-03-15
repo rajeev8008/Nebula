@@ -26,7 +26,7 @@ import logging
 import orjson
 import redis.asyncio as aioredis
 
-from backend.database import get_redis
+from .database import get_redis
 
 logger = logging.getLogger(__name__)
 

@@ -69,7 +69,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                                         >
                                             <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
                                                 <img 
-                                                    src={log.poster ? `https://image.tmdb.org/t/p/w92${log.poster}` : ''} 
+                                                    src={log.poster ? `https://image.tmdb.org/t/p/w92${log.poster}` : null} 
                                                     style={{ width: '50px', height: '75px', objectFit: 'cover', borderRadius: '6px', cursor: 'pointer' }}
                                                     onClick={() => { onMovieClick(log); onClose(); }}
                                                 />

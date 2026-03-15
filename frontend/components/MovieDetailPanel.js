@@ -32,9 +32,9 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                     transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                     style={{
                         position: 'fixed',
-                        top: '84px',
+                        top: 0,
                         right: 0,
-                        height: 'calc(100vh - 84px)',
+                        height: '100vh',
                         width: '420px',
                         maxWidth: '100vw',
                         zIndex: 10001,
@@ -69,7 +69,7 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                         </div>
                     )}
 
-                    <div style={{ padding: '20px 24px 28px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                    <div style={{ padding: '40px 24px 28px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
                         {/* Title fallback (no poster) */}
                         {!selectedMovie.poster && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

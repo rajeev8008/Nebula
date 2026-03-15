@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { useAppStore } from '@/store/useAppStore';
 import axios from 'axios';
@@ -54,6 +55,7 @@ function getSimilarMovies(targetMovie, links, allNodes, limit = 6) {
 export default function Home() {
   const view = useAppStore((state) => state.view);
   const setView = useAppStore((state) => state.setView);
+  const router = useRouter();
 
   // Graph & Filtered Data (Preserved for compatibility if needed, but we'll use graphData for the Engine)
   const graphData = useAppStore((state) => state.graphData);
@@ -92,6 +94,7 @@ export default function Home() {
     setEngineStage('search');
     useAppStore.getState().setEngineQuery('');
     useAppStore.setState({ hasSeenLoadingAnimation: false });
+    router.push('/');
   };
 
   const exitEngineToBrowse = () => {
@@ -102,6 +105,7 @@ export default function Home() {
 
   const launchBrowse = () => {
     setView('BROWSE');
+    router.push('/');
   };
 
   // Listen for the custom search event dispatched from EngineDrawer
@@ -277,7 +281,10 @@ export default function Home() {
     return (
       <Suspense>
         <BrowseMovies
-          onBack={() => setView('LANDING')}
+          onBack={() => {
+            setView('LANDING');
+            router.push('/');
+          }}
           onLaunchEngine={() => launchGraph('browse')}
           onMovieClick={(movie) => {
             // For Browse view, just set the selected movie so the panel opens

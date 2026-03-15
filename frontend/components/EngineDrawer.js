@@ -2,6 +2,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { X } from 'lucide-react';
 
 // Options for loading dots
@@ -26,6 +27,8 @@ export default function EngineDrawer({ onSelectMovie }) {
     const engineStage = useAppStore((state) => state.engineStage);
     const hasSeenLoadingAnimation = useAppStore((state) => state.hasSeenLoadingAnimation);
     const engineEntrySource = useAppStore((state) => state.engineEntrySource);
+    const router = useRouter();
+    const pathname = usePathname();
 
     const isFullScreen = engineStage === 'search' || engineStage === 'building';
 
@@ -36,6 +39,7 @@ export default function EngineDrawer({ onSelectMovie }) {
             setView(engineEntrySource === 'direct' ? 'LANDING' : 'BROWSE');
             setEngineStage('search');
             useAppStore.setState({ hasSeenLoadingAnimation: false });
+            router.push(pathname);
         }
     };
 
@@ -58,14 +62,15 @@ export default function EngineDrawer({ onSelectMovie }) {
             transition={{ type: "spring", bounce: 0, duration: 0.7 }}
             style={{
                 position: 'absolute',
-                top: isFullScreen ? 0 : '84px',
+                top: 0,
                 left: 0,
-                height: isFullScreen ? '100vh' : 'calc(100vh - 84px)',
+                height: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
                 zIndex: 10001, // Above normal UI and header
                 overflow: 'hidden',
                 boxShadow: isFullScreen ? 'none' : '10px 0 30px rgba(0,0,0,0.5)',
+                pointerEvents: 'auto',
             }}
         >
             {/* Ambient Particle Background for Full Screen (State 1 and 2) */}
@@ -134,7 +139,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                     flexDirection: 'column',
                     justifyContent: isFullScreen ? 'center' : 'flex-start',
                     alignItems: isFullScreen ? 'center' : 'stretch',
-                    padding: isFullScreen ? '0 24px' : '24px 20px',
+                    padding: isFullScreen ? '0 24px' : '40px 20px 24px',
                     borderBottom: isFullScreen ? 'none' : '1px solid rgba(255,255,255,0.05)',
                     background: isFullScreen ? 'transparent' : 'rgba(0,0,0,0.3)',
                     pointerEvents: engineStage === 'building' ? 'none' : 'auto', // Block interaction only when building
@@ -336,6 +341,12 @@ export default function EngineDrawer({ onSelectMovie }) {
                                     onClick={() => {
                                         setEngineQuery('');
                                         useAppStore.getState().setEngineStage('search');
+                                        // Clear all stale data immediately
+                                        useAppStore.setState({ 
+                                            graphData: { nodes: [], links: [] },
+                                            engineResults: [],
+                                            selectedEngineMovie: null
+                                        });
                                         document.dispatchEvent(new CustomEvent('engine-clear-selection'));
                                     }}
                                     style={{

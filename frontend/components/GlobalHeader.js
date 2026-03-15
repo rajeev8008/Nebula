@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { supabase } from '@/lib/supabase';
@@ -20,6 +21,8 @@ export default function GlobalHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const user = useAppStore(state => state.user);
   const profile = useAppStore(state => state.profile);
@@ -125,7 +128,10 @@ export default function GlobalHeader() {
           {view === 'BROWSE' && (
             <>
               <div
-                onClick={() => setView('LANDING')}
+                onClick={() => {
+                  setView('LANDING');
+                  router.push(pathname);
+                }}
                 style={{
                   fontSize: '24px',
                   fontWeight: 800,
@@ -140,7 +146,10 @@ export default function GlobalHeader() {
                 Nebula
               </div>
               <button
-                onClick={() => setView('LANDING')}
+                onClick={() => {
+                  setView('LANDING');
+                  router.push(pathname);
+                }}
                 style={{
                   padding: '6px 12px',
                   background: 'rgba(255,255,255,0.05)',
@@ -179,7 +188,10 @@ export default function GlobalHeader() {
 
           <button
             suppressHydrationWarning={true}
-            onClick={() => setView('BROWSE')}
+            onClick={() => {
+              setView('BROWSE');
+              router.push(pathname);
+            }}
             style={{ background: 'transparent', border: 'none', color: view === 'BROWSE' ? '#fff' : '#94a3b8', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
             onMouseEnter={(e) => e.target.style.color = '#fff'}
             onMouseLeave={(e) => e.target.style.color = view === 'BROWSE' ? '#fff' : '#94a3b8'}

@@ -186,7 +186,7 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                                             <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <div style={{ display: 'flex', gap: '16px' }}>
                                                     <img 
-                                                        src={log.movie_data.poster ? `https://image.tmdb.org/t/p/w92${log.movie_data.poster}` : ''} 
+                                                        src={log.movie_data.poster ? `https://image.tmdb.org/t/p/w92${log.movie_data.poster}` : null} 
                                                         style={{ width: '40px', height: '60px', objectFit: 'cover', borderRadius: '6px', cursor: 'pointer' }}
                                                         onClick={() => onMovieClick(log.movie_data)}
                                                     />

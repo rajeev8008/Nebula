@@ -96,7 +96,7 @@ export default function WatchlistPanel({ isOpen, onClose, onMovieClick }) {
                                             whileHover={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(249,115,22,0.3)' }}
                                         >
                                             <img
-                                                src={movie.poster ? `https://image.tmdb.org/t/p/w92${movie.poster}` : ''}
+                                                src={movie.poster ? `https://image.tmdb.org/t/p/w92${movie.poster}` : null}
                                                 style={{ width: '60px', height: '90px', objectFit: 'cover', borderRadius: '6px' }}
                                             />
                                             <div style={{ flex: 1, minWidth: 0 }}>
