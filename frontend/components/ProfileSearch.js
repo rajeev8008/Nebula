@@ -31,17 +31,17 @@ export default function ProfileSearch({ isOpen, onClose, onSelectUser }) {
       console.error("Profile search full error:", JSON.stringify(searchError, null, 2));
       // Fallback: try without the join if join failed
       if (searchError.message?.includes('diary_entries')) {
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('profiles')
-            .select('username, id')
-            .ilike('username', `%${val}%`)
-            .limit(10);
-          
-          if (!fallbackError && fallbackData) {
-              setResults(fallbackData.map(p => ({ ...p, count: 0, avg: '0.0' })));
-          } else {
-              setError(fallbackError || searchError);
-          }
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('profiles')
+          .select('username, id')
+          .ilike('username', `%${val}%`)
+          .limit(10);
+
+        if (!fallbackError && fallbackData) {
+          setResults(fallbackData.map(p => ({ ...p, count: 0, avg: '0.0' })));
+        } else {
+          setError(fallbackError || searchError);
+        }
       } else {
         setError(searchError);
       }
@@ -52,7 +52,7 @@ export default function ProfileSearch({ isOpen, onClose, onSelectUser }) {
       const formatted = data.map(p => ({
         ...p,
         count: p.diary_entries?.length || 0,
-        avg: p.diary_entries?.length 
+        avg: p.diary_entries?.length
           ? (p.diary_entries.reduce((acc, curr) => acc + (curr.rating || 0), 0) / p.diary_entries.length).toFixed(1)
           : '0.0'
       }));
@@ -105,7 +105,7 @@ export default function ProfileSearch({ isOpen, onClose, onSelectUser }) {
                   <p>Search failed. Your database might not be set up yet.</p>
                 </div>
               )}
-              
+
               {results.map((user, idx) => (
                 <motion.div
                   key={user.id}

@@ -3,7 +3,7 @@
  * Connects the Next.js frontend to the FastAPI + Pinecone backend.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
 /**
  * Fetch movies from the backend with optional search, filters, and pagination.

@@ -47,7 +47,7 @@ function FilterChip({ label, active, onClick, color = 'orange' }) {
         blue: { grad: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'rgba(59,130,246,0.8)', glow: 'rgba(59,130,246,0.3)' },
         violet: { grad: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', border: 'rgba(139,92,246,0.8)', glow: 'rgba(139,92,246,0.3)' }
     };
-    
+
     const theme = colorMap[color] || colorMap.orange;
 
     return (
@@ -101,7 +101,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     const setBrowseSortBy = useAppStore(state => state.setBrowseSortBy);
     const browseRuntime = useAppStore(state => state.browseRuntime);
     const setBrowseRuntime = useAppStore(state => state.setBrowseRuntime);
-    
+
     const hasLocalFilters = browseSearchQuery || browseRuntime || (browseSortBy && browseSortBy !== 'popularity');
     const hasActiveFilters = hasActiveUrlFilters || hasLocalFilters;
 
@@ -191,7 +191,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     // Apply Client-Side Filtering & Sorting
     const movies = useMemo(() => {
         let result = rawMovies;
-        
+
         // 1. Title Search
         if (browseSearchQuery) {
             const query = browseSearchQuery.toLowerCase();
@@ -284,9 +284,10 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     const rowCount = Math.ceil(movies.length / columns);
     const virtualizer = useVirtualizer({
         count: rowCount,
-        getScrollElement: () => scrollRef.current,
+        getScrollElement: () => typeof document !== 'undefined' ? document.documentElement : null,
         estimateSize: () => CARD_HEIGHT + CARD_GAP,
-        overscan: 3,
+        overscan: 5,
+        scrollMargin: scrollRef.current?.offsetTop ?? 0,
     });
 
     // Derive unified loading / error
@@ -299,18 +300,16 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
             style={{
                 position: 'relative',
                 width: '100%',
-                height: '100vh',
+                minHeight: '100vh',
                 background: 'linear-gradient(to bottom, #000 0%, #0f172a 50%, #000 100%)',
                 color: 'white',
-                overflowY: 'auto',
-                overflowX: 'hidden',
             }}
         >
             {/* Filter Bar */}
             <div
                 style={{
-                    position: 'fixed',
-                    top: '80px', // Adjusted for GlobalHeader (scrolled: 56px, unscrolled: 80px)
+                    position: 'absolute',
+                    top: '80px',
                     left: 0,
                     right: 0,
                     zIndex: 49,
@@ -323,7 +322,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                 className="hide-scrollbar"
             >
                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap', minWidth: 'max-content' }}>
-                    
+
                     {/* Local Filters: Sort By & Runtime */}
                     <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginRight: '4px', flexShrink: 0 }}>
                         Sort
@@ -449,7 +448,12 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
             </div>
 
             {/* Content Area */}
-            <div style={{ paddingTop: '144px', paddingBottom: '80px' }}>
+            <div style={{ paddingTop: '160px', paddingBottom: '80px' }}>
+                <div style={{ padding: '0 24px', marginBottom: '40px' }}>
+                    <h1 style={{ fontSize: '3rem', fontWeight: 900, background: 'linear-gradient(135deg, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-2px', margin: 0 }}>
+                        Browse Movies
+                    </h1>
+                </div>
 
                 {/* 1. Grouped View (No Filters) */}
                 {!hasActiveFilters && !error && (
@@ -552,14 +556,14 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
             </div>
 
             {/* Watchlist & Diary Panels */}
-            <WatchlistPanel 
-                isOpen={isWatchlistOpen} 
-                onClose={() => setIsWatchlistOpen(false)} 
+            <WatchlistPanel
+                isOpen={isWatchlistOpen}
+                onClose={() => setIsWatchlistOpen(false)}
                 onMovieClick={(movie) => onMovieClick(movie)}
             />
-            <DiaryPanel 
-                isOpen={isDiaryOpen} 
-                onClose={() => setIsDiaryOpen(false)} 
+            <DiaryPanel
+                isOpen={isDiaryOpen}
+                onClose={() => setIsDiaryOpen(false)}
                 onMovieClick={(movie) => onMovieClick(movie)}
             />
         </div>

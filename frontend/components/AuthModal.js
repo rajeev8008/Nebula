@@ -44,8 +44,7 @@ export default function AuthModal({ isOpen, onClose }) {
         if (!authData.user) throw new Error("Signup failed - no user returned.");
 
         // Create Profile (using upsert in case of retry)
-        // Note: If email confirmation is enabled, session might be null and this insert might fail 
-        // depending on your RLS policies. It's recommended to use a DB Trigger for profile creation.
+        // Best effort: The DB Trigger in supabase_schema.sql should handle this automatically.
         const { error: profileError } = await supabase.from('profiles').upsert({
           id: authData.user.id,
           username: username || email.split('@')[0],
@@ -53,9 +52,9 @@ export default function AuthModal({ isOpen, onClose }) {
         });
         
         if (profileError) {
-          console.error("Profile creation error details:", JSON.stringify(profileError, null, 2));
-          // If profile creation fails but auth succeeded, we might still want to proceed
-          // if it's just a 'duplicate' error or RLS issue.
+          console.warn("Manual profile creation failed (this is expected if RLS is strict or trigger already ran):", profileError.message);
+          // We don't throw here because if the user was created in auth.users, 
+          // they can still log in, and the trigger likely handled the profile.
         }
         
         if (authData.session) {
@@ -72,7 +71,17 @@ export default function AuthModal({ isOpen, onClose }) {
       onClose();
     } catch (err) {
       console.error("Auth process error:", err);
-      setError(err.message || "An unexpected error occurred");
+      let msg = err.message || "An unexpected error occurred";
+      
+      if (msg.includes("fetch")) {
+        msg = "Unable to reach authentication server. Please check your internet connection or Supabase configuration.";
+      } else if (msg.includes("Invalid login credentials")) {
+        msg = "Invalid email or password. If you just signed up, please ensure you confirmed your email (if enabled) or try creating a new account.";
+      } else if (msg.includes("Email not confirmed")) {
+        msg = "Please check your email and confirm your account before signing in.";
+      }
+      
+      setError(msg);
     } finally {
       setLoading(false);
     }

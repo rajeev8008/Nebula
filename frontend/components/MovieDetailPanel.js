@@ -32,12 +32,12 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                     transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                     style={{
                         position: 'fixed',
-                        top: 0,
+                        top: '84px',
                         right: 0,
-                        height: '100vh',
-                        width: '100vw',
-                        maxWidth: '420px',
-                        zIndex: 9999,
+                        height: 'calc(100vh - 84px)',
+                        width: '420px',
+                        maxWidth: '100vw',
+                        zIndex: 10001,
                         background: 'rgba(0, 0, 0, 0.60)',
                         backdropFilter: 'blur(40px)',
                         WebkitBackdropFilter: 'blur(40px)',
@@ -91,16 +91,32 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
 
                         {/* User Activity Row */}
                         <div style={{ background: 'rgba(6, 182, 212, 0.03)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(6, 182, 212, 0.15)', display: 'flex', flexDirection: 'column', gap: '16px', backdropFilter: 'blur(8px)' }}>
-                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <div style={{ fontSize: '11px', color: '#22d3ee', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1.2px' }}>Your Rating</div>
                                 <StarRating rating={personalRating} onRate={(r) => setUserRating(selectedMovie.id, r)} size={24} />
-                             </div>
-                              <button
+                            </div>
+                            <button
                                 onClick={() => setIsLogModalOpen(true)}
                                 style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', color: '#93c5fd', fontSize: '14px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
-                             >
+                            >
                                 <ClipboardList size={18} /> Log or Review
-                             </button>
+                            </button>
+
+                            {onLaunchEngine && (
+                                <button
+                                    onClick={onLaunchEngine}
+                                    style={{
+                                        width: '100%', padding: '12px', borderRadius: '10px',
+                                        background: 'linear-gradient(135deg, #f97316, #f59e0b)',
+                                        border: 'none', color: '#000', fontSize: '14px',
+                                        fontWeight: 800, cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                                        boxShadow: '0 4px 12px rgba(249,115,22,0.2)'
+                                    }}
+                                >
+                                    Launch Engine
+                                </button>
+                            )}
                         </div>
 
                         {/* Synopsis & More Info */}
@@ -134,7 +150,7 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
                                             <Calendar size={14} /> Date Watched
                                         </label>
-                                        <input type="date" value={logForm.date} onChange={(e) => setLogForm({...logForm, date: e.target.value})} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none' }} />
+                                        <input type="date" value={logForm.date} onChange={(e) => setLogForm({ ...logForm, date: e.target.value })} style={{ width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none' }} />
                                     </div>
 
                                     {/* Review */}
@@ -142,12 +158,12 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', fontWeight: 600, color: '#64748b', marginBottom: '8px', textTransform: 'uppercase' }}>
                                             <MessageSquare size={14} /> Review
                                         </label>
-                                        <textarea placeholder="Write your thoughts..." value={logForm.review} onChange={(e) => setLogForm({...logForm, review: e.target.value})} style={{ width: '100%', height: '100px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none', resize: 'none' }} />
+                                        <textarea placeholder="Write your thoughts..." value={logForm.review} onChange={(e) => setLogForm({ ...logForm, review: e.target.value })} style={{ width: '100%', height: '100px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', outline: 'none', resize: 'none' }} />
                                     </div>
 
 
                                     {/* Rewatch Toggle */}
-                                    <div onClick={() => setLogForm({...logForm, rewatch: !logForm.rewatch})} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '10px', cursor: 'pointer' }}>
+                                    <div onClick={() => setLogForm({ ...logForm, rewatch: !logForm.rewatch })} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)', padding: '12px 16px', borderRadius: '10px', cursor: 'pointer' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                             <Repeat size={16} color={logForm.rewatch ? '#f97316' : '#64748b'} />
                                             <span style={{ fontSize: '14px', color: logForm.rewatch ? '#fff' : '#94a3b8' }}>Rewatch</span>

@@ -17,7 +17,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 2000 }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 10000 }}
                     />
                     <motion.div
                         initial={{ x: '100%' }}
@@ -27,7 +27,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                         style={{
                             position: 'fixed', top: 0, right: 0, width: '450px', height: '100vh',
                             background: '#0a0a0a', borderLeft: '1px solid rgba(249,115,22,0.2)',
-                            boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', zIndex: 2001,
+                            boxShadow: '-10px 0 30px rgba(0,0,0,0.5)', zIndex: 10001,
                             display: 'flex', flexDirection: 'column', color: 'white'
                         }}
                     >

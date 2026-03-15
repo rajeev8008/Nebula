@@ -23,7 +23,7 @@ export default function WatchlistPanel({ isOpen, onClose, onMovieClick }) {
                             inset: 0,
                             background: 'rgba(0,0,0,0.4)',
                             backdropFilter: 'blur(4px)',
-                            zIndex: 2000
+                            zIndex: 10000
                         }}
                     />
 
@@ -42,7 +42,7 @@ export default function WatchlistPanel({ isOpen, onClose, onMovieClick }) {
                             background: '#0a0a0a',
                             borderLeft: '1px solid rgba(249,115,22,0.2)',
                             boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
-                            zIndex: 2001,
+                            zIndex: 10001,
                             display: 'flex',
                             flexDirection: 'column',
                             color: 'white'

@@ -2,6 +2,8 @@
 import { useRef, useCallback, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ZoomIn, ZoomOut, Locate } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '@/store/useAppStore';
 
 const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
 
@@ -24,6 +26,7 @@ const hudBtnStyle = {
 const imageCache = new Map();
 
 export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, centralNodeId }) {
+  const selectedEngineMovie = useAppStore((state) => state.selectedEngineMovie);
   const graphRef = useRef();
   const [hoveredNode, setHoveredNode] = useState(null);
 
@@ -36,16 +39,16 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
       fg.d3Force('link')?.distance((link) => {
         const sim = link.similarity || link.value || 0.5;
         // High similarity = short distance, low = long
-        return 50 / Math.max(sim, 0.1); 
+        return 50 / Math.max(sim, 0.1);
       });
       if (typeof window !== 'undefined') {
         import('d3-force').then(d3 => {
-           // Base collision radius on poster size
-           fg.d3Force('collide', d3.forceCollide().radius(n => {
-               const voteCount = n.vote_count || 100;
-               const size = Math.min(Math.max(Math.sqrt(voteCount) / 10, 4), 16);
-               return (size * 2) + 20; // Enough room for the poster and spacing
-           }));
+          // Base collision radius on poster size
+          fg.d3Force('collide', d3.forceCollide().radius(n => {
+            const voteCount = n.vote_count || 100;
+            const size = Math.min(Math.max(Math.sqrt(voteCount) / 10, 4), 16);
+            return (size * 2) + 20; // Enough room for the poster and spacing
+          }));
         });
       }
       fg.d3ReheatSimulation();
@@ -55,19 +58,19 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
 
   useEffect(() => {
     if (centralNodeId && graphRef.current) {
-        const centralNode = nodes.find(n => n.id === centralNodeId);
-        if (centralNode) {
-            setTimeout(() => {
-                if (graphRef.current) {
-                    graphRef.current.centerAt(
-                        (centralNode.x || 0) + 30, 
-                        (centralNode.y || 0), 
-                        1000
-                    );
-                    graphRef.current.zoom(2, 1000);
-                }
-            }, 500);
-        }
+      const centralNode = nodes.find(n => n.id === centralNodeId);
+      if (centralNode) {
+        setTimeout(() => {
+          if (graphRef.current) {
+            graphRef.current.centerAt(
+              (centralNode.x || 0) + 30,
+              (centralNode.y || 0),
+              1000
+            );
+            graphRef.current.zoom(2, 1000);
+          }
+        }, 500);
+      }
     }
   }, [centralNodeId, nodes]);
 
@@ -87,12 +90,12 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
     if (!graphRef.current) return;
     const centralNode = nodes.find(n => n.id === centralNodeId);
     if (centralNode && centralNode.x != null) {
-        graphRef.current.centerAt(
-          (centralNode.x || 0) + 30, 
-          (centralNode.y || 0), 
-          1000
-        );
-        graphRef.current.zoom(2, 1000);
+      graphRef.current.centerAt(
+        (centralNode.x || 0) + 30,
+        (centralNode.y || 0),
+        1000
+      );
+      graphRef.current.zoom(2, 1000);
     } else {
       graphRef.current.zoomToFit(1000, 50);
     }
@@ -102,12 +105,12 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
     const isCentral = node.id === centralNodeId;
     const isHovered = hoveredNode?.id === node.id;
     const isDimmed = hoveredNode && !isHovered;
-    
+
     // Size scales with vote count
     const voteCount = node.vote_count || 100;
     // Base size bounded between 4 and 16
     const baseSize = Math.min(Math.max(Math.sqrt(voteCount) / 10, 4), 16);
-    
+
     // Poster dimensions
     const imgWidth = (isCentral ? baseSize * 1.5 : baseSize) * 4;
     const imgHeight = imgWidth * 1.5;
@@ -121,9 +124,9 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
     ctx.save();
     ctx.beginPath();
     if (ctx.roundRect) {
-        ctx.roundRect(x, y, imgWidth, imgHeight, r);
+      ctx.roundRect(x, y, imgWidth, imgHeight, r);
     } else {
-        ctx.rect(x, y, imgWidth, imgHeight);
+      ctx.rect(x, y, imgWidth, imgHeight);
     }
     ctx.fillStyle = '#1e293b'; // slate-800
     ctx.fill();
@@ -147,55 +150,55 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
 
     // Central Node Glowing Ring
     if (isCentral || isHovered) {
-        ctx.beginPath();
-        if (ctx.roundRect) {
-            ctx.roundRect(x - 2, y - 2, imgWidth + 4, imgHeight + 4, r + 2);
-        } else {
-            ctx.rect(x - 2, y - 2, imgWidth + 4, imgHeight + 4);
-        }
-        ctx.lineWidth = isCentral ? 3 : 2;
-        ctx.strokeStyle = isCentral ? '#fbbf24' : '#f97316';
-        if (isCentral) {
-            ctx.shadowColor = 'rgba(251, 191, 36, 0.6)';
-            ctx.shadowBlur = 15;
-        }
-        ctx.stroke();
-        ctx.shadowBlur = 0; // reset
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x - 2, y - 2, imgWidth + 4, imgHeight + 4, r + 2);
+      } else {
+        ctx.rect(x - 2, y - 2, imgWidth + 4, imgHeight + 4);
+      }
+      ctx.lineWidth = isCentral ? 3 : 2;
+      ctx.strokeStyle = isCentral ? '#fbbf24' : '#f97316';
+      if (isCentral) {
+        ctx.shadowColor = 'rgba(251, 191, 36, 0.6)';
+        ctx.shadowBlur = 15;
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0; // reset
     } else {
-        // Normal border
-        ctx.beginPath();
-        if (ctx.roundRect) {
-            ctx.roundRect(x, y, imgWidth, imgHeight, r);
-        } else {
-            ctx.rect(x, y, imgWidth, imgHeight);
-        }
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = '#334155';
-        ctx.stroke();
+      // Normal border
+      ctx.beginPath();
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, imgWidth, imgHeight, r);
+      } else {
+        ctx.rect(x, y, imgWidth, imgHeight);
+      }
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#334155';
+      ctx.stroke();
     }
 
     // Centered Text Overlay matching site typography
     const fontSize = Math.max(10 / globalScale, 3);
     if (imgWidth > fontSize * 2) {
-        ctx.font = `800 ${Math.min(fontSize, imgWidth / 5)}px Inter, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        // Multi-line wrap or truncate? We will truncate to fit poster width
-        const title = node.title;
-        ctx.fillStyle = isCentral ? '#fbbf24' : '#ffffff';
-        
-        let displayTitle = title;
-        if (ctx.measureText(displayTitle).width > imgWidth - 4) {
-             while(displayTitle.length > 0 && ctx.measureText(displayTitle + '...').width > imgWidth - 6) {
-                 displayTitle = displayTitle.slice(0, -1);
-             }
-             displayTitle += '...';
+      ctx.font = `800 ${Math.min(fontSize, imgWidth / 5)}px Inter, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Multi-line wrap or truncate? We will truncate to fit poster width
+      const title = node.title;
+      ctx.fillStyle = isCentral ? '#fbbf24' : '#ffffff';
+
+      let displayTitle = title;
+      if (ctx.measureText(displayTitle).width > imgWidth - 4) {
+        while (displayTitle.length > 0 && ctx.measureText(displayTitle + '...').width > imgWidth - 6) {
+          displayTitle = displayTitle.slice(0, -1);
         }
-        
-        ctx.fillText(displayTitle, node.x, node.y);
+        displayTitle += '...';
+      }
+
+      ctx.fillText(displayTitle, node.x, node.y);
     }
-    
+
     ctx.globalAlpha = 1;
 
   }, [centralNodeId, hoveredNode]);
@@ -208,13 +211,13 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
     const isHovered = hoveredNode !== null;
     const involvesHovered = isHovered && (start.id === hoveredNode.id || end.id === hoveredNode.id);
     const isCentralLink = link.isCentralLink;
-    
+
     ctx.beginPath();
     ctx.moveTo(start.x, start.y);
     ctx.lineTo(end.x, end.y);
-    
+
     const sim = link.similarity || link.value || 0.5;
-    
+
     if (isHovered && !involvesHovered) {
       ctx.strokeStyle = 'rgba(15, 23, 42, 0.2)'; // Faded out
       ctx.lineWidth = 0.5 / globalScale;
@@ -223,13 +226,13 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
       ctx.lineWidth = (sim * 5) / globalScale;
     } else {
       // Scale edge thickness and opacity with similarity
-      ctx.strokeStyle = isCentralLink 
-            ? `rgba(249, 115, 22, ${Math.max(sim * 0.7, 0.2)})`  // Central link orange
-            : `rgba(251, 191, 36, ${Math.max(sim * 0.5, 0.1)})`; // Cross link yellow
-            
+      ctx.strokeStyle = isCentralLink
+        ? `rgba(249, 115, 22, ${Math.max(sim * 0.7, 0.2)})`  // Central link orange
+        : `rgba(251, 191, 36, ${Math.max(sim * 0.5, 0.1)})`; // Cross link yellow
+
       ctx.lineWidth = (sim * 3) / globalScale;
     }
-    
+
     ctx.stroke();
   }, [hoveredNode]);
 
@@ -246,8 +249,8 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
         warmupTicks={50}
         onNodeClick={(node) => {
           graphRef.current.centerAt(
-            (node.x || 0) + 30, 
-            (node.y || 0), 
+            (node.x || 0) + 30,
+            (node.y || 0),
             1000
           );
           graphRef.current.zoom(2.5, 1000);
@@ -263,11 +266,14 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
       />
 
       {/* Floating Navigation HUD */}
-      <div
+      <motion.div
+        animate={{
+          left: selectedEngineMovie ? 'calc(50% - 30px)' : 'calc(50% + 180px)',
+        }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         style={{
           position: 'absolute',
           bottom: '32px',
-          left: 'calc(50% + 180px)', // Offset to account for the 360px left panel
           transform: 'translateX(-50%)',
           zIndex: 30,
           display: 'flex',
@@ -336,7 +342,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
         >
           <Locate size={20} />
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }

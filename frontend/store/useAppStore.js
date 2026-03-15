@@ -47,10 +47,10 @@ export const useAppStore = create((set, get) => ({
     browseSearchQuery: '',
     setBrowseSearchQuery: (browseSearchQuery) => set({ browseSearchQuery }),
 
-    browseSortBy: 'popularity', 
+    browseSortBy: 'popularity',
     setBrowseSortBy: (browseSortBy) => set({ browseSortBy }),
 
-    browseRuntime: '', 
+    browseRuntime: '',
     setBrowseRuntime: (browseRuntime) => set({ browseRuntime }),
 
     // ─── Auth State ───
@@ -62,19 +62,19 @@ export const useAppStore = create((set, get) => ({
     setProfile: (profile) => set({ profile }),
 
     // ─── Watchlist Feature ───
-    watchlist: typeof window !== 'undefined' && localStorage.getItem('nebula_watchlist') 
-        ? JSON.parse(localStorage.getItem('nebula_watchlist')) 
+    watchlist: typeof window !== 'undefined' && localStorage.getItem('nebula_watchlist')
+        ? JSON.parse(localStorage.getItem('nebula_watchlist'))
         : [],
-    
+
     // ─── User Activity (Diary / Logs) ───
     diaryEntries: typeof window !== 'undefined' && localStorage.getItem('nebula_logs')
         ? JSON.parse(localStorage.getItem('nebula_logs'))
         : [],
-    
+
     userRatings: typeof window !== 'undefined' && localStorage.getItem('nebula_ratings')
         ? JSON.parse(localStorage.getItem('nebula_ratings'))
         : {},
-    
+
     // ─── Sync Actions ───
     syncStore: async () => {
         const { user } = get();
@@ -128,7 +128,7 @@ export const useAppStore = create((set, get) => ({
         const newWatchlist = isSaved
             ? watchlist.filter(m => String(m.id) !== String(movie.id))
             : [...watchlist, movie];
-        
+
         set({ watchlist: newWatchlist });
         if (typeof window !== 'undefined') {
             localStorage.setItem('nebula_watchlist', JSON.stringify(newWatchlist));

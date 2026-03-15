@@ -6,16 +6,16 @@ import { X } from 'lucide-react';
 
 // Options for loading dots
 const dotVariants = {
-  hidden: { opacity: 0.2, scale: 0.5 },
-  visible: { 
-    opacity: 1, 
-    scale: 1,
-    transition: {
-      duration: 0.8,
-      repeat: Infinity,
-      repeatType: "reverse"
+    hidden: { opacity: 0.2, scale: 0.5 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: {
+            duration: 0.8,
+            repeat: Infinity,
+            repeatType: "reverse"
+        }
     }
-  }
 };
 
 export default function EngineDrawer({ onSelectMovie }) {
@@ -31,10 +31,16 @@ export default function EngineDrawer({ onSelectMovie }) {
 
     const handleBack = () => {
         const setView = useAppStore.getState().setView;
+        const setEngineStage = useAppStore.getState().setEngineStage; // Get setEngineStage from store
         if (setView) {
-            setView(engineEntrySource === 'direct' ? 'LANDING' : 'BROWSE');
-            useAppStore.setState({ hasSeenLoadingAnimation: false });
-            useAppStore.getState().setEngineStage('search');
+            if (engineEntrySource === 'direct') {
+                setView('LANDING');
+            } else {
+                setView('BROWSE');
+            }
+            // Ensure stage is reset as well
+            setEngineStage('search');
+            useAppStore.setState({ hasSeenLoadingAnimation: false }); // Keep this line
         }
     };
 
@@ -46,7 +52,7 @@ export default function EngineDrawer({ onSelectMovie }) {
     };
 
     return (
-        <motion.div 
+        <motion.div
             initial={false}
             animate={{
                 width: isFullScreen ? '100vw' : '360px',
@@ -57,12 +63,12 @@ export default function EngineDrawer({ onSelectMovie }) {
             transition={{ type: "spring", bounce: 0, duration: 0.7 }}
             style={{
                 position: 'absolute',
-                top: 0,
+                top: isFullScreen ? 0 : '84px',
                 left: 0,
-                height: '100vh',
+                height: isFullScreen ? '100vh' : 'calc(100vh - 84px)',
                 display: 'flex',
                 flexDirection: 'column',
-                zIndex: 60, // Above normal UI 
+                zIndex: 10001, // Above normal UI and header
                 overflow: 'hidden',
                 boxShadow: isFullScreen ? 'none' : '10px 0 30px rgba(0,0,0,0.5)',
             }}
@@ -141,10 +147,10 @@ export default function EngineDrawer({ onSelectMovie }) {
                 transition={{ type: "spring", bounce: 0, duration: 0.7 }}
             >
                 {/* Full Screen Form Wrapper OR State 3 Header */}
-                <motion.div 
+                <motion.div
                     layout
-                    style={{ 
-                        width: '100%', 
+                    style={{
+                        width: '100%',
                         maxWidth: isFullScreen ? '600px' : '100%',
                     }}
                     initial={isFullScreen ? { y: 20, opacity: 0 } : false}
@@ -164,7 +170,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                                     </h1>
                                 </motion.div>
 
-                                <form 
+                                <form
                                     onSubmit={handleSearchSubmit}
                                     style={{ position: 'relative' }}
                                 >
@@ -247,7 +253,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                                             <X size={20} />
                                         </button>
                                     )}
-                                    <button 
+                                    <button
                                         type="submit"
                                         disabled={searchLoading}
                                         style={{
@@ -266,8 +272,8 @@ export default function EngineDrawer({ onSelectMovie }) {
                                         }}
                                     >
                                         {!searchLoading && (
-                                            <motion.span 
-                                                whileHover={{ scale: 1.1 }} 
+                                            <motion.span
+                                                whileHover={{ scale: 1.1 }}
                                                 whileTap={{ scale: 0.9 }}
                                                 style={{ fontSize: '20px' }}
                                             >
@@ -292,7 +298,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                             </motion.div>
                         ) : (
                             <motion.div key="state3-header" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                <motion.h2 
+                                <motion.h2
                                     style={{
                                         fontSize: '1.25rem',
                                         fontWeight: 800,
@@ -326,7 +332,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                                     {engineEntrySource === 'direct' ? '← Back to Main Page' : '← Back to Browse Movies'}
                                 </button>
 
-                                 <div>
+                                <div>
                                     <span style={{ fontSize: '13px', color: '#64748b' }}>Results for: </span>
                                     <span style={{ fontSize: '14px', color: '#22d3ee', fontWeight: 600 }} className="text-glow-cyan">"{engineQuery}"</span>
                                 </div>
@@ -350,20 +356,20 @@ export default function EngineDrawer({ onSelectMovie }) {
                                         transition: 'all 0.2s',
                                         boxShadow: '0 0 15px rgba(6, 182, 212, 0.05)',
                                     }}
-                                    onMouseEnter={(e) => { 
-                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.15)'; 
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.15)';
                                         e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.6)';
                                         e.currentTarget.style.boxShadow = '0 0 25px rgba(6, 182, 212, 0.15)';
                                     }}
-                                    onMouseLeave={(e) => { 
-                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.05)'; 
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.background = 'rgba(6, 182, 212, 0.05)';
                                         e.currentTarget.style.borderColor = 'rgba(6, 182, 212, 0.3)';
                                         e.currentTarget.style.boxShadow = '0 0 15px rgba(6, 182, 212, 0.05)';
                                     }}
                                 >
                                     New Search
                                 </button>
-                                
+
                                 <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', marginTop: '8px', marginBottom: '8px' }} />
                             </motion.div>
                         )}
@@ -421,11 +427,11 @@ export default function EngineDrawer({ onSelectMovie }) {
                             {/* Central glowing core */}
                             <motion.div
                                 initial={{ x: '-50%', y: '-50%' }}
-                                animate={{ 
-                                    scale: [1, 1.2, 1], 
+                                animate={{
+                                    scale: [1, 1.2, 1],
                                     opacity: [0.7, 1, 0.7],
                                     x: '-50%',
-                                    y: '-50%' 
+                                    y: '-50%'
                                 }}
                                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                                 style={{
@@ -440,11 +446,11 @@ export default function EngineDrawer({ onSelectMovie }) {
                                 }}
                             />
                         </div>
-                        <h3 
+                        <h3
                             className="text-glow-cyan"
-                            style={{ 
-                                fontSize: '20px', 
-                                fontWeight: 700, 
+                            style={{
+                                fontSize: '20px',
+                                fontWeight: 700,
                                 color: '#22d3ee',
                                 letterSpacing: '1px',
                                 textTransform: 'uppercase'
@@ -462,7 +468,7 @@ export default function EngineDrawer({ onSelectMovie }) {
             {/* STATE 3: Left Panel Results */}
             <AnimatePresence>
                 {engineStage === 'graph' && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
@@ -474,7 +480,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                             display: 'flex',
                             flexDirection: 'column',
                             zIndex: 10,
-                        }} 
+                        }}
                         className="hide-scrollbar"
                     >
                         <div style={{
@@ -493,85 +499,85 @@ export default function EngineDrawer({ onSelectMovie }) {
                             {engineResults.map((movie, index) => {
                                 const isSelected = useAppStore.getState().selectedEngineMovie?.id === movie.id;
                                 return (
-                                <motion.div
-                                    key={movie.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.05 }}
-                                    onClick={() => onSelectMovie && onSelectMovie(movie)}
-                                    style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '12px',
-                                        padding: '10px',
-                                        borderRadius: '12px',
-                                        background: isSelected ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.03)',
-                                        border: isSelected ? '1px solid rgba(6,182,212,0.5)' : '1px solid rgba(255,255,255,0.05)',
-                                        boxShadow: isSelected ? '0 0 15px rgba(6,182,212,0.2)' : 'none',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!isSelected) {
-                                            e.currentTarget.style.background = 'rgba(249,115,22,0.1)';
-                                            e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!isSelected) {
-                                            e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
-                                        }
-                                    }}
-                                >
-                                    {/* Circular Poster */}
-                                    <div style={{
-                                        width: '48px',
-                                        height: '48px',
-                                        borderRadius: '50%',
-                                        overflow: 'hidden',
-                                        flexShrink: 0,
-                                        background: '#1e293b',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                    }}>
-                                        {movie.poster ? (
-                                            <img
-                                                src={`https://image.tmdb.org/t/p/w200${movie.poster}`}
-                                                alt={movie.title}
-                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                                            />
-                                        ) : (
-                                            <span style={{ fontSize: '12px' }}>🎬</span>
-                                        )}
-                                    </div>
-                                    
-                                    {/* Details */}
-                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                    <motion.div
+                                        key={movie.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: index * 0.05 }}
+                                        onClick={() => onSelectMovie && onSelectMovie(movie)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '12px',
+                                            padding: '10px',
+                                            borderRadius: '12px',
+                                            background: isSelected ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.03)',
+                                            border: isSelected ? '1px solid rgba(6,182,212,0.5)' : '1px solid rgba(255,255,255,0.05)',
+                                            boxShadow: isSelected ? '0 0 15px rgba(6,182,212,0.2)' : 'none',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s',
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            if (!isSelected) {
+                                                e.currentTarget.style.background = 'rgba(249,115,22,0.1)';
+                                                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.3)';
+                                            }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (!isSelected) {
+                                                e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                                                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                                            }
+                                        }}
+                                    >
+                                        {/* Circular Poster */}
                                         <div style={{
-                                            fontSize: '14px',
-                                            fontWeight: 600,
-                                            color: '#f8fafc',
-                                            whiteSpace: 'nowrap',
+                                            width: '48px',
+                                            height: '48px',
+                                            borderRadius: '50%',
                                             overflow: 'hidden',
-                                            textOverflow: 'ellipsis',
-                                            marginBottom: '4px'
+                                            flexShrink: 0,
+                                            background: '#1e293b',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
                                         }}>
-                                            {movie.title}
+                                            {movie.poster ? (
+                                                <img
+                                                    src={`https://image.tmdb.org/t/p/w200${movie.poster}`}
+                                                    alt={movie.title}
+                                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                                />
+                                            ) : (
+                                                <span style={{ fontSize: '12px' }}>🎬</span>
+                                            )}
                                         </div>
-                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                            <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-                                                {movie.release_date && movie.release_date !== 'Unknown' 
-                                                    ? new Date(movie.release_date).getFullYear() 
-                                                    : 'Year'}
-                                            </span>
-                                            <span style={{ fontSize: '12px', color: '#4ade80', fontWeight: 600 }}>
-                                                {(movie.score * 100).toFixed(0)}% Match
-                                            </span>
+
+                                        {/* Details */}
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{
+                                                fontSize: '14px',
+                                                fontWeight: 600,
+                                                color: '#f8fafc',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                marginBottom: '4px'
+                                            }}>
+                                                {movie.title}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                                                    {movie.release_date && movie.release_date !== 'Unknown'
+                                                        ? new Date(movie.release_date).getFullYear()
+                                                        : 'Year'}
+                                                </span>
+                                                <span style={{ fontSize: '12px', color: '#4ade80', fontWeight: 600 }}>
+                                                    {(movie.score * 100).toFixed(0)}% Match
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </motion.div>
+                                    </motion.div>
                                 );
                             })}
                         </div>
