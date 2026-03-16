@@ -70,7 +70,7 @@ export default function ProfileSearch({ isOpen, onClose, onSelectUser }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 1100 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)', zIndex: 21000 }}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -78,11 +78,11 @@ export default function ProfileSearch({ isOpen, onClose, onSelectUser }) {
             exit={{ opacity: 0, scale: 0.95 }}
             style={{
               position: 'fixed', top: '15%', left: '50%', x: '-50%',
-              width: '100%', maxWidth: '600px', zIndex: 1101
+              width: '100%', maxWidth: '600px', zIndex: 21001
             }}
           >
             <div style={{ position: 'relative', marginBottom: '24px' }}>
-              <Search style={{ position: 'absolute', left: '20px', top: '50%', y: '-50%', color: '#f97316' }} size={24} />
+              <Search style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', color: '#f97316' }} size={24} />
               <input
                 autoFocus
                 placeholder="Search Nebula users..."
@@ -95,7 +95,7 @@ export default function ProfileSearch({ isOpen, onClose, onSelectUser }) {
                   outline: 'none', boxShadow: '0 0 30px rgba(249,115,22,0.1)'
                 }}
               />
-              {loading && <Loader2 style={{ position: 'absolute', right: '20px', top: '50%', y: '-50%', color: '#64748b' }} size={20} className="animate-spin" />}
+              {loading && <Loader2 style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} size={20} className="animate-spin" />}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

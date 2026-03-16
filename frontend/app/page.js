@@ -188,6 +188,13 @@ export default function Home() {
           links: res.data.links
         });
         setCentralNodeId(res.data.centralNodeId);
+        
+        // Update the similar movies list in the left panel as well
+        if (res.data.nodes) {
+          // Filter out the central node itself to show only similar movies
+          const neighbors = res.data.nodes.filter(n => n.id !== res.data.centralNodeId);
+          setEngineResults(neighbors);
+        }
       } catch (err) {
         console.error("Failed to load similar graph:", err);
         setError("Failed to build galaxy for: " + movie.title);

@@ -58,16 +58,16 @@ export default function EngineDrawer({ onSelectMovie }) {
                 background: isFullScreen ? '#0a0a0a' : 'rgba(10, 10, 10, 0.95)',
                 borderRight: isFullScreen ? '1px solid transparent' : '1px solid rgba(249,115,22,0.2)',
                 backdropFilter: isFullScreen ? 'blur(0px)' : 'blur(20px)',
+                top: 0,
+                height: '100vh',
+                zIndex: isFullScreen ? 20000 : 9000,
             }}
             transition={{ type: "spring", bounce: 0, duration: 0.7 }}
             style={{
                 position: 'absolute',
-                top: 0,
                 left: 0,
-                height: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
-                zIndex: 10001, // Above normal UI and header
                 overflow: 'hidden',
                 boxShadow: isFullScreen ? 'none' : '10px 0 30px rgba(0,0,0,0.5)',
                 pointerEvents: 'auto',
@@ -139,7 +139,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                     flexDirection: 'column',
                     justifyContent: isFullScreen ? 'center' : 'flex-start',
                     alignItems: isFullScreen ? 'center' : 'stretch',
-                    padding: isFullScreen ? '0 24px' : '40px 20px 24px',
+                    padding: isFullScreen ? '0 24px' : '16px 20px 24px',
                     borderBottom: isFullScreen ? 'none' : '1px solid rgba(255,255,255,0.05)',
                     background: isFullScreen ? 'transparent' : 'rgba(0,0,0,0.3)',
                     pointerEvents: engineStage === 'building' ? 'none' : 'auto', // Block interaction only when building

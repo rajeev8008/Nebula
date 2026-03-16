@@ -105,7 +105,7 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 2100 }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 8999 }}
                     />
                     <motion.div
                         initial={{ x: '100%' }}
@@ -113,9 +113,9 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         style={{
-                            position: 'fixed', top: 0, right: 0, width: '480px', height: '100vh',
+                            position: 'fixed', top: '80px', right: 0, width: '480px', height: 'calc(100vh - 80px)',
                             background: '#0a0a0a', borderLeft: '1px solid rgba(249,115,22,0.2)',
-                            boxShadow: '-20px 0 60px rgba(0,0,0,0.8)', zIndex: 2101,
+                            boxShadow: '-20px 0 60px rgba(0,0,0,0.8)', zIndex: 9000,
                             display: 'flex', flexDirection: 'column', color: 'white'
                         }}
                     >

@@ -1,7 +1,7 @@
 import logging
 from typing import TYPE_CHECKING
 from fastapi import Request, HTTPException
-from .database import get_redis
+from database import get_redis
 
 if TYPE_CHECKING:
     from sentence_transformers import SentenceTransformer

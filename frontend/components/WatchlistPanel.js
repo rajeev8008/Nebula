@@ -23,7 +23,7 @@ export default function WatchlistPanel({ isOpen, onClose, onMovieClick }) {
                             inset: 0,
                             background: 'rgba(0,0,0,0.4)',
                             backdropFilter: 'blur(4px)',
-                            zIndex: 10000
+                            zIndex: 8999
                         }}
                     />
 
@@ -35,14 +35,14 @@ export default function WatchlistPanel({ isOpen, onClose, onMovieClick }) {
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         style={{
                             position: 'fixed',
-                            top: 0,
+                            top: '80px',
                             right: 0,
                             width: '420px',
-                            height: '100vh',
+                            height: 'calc(100vh - 80px)',
                             background: '#0a0a0a',
                             borderLeft: '1px solid rgba(249,115,22,0.2)',
                             boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
-                            zIndex: 10001,
+                            zIndex: 9000,
                             display: 'flex',
                             flexDirection: 'column',
                             color: 'white'

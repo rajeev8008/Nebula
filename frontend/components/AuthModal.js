@@ -97,7 +97,7 @@ export default function AuthModal({ isOpen, onClose }) {
     <AnimatePresence>
       {isOpen && (
         <div style={{ 
-          position: 'fixed', inset: 0, zIndex: 1100,
+          position: 'fixed', inset: 0, zIndex: 20000,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: '20px'
         }}>

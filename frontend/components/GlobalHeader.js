@@ -57,6 +57,14 @@ export default function GlobalHeader() {
     };
   }, []);
 
+  // Dropdown Click-away listener
+  useEffect(() => {
+    if (!isDropdownOpen) return;
+    const handleClickOutside = () => setIsDropdownOpen(false);
+    window.addEventListener('click', handleClickOutside);
+    return () => window.removeEventListener('click', handleClickOutside);
+  }, [isDropdownOpen]);
+
   useEffect(() => {
     if (user) {
       fetchNotifications();
@@ -114,7 +122,7 @@ export default function GlobalHeader() {
       <header
         suppressHydrationWarning
         style={{
-          position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 2001,
+          position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 10000,
           padding: scrolled ? '12px 40px' : '24px 40px',
           background: scrolled ? 'rgba(0,0,0,0.8)' : 'transparent',
           backdropFilter: scrolled ? 'blur(20px)' : 'none',

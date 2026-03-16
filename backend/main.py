@@ -3,8 +3,8 @@ import asyncio
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends, Request
-from .dependencies import rate_limiter, get_model, get_index
-from .cache import get_cached_search, set_cached_search
+from dependencies import rate_limiter, get_model, get_index
+from cache import get_cached_search, set_cached_search
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -533,6 +533,7 @@ async def engine_similar(
                 "genres": match.metadata.get("genres", "Unknown"),
                 "release_date": match.metadata.get("release_date", "Unknown"),
                 "vote_count": match.metadata.get("vote_count", 100),
+                "score": float(match.score),
                 "isCentralNode": match.id == seed_match.id
             })
             vectors.append(match.values)

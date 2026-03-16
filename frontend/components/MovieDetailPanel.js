@@ -24,12 +24,28 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
     return (
         <AnimatePresence>
             {selectedMovie && (
-                <motion.div
-                    key="movie-detail-panel"
-                    initial={{ x: '100%', opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: '100%', opacity: 0 }}
-                    transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                <>
+                    {/* Full Screen Backdrop for click-away */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                        style={{
+                            position: 'fixed',
+                            inset: 0,
+                            background: 'rgba(0,0,0,0.4)',
+                            backdropFilter: 'blur(4px)',
+                            zIndex: 8999,
+                            cursor: 'default'
+                        }}
+                    />
+                    <motion.div
+                        key="movie-detail-panel"
+                        initial={{ x: '100%', opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: '100%', opacity: 0 }}
+                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                     style={{
                         position: 'fixed',
                         top: 0,
@@ -37,7 +53,7 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                         height: '100vh',
                         width: '420px',
                         maxWidth: '100vw',
-                        zIndex: 10001,
+                        zIndex: 9000,
                         background: 'rgba(0, 0, 0, 0.60)',
                         backdropFilter: 'blur(40px)',
                         WebkitBackdropFilter: 'blur(40px)',
@@ -50,26 +66,43 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                     }}
                     className="hide-scrollbar"
                 >
-                    {/* ... (Poster Header remains same) ... */}
+                    {/* Backdrop for click-off */}
+                    <div 
+                        onClick={onClose}
+                        style={{ position: 'fixed', inset: 0, zIndex: -1, cursor: 'default' }}
+                    />
+                    {/* Movie Poster - Redesigned with buttons outside */}
                     {selectedMovie.poster && (
-                        <div style={{ position: 'relative', width: '100%', height: '240px', flexShrink: 0 }}>
-                            <img
-                                src={`https://image.tmdb.org/t/p/w500${selectedMovie.poster}`}
-                                alt={selectedMovie.title}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                            />
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.1) 100%)' }} />
-                            <button onClick={onClose} style={{ position: 'absolute', top: '20px', right: '20px', width: '44px', height: '44px', borderRadius: '50%', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: '#e5e7eb', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20 }}>✕</button>
-                            <button onClick={(e) => { e.stopPropagation(); toggleWatchlist(selectedMovie); }} style={{ position: 'absolute', top: '20px', left: '24px', width: '44px', height: '44px', borderRadius: '50%', background: isBookmarked ? 'rgba(6, 182, 212, 0.9)' : 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid', borderColor: isBookmarked ? 'rgba(6,182,212,1)' : 'rgba(255,255,255,0.12)', color: isBookmarked ? '#000' : '#e5e7eb', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 20 }}>
-                                <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
-                            </button>
-                            <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '60px' }}>
-                                <h2 style={{ fontSize: '1.6rem', fontWeight: 800, background: 'linear-gradient(135deg, #fdba74, #f97316, #fbbf24)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.2, margin: 0 }}>{selectedMovie.title}</h2>
+                        <div style={{ padding: '120px 32px 0px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <div style={{ position: 'relative', width: '180px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                <img
+                                    src={`https://image.tmdb.org/t/p/w500${selectedMovie.poster}`}
+                                    alt={selectedMovie.title}
+                                    style={{ width: '100%', height: 'auto', display: 'block' }}
+                                />
+                            </div>
+                            
+                            {/* Action Row - Below Poster */}
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                                <button 
+                                    onClick={(e) => { e.stopPropagation(); toggleWatchlist(selectedMovie); }} 
+                                    style={{ padding: '10px 20px', borderRadius: '12px', background: isBookmarked ? 'rgba(6, 182, 212, 0.9)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: isBookmarked ? '#000' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}
+                                >
+                                    <Bookmark size={16} fill={isBookmarked ? "currentColor" : "none"} />
+                                    {isBookmarked ? 'Saved' : 'Watchlist'}
+                                </button>
+                                <button 
+                                    onClick={onClose} 
+                                    style={{ padding: '10px 20px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600 }}
+                                >
+                                    ✕ Close
+                                </button>
                             </div>
                         </div>
                     )}
 
-                    <div style={{ padding: '40px 24px 28px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                    <div style={{ padding: '24px 24px 28px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1 }}>
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: 900, background: 'linear-gradient(135deg, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1.2, margin: '8px 0', textAlign: 'center' }}>{selectedMovie.title}</h2>
                         {/* Title fallback (no poster) */}
                         {!selectedMovie.poster && (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -80,14 +113,14 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                             </div>
                         )}
 
-                        {/* Genre Tags */}
-                        {selectedMovie.genres && selectedMovie.genres !== 'Unknown' && (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                                {selectedMovie.genres.split(', ').map((genre, i) => (
-                                    <span key={i} style={{ padding: '4px 14px', fontSize: '11px', fontWeight: 600, background: 'rgba(6,182,212,0.08)', color: '#67e8f9', borderRadius: '20px', border: '1px solid rgba(6,182,212,0.2)' }}>{genre}</span>
-                                ))}
-                            </div>
-                        )}
+                            {/* Genre Tags */}
+                            {selectedMovie.genres && selectedMovie.genres !== 'Unknown' && (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+                                    {selectedMovie.genres.split(', ').map((genre, i) => (
+                                        <span key={i} style={{ padding: '4px 14px', fontSize: '11px', fontWeight: 600, background: 'rgba(6,182,212,0.08)', color: '#67e8f9', borderRadius: '20px', border: '1px solid rgba(6,182,212,0.2)' }}>{genre}</span>
+                                    ))}
+                                </div>
+                            )}
 
                         {/* User Activity Row */}
                         <div style={{ background: 'rgba(6, 182, 212, 0.03)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(6, 182, 212, 0.15)', display: 'flex', flexDirection: 'column', gap: '16px', backdropFilter: 'blur(8px)' }}>
@@ -141,7 +174,14 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                             >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#f97316' }}>Log Movie</h3>
-                                    <button onClick={() => setIsLogModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}>✕</button>
+                                    <button 
+                                        onClick={() => setIsLogModalOpen(false)} 
+                                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', width: '36px', height: '36px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                                    >
+                                        ✕
+                                    </button>
                                 </div>
 
                                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -174,25 +214,34 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                                     </div>
                                 </div>
 
-                                <button
-                                    onClick={() => {
-                                        addLog({
-                                            ...selectedMovie,
-                                            ...logForm,
-                                            personalRating,
-                                            loggedAt: Date.now()
-                                        });
-                                        setIsLogModalOpen(false);
-                                        setLogForm({ date: new Date().toISOString().split('T')[0], review: '', rewatch: false });
-                                    }}
-                                    style={{ width: '100%', padding: '16px', borderRadius: '12px', background: 'linear-gradient(135deg, #f97316, #f59e0b)', border: 'none', color: '#000', fontSize: '15px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 20px rgba(249,115,22,0.3)', marginTop: '20px' }}
-                                >
-                                    Save Entry
-                                </button>
+                                <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                                    <button
+                                        onClick={() => {
+                                            addLog({
+                                                ...selectedMovie,
+                                                ...logForm,
+                                                personalRating,
+                                                loggedAt: Date.now()
+                                            });
+                                            setIsLogModalOpen(false);
+                                            setLogForm({ date: new Date().toISOString().split('T')[0], review: '', rewatch: false });
+                                        }}
+                                        style={{ flex: 1, padding: '16px', borderRadius: '12px', background: 'linear-gradient(135deg, #f97316, #f59e0b)', border: 'none', color: '#000', fontSize: '15px', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 20px rgba(249,115,22,0.3)' }}
+                                    >
+                                        Save Entry
+                                    </button>
+                                    <button
+                                        onClick={() => setIsLogModalOpen(false)}
+                                        style={{ padding: '16px 24px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '15px', fontWeight: 600, cursor: 'pointer' }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </motion.div>
+                </>
             )}
         </AnimatePresence>
     );
