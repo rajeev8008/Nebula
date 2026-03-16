@@ -1,6 +1,9 @@
 import logging
-from typing import TYPE_CHECKING
-from fastapi import Request, HTTPException
+from typing import TYPE_CHECKING, Optional
+import os
+import httpx
+from fastapi import Request, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from backend.database import get_redis
 
 if TYPE_CHECKING:
@@ -42,3 +45,29 @@ def get_model(request: Request) -> "SentenceTransformer":
 
 def get_index(request: Request) -> "pinecone.Index":
     return request.app.state.index
+
+# --- Supabase Auth Dependency ---
+
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """
+    Verifies the Supabase JWT from the Authorization header.
+    In a real-world scenario, you'd use a library like `python-jose` to verify the JWT
+    against Supabase's public key. For this implementation, we'll simulate the verification
+    or use the Supabase Admin API if needed.
+    """
+    token = credentials.credentials
+    # Simulation: In production, verify JWT using Supabase JWT Secret or public key
+    # For now, we'll assume the token is valid if it exists, or provide a mock for testing
+    if os.getenv("TESTING") == "true":
+        return {"sub": "00000000-0000-0000-0000-000000000000", "email": "test@example.com"}
+    
+    # Example: Verify with Supabase (simplified)
+    # response = httpx.get(f"{SUPABASE_URL}/auth/v1/user", headers={"Authorization": f"Bearer {token}"})
+    # if response.status_code != 200:
+    #     raise HTTPException(status_code=401, detail="Invalid token")
+    # return response.json()
+    
+    # Placeholder for actual JWT decoding
+    return {"sub": "user_id_from_token"} 

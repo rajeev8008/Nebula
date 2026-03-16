@@ -42,6 +42,7 @@ A powerful, responsive movie catalog designed for organized browsing.
 - **Social Activity**: Search and follow other users to explore their diaries and discover new cinematic tastes.
 - **Interactive Posters**: 3D tilt-and-glare effects on movie cards that respond to your mouse movement.
 - **Supabase Sync**: Your profile, lists, and activity are synced to the cloud via Supabase, accessible from anywhere.
+- **Persistent State**: PostgreSQL integration for user watchlists and recommendation history/preferences.
 
 ---
 
@@ -50,7 +51,8 @@ A powerful, responsive movie catalog designed for organized browsing.
 - **Frontend**: `Next.js 16`, `React`, `Framer Motion`, `react-force-graph-2d`, `Zustand`.
 - **Backend**: `FastAPI` (Python 3.11).
 - **AI/ML/Vector**: `OpenAI Embeddings`, `Pinecone Vector DB`, `SentenceTransformers`.
-- **Database/Auth**: `Supabase`.
+- **Database/Auth**: `Supabase`, `PostgreSQL` (persistent state), `Redis` (caching).
+- **CI/CD**: `GitHub Actions` (automated tests, linting, Docker builds).
 - **Data Source**: `The Movie Database (TMDB)`.
 
 ---
@@ -58,23 +60,91 @@ A powerful, responsive movie catalog designed for organized browsing.
 ##  Getting Started
 
 ### Prerequisites
-- Node.js 20.9.0+
-- Python 3.11+
-- API Keys: Pinecone, OpenAI, TMDB, Supabase.
 
-### Setup
-1. **Clone the repository**
-2. **Environment Variables**:
-   Create a `.env` file at the root:
+- **Node.js**: `v20.9.0` or higher
+- **Python**: `3.11` or higher
+- **Docker**: Optional, for containerized execution
+- **API Keys**: 
+  - [OpenAI](https://platform.openai.com/) (for embeddings)
+  - [Pinecone](https://www.pinecone.io/) (vector database)
+  - [TMDB](https://www.themoviedb.org/documentation/api) (movie metadata)
+  - [Supabase](https://supabase.com/) (auth and user data)
+
+### 1. Environment Configuration
+
+Clone the repository and create a `.env` file in the root directory by copying the example:
+
+```bash
+git clone https://github.com/rajeev8008/Nebula.git
+cd Nebula
+cp .env.example .env
+```
+
+Fill in your API keys and configuration in the `.env` file.
+
+---
+
+### 2. How to Run
+
+You can run Nebula either using Docker (recommended for quick start) or manually for development.
+
+#### Option A: Running with Docker (Recommended)
+
+This will spin up the frontend, backend, and potentially Redis (if configured) in containers.
+
+```bash
+docker-compose up --build
+```
+
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:8000](http://localhost:8000)
+- **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+#### Option B: Manual Local Setup (Development)
+
+**Backend Setup:**
+1. Navigate to the projects root directory (if not already there).
+2. Create and activate a virtual environment:
    ```bash
-   cp .env.example .env
+   # Windows:
+   python -m venv backend/venv
+   .\backend\venv\Scripts\activate
+   # macOS/Linux:
+   python3 -m venv backend/venv
+   source backend/venv/bin/activate
    ```
-3. **Run with Docker**:
+3. Install dependencies:
    ```bash
-   docker-compose up --build
+   pip install -r backend/requirements.txt
    ```
-   - Frontend: `http://localhost:3000`
-   - Backend: `http://localhost:8000`
+4. Start the FastAPI server (Run from root):
+   ```bash
+   uvicorn backend.main:app --reload --port 8000
+   ```
+
+**Frontend Setup:**
+1. Open a new terminal and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+   The app will be available at [http://localhost:3000](http://localhost:3000).
+
+---
+
+### 3. Data Ingestion (Optional)
+If you need to seed your Pinecone index with movie data:
+```bash
+cd scripts
+python ingest.py  # Follow internal instructions for data source
+```
 
 ---
 

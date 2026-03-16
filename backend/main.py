@@ -1,9 +1,14 @@
 import os
 import asyncio
 import numpy as np
+import json
 from sklearn.metrics.pairwise import cosine_similarity
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends, Request
-from backend.dependencies import rate_limiter, get_model, get_index
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends, Request, Header
+from backend.dependencies import rate_limiter, get_model, get_index, get_current_user
+from backend.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, delete
+from backend.models import User, Watchlist, RecommendationState, MovieMetadata
 from backend.cache import get_cached_search, set_cached_search
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -568,3 +573,81 @@ async def engine_similar(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# --- Watchlist & Recommendation State Endpoints ---
+
+@app.get("/api/watchlist")
+async def get_watchlist(
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    """Fetch the watchlist for the authenticated user."""
+    user_id = user["sub"]
+    result = await db.execute(
+        select(Watchlist, MovieMetadata)
+        .join(MovieMetadata, Watchlist.movie_id == MovieMetadata.id)
+        .where(Watchlist.user_id == user_id)
+    )
+    watchlist = []
+    for wl, movie in result:
+        watchlist.append({
+            "id": str(wl.id),
+            "movie_id": str(movie.id),
+            "title": movie.title,
+            "rating": movie.rating,
+            "added_at": wl.added_at
+        })
+    return watchlist
+
+@app.post("/api/watchlist")
+async def add_to_watchlist(
+    movie_id: str,
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    """Add a movie to the user's watchlist."""
+    user_id = user["sub"]
+    # Check if movie exists in metadata (simplified logic)
+    # ...
+    new_entry = Watchlist(user_id=user_id, movie_id=movie_id)
+    db.add(new_entry)
+    await db.commit()
+    return {"message": "Added to watchlist"}
+
+@app.get("/api/recommendations/state")
+async def get_recommendation_state(
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    """Fetch recommendation state for the authenticated user."""
+    user_id = user["sub"]
+    result = await db.execute(
+        select(RecommendationState).where(RecommendationState.user_id == user_id)
+    )
+    state = result.scalars().first()
+    if not state:
+        return {"state_data": {}}
+    return {"state_data": json.loads(state.state_data) if state.state_data else {}}
+
+@app.post("/api/recommendations/state")
+async def save_recommendation_state(
+    state_data: dict,
+    db: AsyncSession = Depends(get_db),
+    user: dict = Depends(get_current_user)
+):
+    """Save/update recommendation state for the authenticated user."""
+    user_id = user["sub"]
+    result = await db.execute(
+        select(RecommendationState).where(RecommendationState.user_id == user_id)
+    )
+    state = result.scalars().first()
+    
+    state_json = json.dumps(state_data)
+    if state:
+        state.state_data = state_json
+    else:
+        state = RecommendationState(user_id=user_id, state_data=state_json)
+        db.add(state)
+        
+    await db.commit()
+    return {"message": "Recommendation state saved"}

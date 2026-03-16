@@ -11,6 +11,7 @@ Models:
 
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import ForeignKey, String, Float, Integer, DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -40,6 +41,9 @@ class User(Base):
 
     # Relationships
     watchlist_entries: Mapped[list["Watchlist"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    recommendation_states: Mapped[list["RecommendationState"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -107,3 +111,34 @@ class Watchlist(Base):
 
     def __repr__(self) -> str:
         return f"<Watchlist(user_id={self.user_id}, movie_id={self.movie_id})>"
+
+
+# ---------------------------------------------------------------------------
+# RecommendationState (User ↔ Preferences/History)
+# ---------------------------------------------------------------------------
+class RecommendationState(Base):
+    __tablename__ = "recommendation_states"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    state_data: Mapped[Optional[dict]] = mapped_column(
+        type_=String,  # Storing as JSON string for simplicity, or use JSONB
+        nullable=True,
+        comment="JSON blob of recommendation preferences, weights, or history",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(back_populates="recommendation_states")
+
+    def __repr__(self) -> str:
+        return f"<RecommendationState(user_id={self.user_id}, updated_at={self.updated_at})>"

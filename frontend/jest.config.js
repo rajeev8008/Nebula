@@ -13,6 +13,7 @@ const customJestConfig = {
     '^@/(.*)$': '<rootDir>/$1',
     '^react-force-graph-2d$': '<rootDir>/__mocks__/react-force-graph-2d.js',
   },
+  modulePathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],
 }
 
 module.exports = createJestConfig(customJestConfig)
