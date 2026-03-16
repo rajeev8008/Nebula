@@ -462,7 +462,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                                 textTransform: 'uppercase'
                             }}
                         >
-                            Building your Galaxy...
+                            Discovering Connections...
                         </h3>
                         <p style={{ color: '#64748b', fontSize: '14px', marginTop: '8px' }}>
                             Locating semantic neighbors in the latent space
