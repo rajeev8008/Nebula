@@ -194,18 +194,20 @@ export default function GlobalHeader() {
             <Search size={14} suppressHydrationWarning={true} /> Search
           </button>
 
-          <button
-            suppressHydrationWarning={true}
-            onClick={() => {
-              setView('BROWSE');
-              router.push(pathname);
-            }}
-            style={{ background: 'transparent', border: 'none', color: view === 'BROWSE' ? '#fff' : '#94a3b8', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
-            onMouseEnter={(e) => e.target.style.color = '#fff'}
-            onMouseLeave={(e) => e.target.style.color = view === 'BROWSE' ? '#fff' : '#94a3b8'}
-          >
-            <Compass size={14} suppressHydrationWarning={true} /> Browse
-          </button>
+          {view !== 'LANDING' && (
+            <button
+              suppressHydrationWarning={true}
+              onClick={() => {
+                setView('BROWSE');
+                router.push(pathname);
+              }}
+              style={{ background: 'transparent', border: 'none', color: view === 'BROWSE' ? '#fff' : '#94a3b8', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+              onMouseEnter={(e) => e.target.style.color = '#fff'}
+              onMouseLeave={(e) => e.target.style.color = view === 'BROWSE' ? '#fff' : '#94a3b8'}
+            >
+              <Compass size={14} suppressHydrationWarning={true} /> Browse
+            </button>
+          )}
 
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', paddingLeft: '16px', borderLeft: '1px solid rgba(255,255,255,0.1)' }}>

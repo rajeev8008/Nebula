@@ -3,8 +3,8 @@ import asyncio
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends, Request
-from dependencies import rate_limiter, get_model, get_index
-from cache import get_cached_search, set_cached_search
+from backend.dependencies import rate_limiter, get_model, get_index
+from backend.cache import get_cached_search, set_cached_search
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional, Dict
