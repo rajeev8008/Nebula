@@ -220,7 +220,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
         }
 
         return result;
-    }, [rawMovies, browseSearchQuery, browseRuntime, browseSortBy]);
+    }, [rawMovies, browseRuntime, browseSortBy]);
 
     const totalCount = filteredData?.pages?.[0]?.total ?? 0;
 
@@ -580,7 +580,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                         <div style={{ marginBottom: '24px' }}>
                             <p style={{ fontSize: '13px', color: '#9ca3af' }}>
                                 Showing <span style={{ color: '#fdba74', fontWeight: 600 }}>{totalCount}</span> movies
-                                {browseSearchQuery && <> matching <span style={{ color: '#22d3ee', fontWeight: 600 }}>"{browseSearchQuery}"</span></>}
+                                {browseSearchQuery && <> matching <span style={{ color: '#22d3ee', fontWeight: 600 }}>&quot;{browseSearchQuery}&quot;</span></>}
                                 {activeGenre && <> in <span style={{ color: '#fb923c' }}>{activeGenre}</span></>}
                                 {activeDecade && <> from the <span style={{ color: '#fb923c' }}>{activeDecade}</span></>}
                                 {activeRating && <> rated <span style={{ color: '#fb923c' }}>★ {activeRating}+</span></>}

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
@@ -55,7 +55,7 @@ export default function GlobalHeader() {
       window.removeEventListener('scroll', handleScroll);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [setSession, setUser, syncStore]);
 
   // Dropdown Click-away listener
   useEffect(() => {
@@ -85,9 +85,9 @@ export default function GlobalHeader() {
         .subscribe();
       return () => supabase.removeChannel(channel);
     }
-  }, [user]);
+  }, [user, fetchNotifications]);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user) return;
     const { data } = await supabase
       .from('notifications')
@@ -100,7 +100,7 @@ export default function GlobalHeader() {
       setNotifications(data);
       setUnreadCount(data.filter(n => !n.is_read).length);
     }
-  };
+  }, [user]);
 
   const markNotificationsAsRead = async () => {
     if (!user || unreadCount === 0) return;

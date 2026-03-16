@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
 // Default shader source for WebGL
@@ -338,7 +338,7 @@ const useShaderBackground = () => {
     }
   };
 
-  const loop = (now) => {
+  const loop = useCallback((now) => {
     if (!rendererRef.current || !pointersRef.current) return;
 
     rendererRef.current.updateMouse(pointersRef.current.first);
@@ -347,7 +347,7 @@ const useShaderBackground = () => {
     rendererRef.current.updateMove(pointersRef.current.move);
     rendererRef.current.render(now);
     animationFrameRef.current = requestAnimationFrame(loop);
-  };
+  }, []);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -380,7 +380,7 @@ const useShaderBackground = () => {
         rendererRef.current.reset();
       }
     };
-  }, []);
+  }, [loop]);
 
   return canvasRef;
 };

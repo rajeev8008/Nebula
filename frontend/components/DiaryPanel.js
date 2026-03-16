@@ -71,6 +71,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                                                 <img 
                                                     src={log.poster ? `https://image.tmdb.org/t/p/w92${log.poster}` : null} 
                                                     style={{ width: '50px', height: '75px', objectFit: 'cover', borderRadius: '6px', cursor: 'pointer' }}
+                                                    alt={log.title}
                                                     onClick={() => { onMovieClick(log); onClose(); }}
                                                 />
                                                 <div style={{ flex: 1 }}>
@@ -97,7 +98,7 @@ export default function DiaryPanel({ isOpen, onClose, onMovieClick }) {
                                             </div>
                                             {log.review && (
                                                 <div style={{ background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px', fontSize: '13px', color: '#d1d5db', lineHeight: 1.5, borderLeft: '2px solid rgba(249,115,22,0.3)' }}>
-                                                    "{log.review}"
+                                                    &quot;{log.review}&quot;
                                                 </div>
                                             )}
                                         </motion.div>

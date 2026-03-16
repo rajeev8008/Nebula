@@ -166,7 +166,7 @@ export default function EngineDrawer({ onSelectMovie }) {
                                         color: '#94a3b8',
                                         letterSpacing: '0.5px'
                                     }}>
-                                        Describe the movie you're looking for
+                                        Describe the movie you&apos;re looking for
                                     </h1>
                                 </motion.div>
 
@@ -334,7 +334,7 @@ export default function EngineDrawer({ onSelectMovie }) {
 
                                 <div>
                                     <span style={{ fontSize: '13px', color: '#64748b' }}>Results for: </span>
-                                    <span style={{ fontSize: '14px', color: '#22d3ee', fontWeight: 600 }} className="text-glow-cyan">"{engineQuery}"</span>
+                                    <span style={{ fontSize: '14px', color: '#22d3ee', fontWeight: 600 }} className="text-glow-cyan">&quot;{engineQuery}&quot;</span>
                                 </div>
 
                                 <button

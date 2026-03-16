@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/store/useAppStore';
 import { supabase } from '@/lib/supabase';
@@ -19,9 +19,9 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
         if (userId && isOpen) {
             fetchProfileData();
         }
-    }, [userId, isOpen]);
+    }, [userId, isOpen, fetchProfileData]);
 
-    const fetchProfileData = async () => {
+    const fetchProfileData = useCallback(async () => {
         setLoading(true);
         try {
             // 1. Fetch Basic Profile
@@ -91,7 +91,7 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId, currentUser, profile]);
 
     const handleFollow = async () => {
         if (!currentUser) return;
@@ -202,6 +202,7 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                                                     <img 
                                                         src={log.movie_data.poster ? `https://image.tmdb.org/t/p/w92${log.movie_data.poster}` : null} 
                                                         style={{ width: '40px', height: '60px', objectFit: 'cover', borderRadius: '6px', cursor: 'pointer' }}
+                                                        alt={log.movie_data.title}
                                                         onClick={() => onMovieClick(log.movie_data)}
                                                     />
                                                     <div style={{ flex: 1 }}>
@@ -213,7 +214,7 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                                                     </div>
                                                 </div>
                                                 {log.review_text && (
-                                                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: '12px 0 0', fontStyle: 'italic', lineHeight: 1.5 }}>"{log.review_text}"</p>
+                                                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: '12px 0 0', fontStyle: 'italic', lineHeight: 1.5 }}>&quot;{log.review_text}&quot;</p>
                                                 )}
                                             </div>
                                         ))}
