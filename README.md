@@ -1,111 +1,100 @@
-# Nebula
+# 🌌 Nebula
 
-### The Semantic Cinema Engine.
-### Describe the vibe. Discover the film.
-Powered by OpenAI Embeddings & Pinecone Vector Search.
+### **The Semantic Cinema Engine.**
+> "Describe the vibe. Discover the film."
 
-## Features
-- Semantic natural language movie search
-- 2D Constellation Graph Engine (Connected Papers style)
-- Movie Browser with filters, search, and watchlist
-- AI-powered similarity graph with force-directed physics
+Nebula is a movie discovery platform that moves beyond simple keyword matching. It leverages **OpenAI Embeddings** and **Pinecone Vector Search** to understand the "vibe" of cinema through natural language.
 
-## Tech Stack
-- Frontend: Next.js, React, Framer Motion, react-force-graph-2d, Tailwind CSS
-- Backend: FastAPI, Python
-- AI/ML: OpenAI Embeddings
-- Vector DB: Pinecone
-- Movie Data: TMDB API
+---
 
-## Getting Started
+## 📸 Screenshots
+
+<p align="center">
+  <!-- PRIMARY HERO SCREENSHOT -->
+  <img src="https://via.placeholder.com/1200x675.png?text=Nebula+Platform+Overview+-+Place+Hero+Screenshot+Here" alt="Nebula Hero" width="100%">
+</p>
+
+| **The Nebula Graph** | **Semantic Browser** |
+|:---:|:---:|
+| <img src="https://via.placeholder.com/600x400.png?text=Graph+View+Screenshot" alt="Graph Engine" width="100%"> | <img src="https://via.placeholder.com/600x400.png?text=Movie+Grid+Screenshot" alt="Browser" width="100%"> |
+| *2D Constellation Graph (Connected Papers style)* | *Responsive Grid with Semantic Search* |
+
+---
+
+## 🚀 Core Features
+
+### 🔭 1. The Launch Engine
+A **Connected Papers-style** 2D constellation graph for nonlinear movie discovery.
+- **Semantic Discovery**: Input a query like *"Interstellar vibes but with more philosophy"* to generate a seed neighborhood of films.
+- **Force-Directed Physics**: Interactive nodes that bounce, attract, and repel based on thematic similarity.
+- **Neighborhood Exploration**: Click any node to "jump" into its specific neighborhood, expanding the graph dynamically.
+- **Hover Exploration**: Glide over nodes to see details instantly without losing your place in the nebula.
+- **Glassmorphic UI**: High-fidelity detail panels that slide in without breaking your focus.
+
+### 🎭 2. Semantic Browser
+A powerful, responsive movie catalog designed for organized browsing.
+- **Semantic Search**: Use the search bar for both specific titles and broad concepts (e.g., *"movies about existential loneliness in space"*).
+- **Advanced Filters**: Filter by Decade, Rating, Genre, and Runtime.
+- **Fluid Layout**: A fully responsive grid that fills your screen width, optimized for cinematic posters.
+- **Interactive Posters**: 3D tilt-and-glare effects on movie cards that respond to your mouse movement.
+
+### 📖 3. Watchlist & Diary
+- **Watchlist**: Save movies you want to explore later with a single click.
+- **Activity Log**: Keep a detailed diary of films you've watched, with personal ratings and reviews.
+- **Supabase Sync**: Your profile and lists are synced to the cloud, accessible from anywhere.
+
+---
+
+## 🛠 Tech Stack
+
+- **Frontend**: `Next.js 14`, `React`, `Framer Motion`, `react-force-graph-2d`, `Zustand`.
+- **Backend**: `FastAPI` (Python 3.11).
+- **AI/ML/Vector**: `OpenAI Embeddings`, `Pinecone Vector DB`, `SentenceTransformers`.
+- **Database/Auth**: `Supabase`.
+- **Data Source**: `The Movie Database (TMDB)`.
+
+---
+
+## 🏁 Getting Started
 
 ### Prerequisites
 - Node.js 18+
 - Python 3.11+
-- Pinecone API Key
-- OpenAI API Key
-- TMDB API Key
-- Docker Engine (Optional but recommended)
+- API Keys: Pinecone, OpenAI, TMDB, Supabase.
 
-### Environment Setup (.env.example)
-Create a `.env` file at the root based on `.env.example`:
-```bash
-cp .env.example .env
-```
-Fill out API keys.
+### Setup
+1. **Clone the repository**
+2. **Environment Variables**:
+   Create a `.env` file at the root:
+   ```bash
+   cp .env.example .env
+   ```
+3. **Run with Docker**:
+   ```bash
+   docker-compose up --build
+   ```
+   - Frontend: `http://localhost:3000`
+   - Backend: `http://localhost:8000`
 
-### Running with Docker (production)
-Starts the optimized production builds for both backend and frontend:
-```bash
-docker-compose up --build
-```
-- Frontend: `http://localhost:3000`
-- Backend: `http://localhost:8000`
+---
 
-### Running with Docker (development)
-Starts hot-reloading containers, using mounted volumes for your source code:
-```bash
-docker-compose -f docker-compose.dev.yml up --build
-```
+## 📂 Project Structure
 
-### Running locally without Docker
-**Backend:**
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements-dev.txt
-uvicorn main:app --reload --port 8000
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## Project Structure
-```
+```text
 Nebula/
-├── backend/            # FastAPI, Pinecone, and AI logic
-│   ├── main.py         # Entrypoint
-│   ├── tests/          # Pytest backend tests
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/           # Next.js, React, and 2D Graph Engine
-│   ├── components/     # Reusable UI elements
-│   ├── app/            # Next.js App Router
-│   ├── __tests__/      # Jest frontend component tests
-│   ├── package.json
-│   └── Dockerfile
-├── .github/workflows/  # CI pipeline
-├── docker-compose.yml     # Production Docker config
-└── docker-compose.dev.yml # Development Docker config
+├── backend/            # FastAPI, Vector Search logic
+│   ├── main.py         # Primary API Entrypoint
+│   ├── routes/         # Modular API Route handlers
+│   └── dependencies.py # Shared resources (Model, Index)
+├── frontend/           # Next.js Application
+│   ├── app/            # App Router & Main Entry points
+│   ├── components/     # Interactive UI (Graph, Browser, Panels)
+│   ├── store/          # Zustand State Architecture
+│   └── lib/            # API Clients & Utilities
+└── docker-compose.yml  # Container Orchestration
 ```
 
-## Testing
+---
 
-**Backend:**
-```bash
-cd backend
-pytest tests/
-```
-
-**Frontend:**
-```bash
-cd frontend
-npm run test
-```
-
-## Environment Variables Reference
-
-| Variable | Description | Where to find it |
-|----------|-------------|------------------|
-| `OPENAI_API_KEY` | OpenAI API Auth | platform.openai.com |
-| `PINECONE_API_KEY` | Pinecone Auth | app.pinecone.io |
-| `PINECONE_INDEX_NAME` | Vector DB Index name | app.pinecone.io |
-| `PINECONE_ENVIRONMENT` | DB region/env | app.pinecone.io |
-| `TMDB_API_KEY` | The Movie DataBase API | developer.themoviedb.org |
-| `NEXT_PUBLIC_APP_NAME` | Website title label | N/A |
-| `NEXT_PUBLIC_APP_TAGLINE` | Website subtitle | N/A |
+## 📜 License
+MIT License. Created with ❤️ by Rajeev K.
