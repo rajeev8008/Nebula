@@ -17,7 +17,8 @@ Nebula is a movie discovery platform that moves beyond simple keyword matching. 
 
 | **The Nebula Graph** | **Semantic Browser** |
 |:---:|:---:|
-| <img src="https://via.placeholder.com/600x400.png?text=Graph+View+Screenshot" alt="Graph Engine" width="100%"> | <img src="https://via.placeholder.com/600x400.png?text=Movie+Grid+Screenshot" alt="Browser" width="100%"> |
+| <img src="https://via.placeholder.com/600x400.png?text=Graph+View+Screenshot" alt="Graph Engine" width="100%"> | <img width="1848" height="973" alt="image" src="https://github.com/user-attachments/assets/a8bf8de3-2f0f-4fde-80b0-c9db49ae71a0" />
+ |
 | *2D Constellation Graph (Connected Papers style)* | *Responsive Grid with Semantic Search* |
 
 ---
