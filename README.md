@@ -38,17 +38,10 @@ A **Connected Papers-style** 2D constellation graph for nonlinear movie discover
 A powerful, responsive movie catalog designed for organized browsing.
 - **Semantic Search**: Use the search bar for both specific titles and broad concepts.
 - **Advanced Filters**: Filter by Decade, Rating, Genre, and Runtime.
+- **Watchlist & Diary**: Save movies to your watchlist or log them in your personal diary with ratings and reviews.
+- **Social Activity**: Search and follow other users to explore their diaries and discover new cinematic tastes.
 - **Interactive Posters**: 3D tilt-and-glare effects on movie cards that respond to your mouse movement.
-
-###  3. User Discovery & Social
-- **Profile Search**: Search for other Nebula users to explore their movie diaries and ratings.
-- **Activity Log**: Keep a detailed diary of films you've watched, with personal ratings and reviews.
-- **Public Profiles**: View beautiful, glassmorphic profile cards showing a user's movie stats and history.
-
-###  4. Advanced Tools
-- **Command Palette**: Press `Cmd/Ctrl + K` to search movies instantly from anywhere in the app.
-- **Watchlist**: Save movies you want to explore later with a single click.
-- **Supabase Sync**: Your profile and lists are synced to the cloud, accessible from anywhere.
+- **Supabase Sync**: Your profile, lists, and activity are synced to the cloud via Supabase, accessible from anywhere.
 
 ---
 
@@ -104,4 +97,4 @@ Nebula/
 ---
 
 ## 📜 License
-MIT License. Created with by Rajeev K.
+MIT License. Created by Rajeev K.
