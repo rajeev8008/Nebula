@@ -3,16 +3,16 @@ import asyncio
 import numpy as np
 import json
 from sklearn.metrics.pairwise import cosine_similarity
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends, Request, Header
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Depends
 from backend.dependencies import rate_limiter, get_model, get_index, get_current_user
 from backend.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete
-from backend.models import User, Watchlist, RecommendationState, MovieMetadata
+from sqlalchemy import select
+from backend.models import Watchlist, RecommendationState, MovieMetadata
 from backend.cache import get_cached_search, set_cached_search
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Optional, Dict
+from typing import Optional
 from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
@@ -28,11 +28,11 @@ app = FastAPI(title="Nebula API", description="Semantic Search Engine for Movies
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", 
+        "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:3001",
         "http://127.0.0.1:3001"
-    ], 
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -62,9 +62,12 @@ app.state.model = model
 app.state.index = index
 
 # --- Data Models ---
+
+
 class SearchRequest(BaseModel):
     query: str
     top_k: int = 20
+
 
 class MovieResponse(BaseModel):
     id: str
@@ -75,7 +78,14 @@ class MovieResponse(BaseModel):
     rating: float
 
 # --- Helper: Build Pinecone metadata filter ---
-def build_metadata_filter(genre: Optional[str], decade: Optional[str], rating: Optional[float], min_year: Optional[int] = None):
+
+
+def build_metadata_filter(
+    genre: Optional[str],
+    decade: Optional[str],
+    rating: Optional[float],
+    min_year: Optional[int] = None
+):
     """Convert query params into a Pinecone metadata filter dict."""
     conditions = []
 
@@ -198,11 +208,11 @@ def api_search(
 
 @app.post("/search")
 async def search_movies(
-    req: SearchRequest, 
+    req: SearchRequest,
     background_tasks: BackgroundTasks,
     _: None = Depends(rate_limiter),
-    model = Depends(get_model),
-    index = Depends(get_index)
+    model=Depends(get_model),
+    index=Depends(get_index)
 ):
     """
     Takes a user query (e.g., "sad robots"), converts to vector,
@@ -296,8 +306,11 @@ async def search_movies(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/movies")
-async def get_movies():
+async def get_movies(
+    index=Depends(get_index)
+):
     """
     Unified endpoint that returns a flat list of movies with all metadata.
     Calculates cosine similarity on the backend to provide pre-computed graph links.
@@ -305,7 +318,7 @@ async def get_movies():
     try:
         # Fetch top 500 movies with full metadata
         dummy_vec = [0.1] * 384
-        
+
         # Offload synchronous Pinecone query to thread
         results = await asyncio.to_thread(
             index.query,
@@ -314,88 +327,101 @@ async def get_movies():
             include_metadata=True,
             include_values=True
         )
-        
-        # Format movies with all necessary data (skip movies without posters)
-        nodes = []
-        vectors = []
-        id_map = {}
-        idx = 0
-        
-        for match in results.matches:
-            poster = match.metadata.get("poster_path", "")
-            if not poster or not poster.strip():
-                continue  # Skip movies without posters
-                
-            nodes.append({
-                "id": match.id,
-                "title": match.metadata.get("title", "Unknown"),
-                "poster": poster,
-                "overview": match.metadata.get("overview", ""),
-                "rating": match.metadata.get("rating", 0.0),
-                "val": match.metadata.get("rating", 5.0) * 2,
-                "genres": match.metadata.get("genres", "Unknown"),
-                "release_date": match.metadata.get("release_date", "Unknown"),
-                "language": match.metadata.get("original_language", "en"),
-                "popularity": match.metadata.get("popularity", 0.0),
-                "group": 1,
-            })
-            vectors.append(match.values)
-            id_map[idx] = match.id
-            idx += 1
-            
+
+        nodes, vectors, id_map = _format_matches_to_nodes(results.matches)
+
         print(f"Movies endpoint: returned {len(nodes)} movies (with posters)")
-        
+
         # Calculate similarity matrix on backend
         links = []
         if len(vectors) > 1:
             vec_matrix = np.array(vectors)
             sim_matrix = await asyncio.to_thread(cosine_similarity, vec_matrix)
-
-            # Create links for highly similar movies (baseline graph)
-            threshold = 0.65 
-            rows, cols = sim_matrix.shape
-            
-            # Create a set to track connected nodes to rescue orphans later
-            connected_indices = set()
-            
-            for i in range(rows):
-                for j in range(i + 1, cols):
-                    score = sim_matrix[i][j]
-                    if score > threshold:
-                        links.append({
-                            "source": id_map[i],
-                            "target": id_map[j],
-                            "value": float(score),
-                            "similarity": float(score)
-                        })
-                        connected_indices.add(i)
-                        connected_indices.add(j)
-            
-            # Rescue orphan nodes (ensure every node has at least 1 connection)
-            for i in range(rows):
-                if i not in connected_indices:
-                    # Find the highest similarity score for this isolated node
-                    best_j = -1
-                    best_sim = -1
-                    for j in range(cols):
-                        if i == j: continue
-                        score = sim_matrix[i][j] if i < j else sim_matrix[j][i]
-                        if score > best_sim:
-                            best_sim = score
-                            best_j = j
-                    
-                    if best_j >= 0:
-                        links.append({
-                            "source": id_map[i],
-                            "target": id_map[best_j],
-                            "value": float(max(best_sim, 0.1)),
-                            "similarity": float(max(best_sim, 0.1))
-                        })
+            links = _calculate_similarity_links(sim_matrix, id_map)
 
         return {"movies": nodes, "nodes": nodes, "links": links, "total": len(nodes)}
-        
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def _format_matches_to_nodes(matches):
+    """Helper to format Pinecone matches into nodes."""
+    nodes = []
+    vectors = []
+    id_map = {}
+    idx = 0
+
+    for match in matches:
+        poster = match.metadata.get("poster_path", "")
+        if not poster or not poster.strip():
+            continue  # Skip movies without posters
+
+        nodes.append({
+            "id": match.id,
+            "title": match.metadata.get("title", "Unknown"),
+            "poster": poster,
+            "overview": match.metadata.get("overview", ""),
+            "rating": match.metadata.get("rating", 0.0),
+            "val": match.metadata.get("rating", 5.0) * 2,
+            "genres": match.metadata.get("genres", "Unknown"),
+            "release_date": match.metadata.get("release_date", "Unknown"),
+            "language": match.metadata.get("original_language", "en"),
+            "popularity": match.metadata.get("popularity", 0.0),
+            "group": 1,
+        })
+        vectors.append(match.values)
+        id_map[idx] = match.id
+        idx += 1
+    return nodes, vectors, id_map
+
+
+def _calculate_similarity_links(sim_matrix, id_map, threshold=0.65):
+    """Helper to calculate links between similar movies and rescue orphans."""
+    links = []
+    rows, cols = sim_matrix.shape
+    connected_indices = set()
+
+    for i in range(rows):
+        for j in range(i + 1, cols):
+            score = sim_matrix[i][j]
+            if score > threshold:
+                links.append({
+                    "source": id_map[i],
+                    "target": id_map[j],
+                    "value": float(score),
+                    "similarity": float(score)
+                })
+                connected_indices.add(i)
+                connected_indices.add(j)
+
+    # Rescue orphan nodes (ensure every node has at least 1 connection)
+    for i in range(rows):
+        if i not in connected_indices:
+            best_j, best_sim = _find_best_match(i, sim_matrix, cols)
+            if best_j >= 0:
+                links.append({
+                    "source": id_map[i],
+                    "target": id_map[best_j],
+                    "value": float(max(best_sim, 0.1)),
+                    "similarity": float(max(best_sim, 0.1))
+                })
+    return links
+
+
+def _find_best_match(node_idx, sim_matrix, cols):
+    """Helper to find the best match for a given node index."""
+    best_j = -1
+    best_sim = -1
+    for j in range(cols):
+        if node_idx == j:
+            continue
+        score = sim_matrix[node_idx][j] if node_idx < j else sim_matrix[j][node_idx]
+        if score > best_sim:
+            best_sim = score
+            best_j = j
+    return best_j, best_sim
+
 
 # Keep legacy endpoints for backwards compatibility during transition
 @app.get("/graph")
@@ -405,6 +431,7 @@ async def get_graph_data():
     Graph construction now handled by frontend.
     """
     return await get_movies()
+
 
 @app.get("/browse")
 async def browse_movies():
@@ -420,11 +447,12 @@ async def browse_movies():
 class EngineSearchRequest(BaseModel):
     query: str
 
+
 @app.post("/engine/search")
 async def engine_search(
     req: EngineSearchRequest,
-    model = Depends(get_model),
-    index = Depends(get_index)
+    model=Depends(get_model),
+    index=Depends(get_index)
 ):
     """
     Takes a natural language query, encodes it (using the existing SentenceTransformer),
@@ -457,7 +485,7 @@ async def engine_search(
                 "release_date": match.metadata.get("release_date", "Unknown"),
                 "language": match.metadata.get("original_language", "en"),
                 "popularity": match.metadata.get("popularity", 0.0),
-                "vote_count": match.metadata.get("vote_count", 100), # Used for node sizing
+                "vote_count": match.metadata.get("vote_count", 100),  # Used for node sizing
                 "score": float(match.score),
                 "isSearchResult": True,
                 "relevanceRank": i + 1
@@ -468,10 +496,11 @@ async def engine_search(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/engine/similar/{movie_id}")
 async def engine_similar(
     movie_id: str,
-    index = Depends(get_index)
+    index=Depends(get_index)
 ):
     """
     Fetches a specific movie and its top similar neighbors.
@@ -489,45 +518,31 @@ async def engine_similar(
         )
 
         if not selected_res.matches:
-             raise HTTPException(status_code=404, detail="Movie not found")
-             
+            raise HTTPException(status_code=404, detail="Movie not found")
+
         seed_match = selected_res.matches[0]
         seed_vector = seed_match.values
-        
-        # Format the seed node
-        seed_node = {
-            "id": seed_match.id,
-            "title": seed_match.metadata.get("title", "Unknown"),
-            "poster": seed_match.metadata.get("poster_path", ""),
-            "overview": seed_match.metadata.get("overview", ""),
-            "rating": seed_match.metadata.get("rating", 0.0),
-            "val": seed_match.metadata.get("rating", 5.0) * 2,
-            "genres": seed_match.metadata.get("genres", "Unknown"),
-            "release_date": seed_match.metadata.get("release_date", "Unknown"),
-            "vote_count": seed_match.metadata.get("vote_count", 100),
-            "isCentralNode": True
-        }
 
         # Query Pinecone for the nearest neighbors using the seed vector
         # Fetching ~30 robust neighbors
         query_kwargs = {
             "vector": seed_vector,
-            "top_k": 31, # including the seed itself
+            "top_k": 31,  # including the seed itself
             "include_metadata": True,
             "include_values": True,
         }
         neighbor_res = await asyncio.to_thread(index.query, **query_kwargs)
-        
+
         nodes = []
         vectors = []
         id_map = {}
         idx = 0
-        
+
         # Only add valid neighbors (skip self just in case, though Pinecone includes it)
         for match in neighbor_res.matches:
             # Pinecone might return the exact same document, we add it back.
             poster = match.metadata.get("poster_path", "")
-            
+
             nodes.append({
                 "id": match.id,
                 "title": match.metadata.get("title", "Unknown"),
@@ -550,14 +565,14 @@ async def engine_similar(
         if len(vectors) > 1:
             vec_matrix = np.array(vectors)
             sim_matrix = await asyncio.to_thread(cosine_similarity, vec_matrix)
-            
+
             rows, cols = sim_matrix.shape
             for i in range(rows):
                 for j in range(i + 1, cols):
                     score = sim_matrix[i][j]
                     u = id_map[i]
                     v = id_map[j]
-                    
+
                     # Connect everything to central node OR if cross-similarity > 0.75
                     is_central_link = (u == movie_id or v == movie_id)
                     if is_central_link or score >= 0.75:
@@ -574,7 +589,9 @@ async def engine_similar(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # --- Watchlist & Recommendation State Endpoints ---
+
 
 @app.get("/api/watchlist")
 async def get_watchlist(
@@ -599,6 +616,7 @@ async def get_watchlist(
         })
     return watchlist
 
+
 @app.post("/api/watchlist")
 async def add_to_watchlist(
     movie_id: str,
@@ -613,6 +631,7 @@ async def add_to_watchlist(
     db.add(new_entry)
     await db.commit()
     return {"message": "Added to watchlist"}
+
 
 @app.get("/api/recommendations/state")
 async def get_recommendation_state(
@@ -629,6 +648,7 @@ async def get_recommendation_state(
         return {"state_data": {}}
     return {"state_data": json.loads(state.state_data) if state.state_data else {}}
 
+
 @app.post("/api/recommendations/state")
 async def save_recommendation_state(
     state_data: dict,
@@ -641,13 +661,13 @@ async def save_recommendation_state(
         select(RecommendationState).where(RecommendationState.user_id == user_id)
     )
     state = result.scalars().first()
-    
+
     state_json = json.dumps(state_data)
     if state:
         state.state_data = state_json
     else:
         state = RecommendationState(user_id=user_id, state_data=state_json)
         db.add(state)
-        
+
     await db.commit()
     return {"message": "Recommendation state saved"}

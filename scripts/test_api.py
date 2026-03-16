@@ -1,5 +1,4 @@
 import requests
-import json
 
 print("Testing backend endpoints...\n")
 
@@ -20,8 +19,10 @@ except Exception as e:
 # Test /search endpoint
 print("2. Testing POST /search")
 try:
-    response = requests.post('http://127.0.0.1:8000/search', 
-                            json={"query": "action movie", "top_k": 5})
+    response = requests.post(
+        'http://127.0.0.1:8000/search',
+        json={"query": "action movie", "top_k": 5}
+    )
     data = response.json()
     print(f"   Status: {response.status_code}")
     print(f"   Query: {data.get('query')}")

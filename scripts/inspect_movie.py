@@ -13,38 +13,38 @@ model = SentenceTransformer('all-MiniLM-L6-v2')
 query = "Good Boy"
 query_vector = model.encode(query).tolist()
 
-print(f"\n{'='*80}")
+print("\n" + '=' * 80)
 print(f"Searching for: '{query}'")
-print(f"{'='*80}\n")
+print('=' * 80 + "\n")
 
 results = index.query(
-    vector=query_vector, 
-    top_k=5, 
+    vector=query_vector,
+    top_k=5,
     include_metadata=True,
     include_values=True
 )
 
 for i, match in enumerate(results.matches, 1):
-    print(f"\n{'='*80}")
+    print("\n" + '=' * 80)
     print(f"RESULT #{i}: {match.metadata.get('title', 'Unknown')}")
-    print(f"{'='*80}")
-    print(f"\n📌 BASIC INFO:")
+    print('=' * 80)
+    print("\n📌 BASIC INFO:")
     print(f"   ID: {match.id}")
     print(f"   Score: {match.score:.4f} ({match.score * 100:.1f}% match)")
-    
-    print(f"\n📝 METADATA (What's stored in Pinecone):")
+
+    print("\n📝 METADATA (What's stored in Pinecone):")
     for key, value in match.metadata.items():
         if isinstance(value, str) and len(value) > 200:
             print(f"   {key}: {value[:200]}... (truncated, length: {len(value)})")
         else:
             print(f"   {key}: {value}")
-    
-    print(f"\n🔢 VECTOR INFO:")
+
+    print("\n🔢 VECTOR INFO:")
     print(f"   Dimension: {len(match.values)}")
     print(f"   First 10 values: {match.values[:10]}")
     print(f"   Vector type: {type(match.values)}")
-    
-    print(f"\n📊 FRONTEND DISPLAY (What the website shows):")
+
+    print("\n📊 FRONTEND DISPLAY (What the website shows):")
     display_data = {
         "id": match.id,
         "title": match.metadata.get("title", "Unknown"),
@@ -55,12 +55,12 @@ for i, match in enumerate(results.matches, 1):
         "val": match.metadata.get("rating", 5.0) * 2
     }
     print(json.dumps(display_data, indent=2))
-    
+
     if i == 1:  # Show full details for first result only
-        print(f"\n📋 COMPLETE RAW DATA:")
+        print("\n📋 COMPLETE RAW DATA:")
         print(f"   Complete overview: {match.metadata.get('overview', 'N/A')}")
 
-print(f"\n{'='*80}")
+print("\n" + '=' * 80)
 print("SUMMARY:")
 print(f"{'='*80}")
 print("\nWhat's stored in Pinecone for each movie:")

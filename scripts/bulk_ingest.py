@@ -33,6 +33,66 @@ GENRE_MAP = {
 }
 
 
+def _fetch_tmdb_page(url, params, max_retries):
+    """Fetch a single page from TMDB with retries."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            resp = requests.get(url, params=params, timeout=10)
+            if resp.status_code == 429:
+                wait = int(resp.headers.get("Retry-After", 3))
+                time.sleep(wait)
+                continue
+            if resp.status_code == 422:
+                return None  # Page too high
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as e:
+            if attempt == max_retries:
+                tqdm.write(f"    Failed page: {e}")
+            else:
+                time.sleep(1)
+    return {"results": []}
+
+
+def _parse_movie(movie, seen_ids):
+    """Parse TMDB movie data into Nebula format."""
+    mid = str(movie["id"])
+    if mid in seen_ids:
+        return None
+    seen_ids.add(mid)
+
+    overview = (movie.get("overview") or "").strip()
+    title = (movie.get("title") or "").strip()
+    if not overview or len(overview) < 20 or not title:
+        return None
+
+    genre_ids = movie.get("genre_ids", [])
+    genre_names = [GENRE_MAP.get(gid) for gid in genre_ids]
+    genre_str = ", ".join(g for g in genre_names if g) or "Unknown"
+
+    # Extract numeric year
+    rel_date = movie.get("release_date", "Unknown") or "Unknown"
+    rel_year = 0
+    if rel_date != "Unknown":
+        try:
+            rel_year = int(rel_date.split("-")[0])
+        except Exception:
+            pass
+
+    return {
+        "id": mid,
+        "title": title,
+        "poster_path": movie.get("poster_path", "") or "",
+        "overview": overview,
+        "rating": float(movie.get("vote_average", 0) or 0),
+        "genres": genre_str,
+        "release_date": rel_date,
+        "year": rel_year,
+        "original_language": movie.get("original_language", "en") or "en",
+        "popularity": float(movie.get("popularity", 0) or 0),
+    }
+
+
 def fetch_from_tmdb(target_count):
     """Fetch movies from multiple TMDB API endpoints to maximize variety."""
     if not TMDB_KEY:
@@ -65,63 +125,15 @@ def fetch_from_tmdb(target_count):
 
             url = f"https://api.themoviedb.org/3/movie/{endpoint}"
             params = {"api_key": TMDB_KEY, "language": "en-US", "page": page}
-            data = {"results": []}
+            data = _fetch_tmdb_page(url, params, MAX_RETRIES)
 
-            for attempt in range(1, MAX_RETRIES + 1):
-                try:
-                    resp = requests.get(url, params=params, timeout=10)
-                    if resp.status_code == 429:
-                        wait = int(resp.headers.get("Retry-After", 3))
-                        time.sleep(wait)
-                        continue
-                    if resp.status_code == 422:
-                        # TMDB returns 422 when page number is too high
-                        break
-                    resp.raise_for_status()
-                    data = resp.json()
-                    break
-                except Exception as e:
-                    if attempt == MAX_RETRIES:
-                        tqdm.write(f"    Failed page {page} of /{endpoint}: {e}")
-                    else:
-                        time.sleep(1)
+            if data is None:
+                break
 
             for movie in data.get("results", []):
-                mid = str(movie["id"])
-                if mid in seen_ids:
-                    continue
-                seen_ids.add(mid)
-
-                overview = (movie.get("overview") or "").strip()
-                title = (movie.get("title") or "").strip()
-                if not overview or len(overview) < 20 or not title:
-                    continue
-
-                genre_ids = movie.get("genre_ids", [])
-                genre_names = [GENRE_MAP.get(gid) for gid in genre_ids]
-                genre_str = ", ".join(g for g in genre_names if g) or "Unknown"
-
-                # Extract numeric year
-                rel_date = movie.get("release_date", "Unknown") or "Unknown"
-                rel_year = 0
-                if rel_date != "Unknown":
-                    try:
-                        rel_year = int(rel_date.split("-")[0])
-                    except:
-                        pass
-
-                movies.append({
-                    "id": mid,
-                    "title": title,
-                    "poster_path": movie.get("poster_path", "") or "",
-                    "overview": overview,
-                    "rating": float(movie.get("vote_average", 0) or 0),
-                    "genres": genre_str,
-                    "release_date": rel_date,
-                    "year": rel_year,
-                    "original_language": movie.get("original_language", "en") or "en",
-                    "popularity": float(movie.get("popularity", 0) or 0),
-                })
+                m_data = _parse_movie(movie, seen_ids)
+                if m_data:
+                    movies.append(m_data)
 
             # Respect TMDB rate limit (~40 req/10s)
             time.sleep(0.25)
@@ -211,7 +223,7 @@ def main():
     print("=" * 60)
 
     # 1. Fetch movies
-    print(f"\n[1/4] Fetching movies from TMDB...")
+    print("\n[1/4] Fetching movies from TMDB...")
     movies = fetch_from_tmdb(TARGET_COUNT)
     if not movies:
         print("ERROR: No movies fetched. Check your TMDB_API_KEY.")
@@ -245,8 +257,8 @@ def main():
     # Summary
     time.sleep(5)
     stats = index.describe_index_stats()
-    print(f"\n{'=' * 60}")
-    print(f"  Ingestion Complete!")
+    print("\n" + "=" * 60)
+    print("  Ingestion Complete!")
     print(f"  Vectors upserted this run: {success}")
     print(f"  Total vectors in index:    {stats.get('total_vector_count', 'N/A')}")
     print(f"{'=' * 60}")
