@@ -47,7 +47,7 @@ A powerful, responsive movie catalog designed for organized browsing.
 
 ## 🛠 Tech Stack
 
-- **Frontend**: `Next.js 14`, `React`, `Framer Motion`, `react-force-graph-2d`, `Zustand`.
+- **Frontend**: `Next.js 16`, `React`, `Framer Motion`, `react-force-graph-2d`, `Zustand`.
 - **Backend**: `FastAPI` (Python 3.11).
 - **AI/ML/Vector**: `OpenAI Embeddings`, `Pinecone Vector DB`, `SentenceTransformers`.
 - **Database/Auth**: `Supabase`.
@@ -58,7 +58,7 @@ A powerful, responsive movie catalog designed for organized browsing.
 ##  Getting Started
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 20.9.0+
 - Python 3.11+
 - API Keys: Pinecone, OpenAI, TMDB, Supabase.
 

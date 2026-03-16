@@ -90,7 +90,7 @@ export const useAppStore = create((set, get) => ({
 
         // Fetch Watchlist
         const { data: watchlistData } = await supabase
-            .from('watchlists')
+            .from('watchlist')
             .select('*')
             .eq('user_id', user.id);
         if (watchlistData) {
@@ -136,11 +136,11 @@ export const useAppStore = create((set, get) => ({
 
         if (user) {
             if (isSaved) {
-                await supabase.from('watchlists').delete()
+                await supabase.from('watchlist').delete()
                     .eq('user_id', user.id)
                     .eq('movie_id', String(movie.id));
             } else {
-                await supabase.from('watchlists').upsert({
+                await supabase.from('watchlist').upsert({
                     user_id: user.id,
                     movie_id: String(movie.id),
                     movie_data: movie
