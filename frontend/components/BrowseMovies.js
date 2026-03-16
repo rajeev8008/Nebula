@@ -10,7 +10,7 @@ import MovieRow from './MovieRow';
 import { SkeletonSection } from './ui/skeleton';
 import { fetchMovies } from '@/lib/api';
 import { useAppStore } from '@/store/useAppStore'; // Store for local filters
-import { Bookmark, Search, Calendar, Filter, Sparkles, SlidersHorizontal, ArrowUpDown, ArrowLeft } from 'lucide-react';
+import { Bookmark, Search, Calendar, Filter, Sparkles, SlidersHorizontal, ArrowUpDown, ArrowLeft, X } from 'lucide-react';
 import WatchlistPanel from './WatchlistPanel';
 import DiaryPanel from './DiaryPanel';
 
@@ -155,8 +155,8 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
 
     // ─── 2. Filtered Grid via useInfiniteQuery ───
     const filterKey = useMemo(
-        () => ({ genre: activeGenre, decade: activeDecade, rating: activeRating, minYear: activeMinYear }),
-        [activeGenre, activeDecade, activeRating, activeMinYear]
+        () => ({ q: browseSearchQuery, genre: activeGenre, decade: activeDecade, rating: activeRating, minYear: activeMinYear }),
+        [browseSearchQuery, activeGenre, activeDecade, activeRating, activeMinYear]
     );
 
     const {
@@ -170,6 +170,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
         queryKey: ['browse-filtered', filterKey],
         queryFn: async ({ pageParam = 1 }) => {
             const params = { page: pageParam, limit: PAGE_LIMIT };
+            if (browseSearchQuery) params.q = browseSearchQuery;
             if (activeGenre) params.genre = activeGenre;
             if (activeDecade) params.decade = activeDecade;
             if (activeRating) params.rating = parseFloat(activeRating);
@@ -192,11 +193,7 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     const movies = useMemo(() => {
         let result = rawMovies;
 
-        // 1. Title Search
-        if (browseSearchQuery) {
-            const query = browseSearchQuery.toLowerCase();
-            result = result.filter(m => m.title.toLowerCase().includes(query));
-        }
+        // Result is already filtered by title on the server via 'q' parameter in fetchMovies
 
         // 2. Runtime Filter
         if (browseRuntime) {
@@ -285,7 +282,12 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
     const virtualizer = useVirtualizer({
         count: rowCount,
         getScrollElement: () => typeof document !== 'undefined' ? document.documentElement : null,
-        estimateSize: () => CARD_HEIGHT + CARD_GAP,
+        estimateSize: () => {
+            if (!scrollRef.current) return CARD_HEIGHT + CARD_GAP;
+            const containerWidth = scrollRef.current.clientWidth - 48;
+            const cardWidth = (containerWidth - (columns - 1) * CARD_GAP) / columns;
+            return (cardWidth * 1.5) + CARD_GAP;
+        },
         overscan: 5,
         scrollMargin: scrollRef.current?.offsetTop ?? 0,
     });
@@ -321,7 +323,62 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                 }}
                 className="hide-scrollbar"
             >
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'nowrap', minWidth: 'max-content' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'nowrap', minWidth: 'max-content' }}>
+                    
+                    {/* Search Input */}
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', marginRight: '12px', flexShrink: 0 }}>
+                        <Search size={14} style={{ position: 'absolute', left: '12px', color: '#64748b' }} />
+                        <input
+                            type="text"
+                            placeholder="Search by title.."
+                            value={browseSearchQuery}
+                            onChange={(e) => setBrowseSearchQuery(e.target.value)}
+                            style={{
+                                padding: '8px 16px 8px 36px',
+                                borderRadius: '20px',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                color: '#fff',
+                                fontSize: '12px',
+                                fontWeight: 500,
+                                outline: 'none',
+                                width: '220px',
+                                transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+                            }}
+                            onFocus={(e) => {
+                                e.target.style.background = 'rgba(255,255,255,0.08)';
+                                e.target.style.borderColor = 'rgba(249,115,22,0.5)';
+                                e.target.style.width = '280px';
+                            }}
+                            onBlur={(e) => {
+                                e.target.style.background = 'rgba(255,255,255,0.05)';
+                                e.target.style.borderColor = 'rgba(255,255,255,0.1)';
+                                e.target.style.width = '220px';
+                            }}
+                        />
+                        {browseSearchQuery && (
+                            <button
+                                onClick={() => setBrowseSearchQuery('')}
+                                style={{
+                                    position: 'absolute',
+                                    right: '10px',
+                                    background: 'transparent',
+                                    border: 'none',
+                                    color: '#64748b',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    padding: '4px',
+                                    transition: 'color 0.2s'
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = '#64748b'}
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
+                    </div>
 
                     {/* Local Filters: Sort By & Runtime */}
                     <span style={{ fontSize: '11px', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginRight: '4px', flexShrink: 0 }}>
@@ -519,10 +576,11 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
 
                 {/* 2. Filtered Grid View */}
                 {hasActiveFilters && !error && (
-                    <div style={{ maxWidth: '1600px', margin: '0 auto', padding: '0 24px' }}>
+                    <div style={{ padding: '0 24px' }}>
                         <div style={{ marginBottom: '24px' }}>
                             <p style={{ fontSize: '13px', color: '#9ca3af' }}>
                                 Showing <span style={{ color: '#fdba74', fontWeight: 600 }}>{totalCount}</span> movies
+                                {browseSearchQuery && <> matching <span style={{ color: '#22d3ee', fontWeight: 600 }}>"{browseSearchQuery}"</span></>}
                                 {activeGenre && <> in <span style={{ color: '#fb923c' }}>{activeGenre}</span></>}
                                 {activeDecade && <> from the <span style={{ color: '#fb923c' }}>{activeDecade}</span></>}
                                 {activeRating && <> rated <span style={{ color: '#fb923c' }}>★ {activeRating}+</span></>}
@@ -551,15 +609,14 @@ const BrowseMovies = ({ onBack, onLaunchEngine, onMovieClick }) => {
                                                 top: 0,
                                                 left: 0,
                                                 width: '100%',
-                                                height: `${CARD_HEIGHT}px`,
                                                 transform: `translateY(${virtualRow.start}px)`,
-                                                display: 'flex',
-                                                justifyContent: 'center',
+                                                display: 'grid',
+                                                gridTemplateColumns: `repeat(${columns}, 1fr)`,
                                                 gap: `${CARD_GAP}px`,
                                             }}
                                         >
                                             {rowMovies.map((movie) => (
-                                                <div key={movie.id} style={{ width: `${CARD_WIDTH}px`, height: `${CARD_HEIGHT}px`, flexShrink: 0 }}>
+                                                <div key={movie.id} style={{ width: '100%' }}>
                                                     <MovieCard movie={movie} onClick={onMovieClick} onSeeInGraph={onMovieClick} />
                                                 </div>
                                             ))}

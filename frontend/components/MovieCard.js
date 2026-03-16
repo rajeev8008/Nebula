@@ -71,8 +71,10 @@ const MovieCard = ({ movie, onClick, onSeeInGraph, priority = false }) => {
             className="scroll-item"
             style={{
                 position: 'relative',
-                width: '192px',
-                height: '288px',
+                width: '100%',
+                aspectRatio: '2/3',
+                maxWidth: '240px',
+                minWidth: '140px',
                 flexShrink: 0,
                 cursor: 'pointer',
                 borderRadius: '12px',
