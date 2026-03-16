@@ -60,7 +60,11 @@ export default function GlobalHeader() {
   // Dropdown Click-away listener
   useEffect(() => {
     if (!isDropdownOpen) return;
-    const handleClickOutside = () => setIsDropdownOpen(false);
+    const handleClickOutside = (e) => {
+      // If the click is on the toggle button itself, the toggle handler will handle it
+      if (e.target.closest('.profile-toggle-btn')) return;
+      setIsDropdownOpen(false);
+    };
     window.addEventListener('click', handleClickOutside);
     return () => window.removeEventListener('click', handleClickOutside);
   }, [isDropdownOpen]);
@@ -228,8 +232,12 @@ export default function GlobalHeader() {
 
               <div style={{ position: 'relative' }}>
                 <div
+                  className="profile-toggle-btn"
                   suppressHydrationWarning={true}
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsDropdownOpen(!isDropdownOpen);
+                  }}
                   style={{
                     width: '40px', height: '40px', borderRadius: '50%',
                     background: 'linear-gradient(135deg, #f9731611, #f9731644)',
@@ -270,6 +278,7 @@ export default function GlobalHeader() {
                         boxShadow: '0 20px 40px rgba(0,0,0,0.6)', padding: '12px',
                         zIndex: 1001, overflow: 'hidden'
                       }}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <div style={{ padding: '8px 12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '8px' }}>
                         <p style={{ fontSize: '14px', fontWeight: 800, color: '#fff', margin: 0 }}>{profile?.username || user.email.split('@')[0]}</p>

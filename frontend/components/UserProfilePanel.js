@@ -29,8 +29,18 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
-                .single();
-            setProfile(profileData);
+                .maybeSingle();
+            
+            if (profileData) {
+                setProfile(profileData);
+            } else {
+                // Try fetching username from user metadata if profiles table hasn't synced yet
+                setProfile({ 
+                    id: userId, 
+                    username: currentUser?.user_metadata?.username || currentUser?.email?.split('@')[0] || 'Explorer',
+                    created_at: new Date().toISOString()
+                });
+            }
 
             // 2. Fetch Logs
             const { data: logsData } = await supabase
@@ -74,6 +84,10 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
             }
         } catch (err) {
             console.error("Error fetching profile:", err);
+            // Fallback: create a mock profile from userId if DB record is missing
+            if (!profile) {
+                setProfile({ id: userId, username: 'Nebula Explorer', updated_at: new Date().toISOString() });
+            }
         } finally {
             setLoading(false);
         }
@@ -105,7 +119,7 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 8999 }}
+                        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 20000 }}
                     />
                     <motion.div
                         initial={{ x: '100%' }}
@@ -113,9 +127,9 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                         style={{
-                            position: 'fixed', top: '80px', right: 0, width: '480px', height: 'calc(100vh - 80px)',
+                            position: 'fixed', top: 0, right: 0, width: '480px', height: '100vh',
                             background: '#0a0a0a', borderLeft: '1px solid rgba(249,115,22,0.2)',
-                            boxShadow: '-20px 0 60px rgba(0,0,0,0.8)', zIndex: 9000,
+                            boxShadow: '-20px 0 60px rgba(0,0,0,0.8)', zIndex: 20001,
                             display: 'flex', flexDirection: 'column', color: 'white'
                         }}
                     >
@@ -138,7 +152,7 @@ export default function UserProfilePanel({ userId, isOpen, onClose, onMovieClick
                                             <h2 style={{ fontSize: '1.8rem', fontWeight: 900, background: 'linear-gradient(135deg, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>
                                                 {profile.username}
                                             </h2>
-                                            <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>Member since {new Date(profile.updated_at).getFullYear()}</p>
+                                            <p style={{ fontSize: '14px', color: '#64748b', marginTop: '4px' }}>Member since {profile ? (new Date(profile.created_at || profile.updated_at || Date.now()).getFullYear()) : '...'}</p>
                                         </div>
                                     </div>
 
