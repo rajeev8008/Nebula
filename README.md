@@ -1,4 +1,4 @@
-# 🌌 Nebula
+#  Nebula
 
 ### **The Semantic Cinema Engine.**
 > "Describe the vibe. Discover the film."
@@ -7,11 +7,12 @@ Nebula is a movie discovery platform that moves beyond simple keyword matching. 
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 <p align="center">
   <!-- PRIMARY HERO SCREENSHOT -->
-  <img src="https://via.placeholder.com/1200x675.png?text=Nebula+Platform+Overview+-+Place+Hero+Screenshot+Here" alt="Nebula Hero" width="100%">
+<img width="1857" height="978" alt="image" src="https://github.com/user-attachments/assets/17b3b261-85f6-44fb-9eb8-3ba334a74f86" />
+
 </p>
 
 | **The Nebula Graph** | **Semantic Browser** |
@@ -21,9 +22,9 @@ Nebula is a movie discovery platform that moves beyond simple keyword matching. 
 
 ---
 
-## 🚀 Core Features
+##  Core Features
 
-### 🔭 1. The Launch Engine
+###  1. The Launch Engine
 A **Connected Papers-style** 2D constellation graph for nonlinear movie discovery.
 - **Semantic Discovery**: Input a query like *"Interstellar vibes but with more philosophy"* to generate a seed neighborhood of films.
 - **Force-Directed Physics**: Interactive nodes that bounce, attract, and repel based on thematic similarity.
@@ -31,7 +32,7 @@ A **Connected Papers-style** 2D constellation graph for nonlinear movie discover
 - **Hover Exploration**: Glide over nodes to see details instantly without losing your place in the nebula.
 - **Glassmorphic UI**: High-fidelity detail panels that slide in without breaking your focus.
 
-### 🎭 2. Semantic Browser
+###  2. Semantic Browser
 A powerful, responsive movie catalog designed for organized browsing.
 - **Semantic Search**: Use the search bar for both specific titles and broad concepts (e.g., *"movies about existential loneliness in space"*).
 - **Advanced Filters**: Filter by Decade, Rating, Genre, and Runtime.
@@ -45,7 +46,7 @@ A powerful, responsive movie catalog designed for organized browsing.
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 - **Frontend**: `Next.js 14`, `React`, `Framer Motion`, `react-force-graph-2d`, `Zustand`.
 - **Backend**: `FastAPI` (Python 3.11).
@@ -55,7 +56,7 @@ A powerful, responsive movie catalog designed for organized browsing.
 
 ---
 
-## 🏁 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Node.js 18+
@@ -96,5 +97,5 @@ Nebula/
 
 ---
 
-## 📜 License
-MIT License. Created with ❤️ by Rajeev K.
+##  License
+MIT License. Created by Rajeev K.
