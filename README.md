@@ -11,15 +11,16 @@ Nebula is a movie discovery platform that moves beyond simple keyword matching. 
 
 <p align="center">
   <!-- PRIMARY HERO SCREENSHOT -->
-<img width="1857" height="978" alt="image" src="https://github.com/user-attachments/assets/17b3b261-85f6-44fb-9eb8-3ba334a74f86" />
-
+  <img src="https://github.com/user-attachments/assets/17b3b261-85f6-44fb-9eb8-3ba334a74f86" alt="Nebula Hero" width="100%">
 </p>
 
-| **The Nebula Graph** | **Semantic Browser** |
-|:---:|:---:|
-| <img src="https://via.placeholder.com/600x400.png?text=Graph+View+Screenshot" alt="Graph Engine" width="100%"> | <img width="1848" height="973" alt="image" src="https://github.com/user-attachments/assets/a8bf8de3-2f0f-4fde-80b0-c9db49ae71a0" />
- |
-| *2D Constellation Graph (Connected Papers style)* | *Responsive Grid with Semantic Search* |
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/82a95aa9-921c-49c7-a7cf-a619dafc2c20" alt="The Nebula Graph" width="49%">
+  <img src="https://github.com/user-attachments/assets/a8bf8de3-2f0f-4fde-80b0-c9db49ae71a0" alt="Semantic Browser" width="49%">
+</p>
+<p align="center">
+  <em>2D Constellation Graph (Left) | Semantic Browser (Right)</em>
+</p>
 
 ---
 
@@ -35,19 +36,23 @@ A **Connected Papers-style** 2D constellation graph for nonlinear movie discover
 
 ###  2. Semantic Browser
 A powerful, responsive movie catalog designed for organized browsing.
-- **Semantic Search**: Use the search bar for both specific titles and broad concepts (e.g., *"movies about existential loneliness in space"*).
+- **Semantic Search**: Use the search bar for both specific titles and broad concepts.
 - **Advanced Filters**: Filter by Decade, Rating, Genre, and Runtime.
-- **Fluid Layout**: A fully responsive grid that fills your screen width, optimized for cinematic posters.
 - **Interactive Posters**: 3D tilt-and-glare effects on movie cards that respond to your mouse movement.
 
-### 📖 3. Watchlist & Diary
-- **Watchlist**: Save movies you want to explore later with a single click.
+###  3. User Discovery & Social
+- **Profile Search**: Search for other Nebula users to explore their movie diaries and ratings.
 - **Activity Log**: Keep a detailed diary of films you've watched, with personal ratings and reviews.
+- **Public Profiles**: View beautiful, glassmorphic profile cards showing a user's movie stats and history.
+
+###  4. Advanced Tools
+- **Command Palette**: Press `Cmd/Ctrl + K` to search movies instantly from anywhere in the app.
+- **Watchlist**: Save movies you want to explore later with a single click.
 - **Supabase Sync**: Your profile and lists are synced to the cloud, accessible from anywhere.
 
 ---
 
-##  Tech Stack
+## 🛠 Tech Stack
 
 - **Frontend**: `Next.js 14`, `React`, `Framer Motion`, `react-force-graph-2d`, `Zustand`.
 - **Backend**: `FastAPI` (Python 3.11).
@@ -98,5 +103,5 @@ Nebula/
 
 ---
 
-##  License
-MIT License. Created by Rajeev K.
+## 📜 License
+MIT License. Created with by Rajeev K.
