@@ -25,7 +25,7 @@ const hudBtnStyle = {
 
 const imageCache = new Map();
 
-export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, centralNodeId }) {
+export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, onBackgroundClick, centralNodeId }) {
   const selectedEngineMovie = useAppStore((state) => state.selectedEngineMovie);
   const graphRef = useRef();
   const [hoveredNode, setHoveredNode] = useState(null);
@@ -260,6 +260,7 @@ export default function NebulaGraph({ nodes, links, onNodeClick, onNodeHover, ce
           setHoveredNode(node || null);
           if (onNodeHover) onNodeHover(node);
         }}
+        onBackgroundClick={onBackgroundClick}
         enableNodeDrag={true}
         enableZoomInteraction={true}
         enablePanInteraction={true}

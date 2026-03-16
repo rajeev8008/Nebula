@@ -222,10 +222,13 @@ export default function Home() {
                   handleSelectEngineMovie(node);
                 }}
                 onNodeHover={(node) => {
-                  // When a node is hovered, just update the detail panel (don't rebuild graph)
+                  // When a node is hovered, update the detail panel (don't rebuild graph)
                   if (node) {
                     setSelectedEngineMovie(node);
                   }
+                }}
+                onBackgroundClick={() => {
+                  setSelectedEngineMovie(null);
                 }}
                 centralNodeId={centralNodeId}
               />
@@ -268,6 +271,7 @@ export default function Home() {
             onClose={() => setSelectedEngineMovie(null)}
             similarMovies={selectedEngineMovie ? getSimilarMovies(selectedEngineMovie, graphData.links, graphData.nodes) : []}
             onSelectMovie={handleSelectEngineMovie}
+            showBackdrop={false}
           />
 
 

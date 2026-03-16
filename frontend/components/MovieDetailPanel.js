@@ -4,7 +4,7 @@ import { Bookmark, Star, ClipboardList, History, Calendar, MessageSquare, Repeat
 import StarRating from './StarRating';
 import { useState } from 'react';
 
-export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie, onLaunchEngine }) {
+export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies = [], onSelectMovie, onLaunchEngine, showBackdrop = true }) {
     const watchlist = useAppStore((state) => state.watchlist);
     const toggleWatchlist = useAppStore((state) => state.toggleWatchlist);
     const userRatings = useAppStore((state) => state.userRatings);
@@ -26,20 +26,22 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
             {selectedMovie && (
                 <>
                     {/* Full Screen Backdrop for click-away */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={onClose}
-                        style={{
-                            position: 'fixed',
-                            inset: 0,
-                            background: 'rgba(0,0,0,0.4)',
-                            backdropFilter: 'blur(4px)',
-                            zIndex: 8999,
-                            cursor: 'default'
-                        }}
-                    />
+                    {showBackdrop && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={onClose}
+                            style={{
+                                position: 'fixed',
+                                inset: 0,
+                                background: 'rgba(0,0,0,0.4)',
+                                backdropFilter: 'blur(4px)',
+                                zIndex: 8999,
+                                cursor: 'default'
+                            }}
+                        />
+                    )}
                     <motion.div
                         key="movie-detail-panel"
                         initial={{ x: '100%', opacity: 0 }}
@@ -67,10 +69,12 @@ export default function MovieDetailPanel({ selectedMovie, onClose, similarMovies
                     className="hide-scrollbar"
                 >
                     {/* Backdrop for click-off */}
-                    <div 
-                        onClick={onClose}
-                        style={{ position: 'fixed', inset: 0, zIndex: -1, cursor: 'default' }}
-                    />
+                    {showBackdrop && (
+                        <div 
+                            onClick={onClose}
+                            style={{ position: 'fixed', inset: 0, zIndex: -1, cursor: 'default' }}
+                        />
+                    )}
                     {/* Movie Poster - Redesigned with buttons outside */}
                     {selectedMovie.poster && (
                         <div style={{ padding: '120px 32px 0px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
