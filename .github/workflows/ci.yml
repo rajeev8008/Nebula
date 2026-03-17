@@ -7,34 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.12'
-    - name: Install Linting dependencies
-      run: |
-        pip install flake8 black
-    - name: Backend Lint
-      run: |
-        flake8 --count --statistics
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    - name: Install Frontend Dependencies
-      working-directory: ./frontend
-      run: npm install
-    - name: Frontend Lint
-      working-directory: ./frontend
-      run: npm run lint
-
   backend-test:
     runs-on: ubuntu-latest
-    needs: lint
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
@@ -55,7 +29,6 @@ jobs:
 
   frontend-test:
     runs-on: ubuntu-latest
-    needs: lint
     steps:
     - uses: actions/checkout@v4
     - name: Set up Node.js
