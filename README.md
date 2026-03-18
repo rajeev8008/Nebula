@@ -52,7 +52,7 @@ A powerful, responsive movie catalog designed for organized browsing.
 - **Backend**: `FastAPI` (Python 3.11).
 - **AI/ML/Vector**: `OpenAI Embeddings`, `Pinecone Vector DB`, `SentenceTransformers`.
 - **Database/Auth**: `Supabase`, `PostgreSQL` (persistent state), `Redis` (caching).
-- **CI/CD**: `GitHub Actions` (automated tests, linting, Docker builds).
+- **CI/CD**: `GitHub Actions` (automated backend/frontend tests, Docker builds).
 - **Data Source**: `The Movie Database (TMDB)`.
 
 ---
@@ -167,4 +167,4 @@ Nebula/
 ---
 
 ## 📜 License
-MIT License. Created by Rajeev K.
+MIT License. Created by Rajeev K, Mevin Jose.
