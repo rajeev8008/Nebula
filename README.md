@@ -148,7 +148,7 @@ python ingest.py  # Follow internal instructions for data source
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```text
 Nebula/
@@ -166,5 +166,5 @@ Nebula/
 
 ---
 
-## 📜 License
+##  License
 MIT License. Created by Rajeev K, Mevin Jose.
